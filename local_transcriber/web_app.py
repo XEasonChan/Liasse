@@ -5,6 +5,7 @@ import os
 import shutil
 import socket
 import subprocess
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -121,6 +122,7 @@ def create_app() -> FastAPI:
         pyannote_ok = is_downloaded("pyannote/speaker-diarization-community-1")
         ollama_up = _check_ollama()
         qwen4b_ok = _check_ollama_model("qwen3:4b") if ollama_up else False
+        runtime_ready = _check_runtime_ready()
         hf_token_set = bool(
             os.environ.get("HF_TOKEN")
             or os.environ.get("PYANNOTE_AUTH_TOKEN")
@@ -137,10 +139,13 @@ def create_app() -> FastAPI:
             blockers.append("ffmpeg")
         if not asr_ok:
             blockers.append("asr_model")
+        if not runtime_ready:
+            blockers.append("runtime")
 
         return {
             "ok": not blockers,
             "blockers": blockers,
+            "runtime_ready": runtime_ready,
             "checks": {
                 "ffmpeg": bool(shutil.which("ffmpeg")),
                 "ffprobe": bool(shutil.which("ffprobe")),
@@ -150,10 +155,15 @@ def create_app() -> FastAPI:
                 "aligner_model": aligner_ok,
                 "pyannote_model": pyannote_ok,
                 "qwen3_4b_model": qwen4b_ok,
+                "runtime_ready": runtime_ready,
                 "disk_free_gb": disk_free_gb,
                 "models": _check_model_cache(),
             },
         }
+
+    @app.get("/api/install/progress")
+    def install_progress() -> dict:
+        return _read_install_progress()
 
     @app.get("/api/models")
     def models() -> dict:
@@ -760,6 +770,62 @@ def _check_model_cache() -> dict:
         "qwen3_aligner_06b": is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B"),
         "pyannote_community1": is_downloaded("pyannote/speaker-diarization-community-1"),
     }
+
+
+def _check_runtime_ready() -> bool:
+    """重依赖（mlx-qwen3-asr 链）是否装好。装好 = 可以上传任务跑转录。"""
+    import importlib.util
+    return importlib.util.find_spec("mlx_qwen3_asr") is not None
+
+
+_INSTALL_LOG_PATH = Path.home() / "Library" / "Logs" / "WhisperQwen" / "install.log"
+
+
+def _read_install_progress() -> dict:
+    """解析 install.log，给前端展示后台 pip 进度。
+
+    返回字段:
+      ready: bool — runtime 已就绪（重依赖装完）
+      running: bool — install.log 还在被更新（最近 60 秒有新内容）
+      installed: int — 已 "Successfully installed" 的批次
+      currently: str — 当前 collecting / downloading 的包名（最近一行抽出）
+      tail: list[str] — 日志最后若干行，前端可直接展示
+      log_path: str
+    """
+    ready = _check_runtime_ready()
+    info: Dict[str, Any] = {
+        "ready": ready,
+        "running": False,
+        "installed": 0,
+        "currently": "",
+        "tail": [],
+        "log_path": str(_INSTALL_LOG_PATH),
+    }
+    if not _INSTALL_LOG_PATH.exists():
+        return info
+
+    try:
+        stat = _INSTALL_LOG_PATH.stat()
+        info["running"] = (time.time() - stat.st_mtime) < 60 and not ready
+        with _INSTALL_LOG_PATH.open("rb") as fp:
+            try:
+                fp.seek(-8192, os.SEEK_END)
+            except OSError:
+                fp.seek(0)
+            data = fp.read().decode("utf-8", errors="replace")
+    except OSError:
+        return info
+
+    lines = [ln for ln in data.splitlines() if ln.strip()]
+    info["tail"] = lines[-12:]
+    info["installed"] = sum(1 for ln in lines if ln.startswith("Successfully installed"))
+    for ln in reversed(lines):
+        if ln.startswith("Collecting ") or ln.startswith("Downloading ") or ln.startswith("  Downloading "):
+            # 抽出包名/文件名
+            token = ln.strip().split(" ", 2)
+            info["currently"] = token[1] if len(token) > 1 else ln.strip()
+            break
+    return info
 
 
 def _unique_path(target: Path) -> Path:
