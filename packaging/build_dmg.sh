@@ -54,10 +54,8 @@ rsync -a \
   --exclude 'docs/' \
   --exclude 'tests/' \
   --exclude 'scripts/' \
-  --exclude 'run_app.py' \
   --exclude 'Run Test Audio.command' \
   --exclude 'Setup MLX Test Env.command' \
-  --exclude 'Start Local Transcriber.command' \
   --exclude 'Check Runtime.command' \
   "$ROOT/" "$RES_APP/"
 

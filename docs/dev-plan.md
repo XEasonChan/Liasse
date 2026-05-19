@@ -266,7 +266,7 @@ user: {question}
 **做什么**：
 
 1. 更新 `README.md`：用户角度的 quickstart（4 步：装 brew 依赖、跑 Setup MLX Test Env、配置 HF token、双击 Start WhisperQwen）
-2. 删除 `local_transcriber/app.py`（旧 Tkinter UI）和 `run_app.py`（旧入口）、`Start Local Transcriber.command`
+2. ✅ (2026-05-19) 已删除 `run_app.py`（旧入口）和 `Start Local Transcriber.command`；`local_transcriber/app.py`（旧 Tkinter UI）拆出单独清理
 3. 验证：在干净 zsh session 里双击 `Start WhisperQwen.command`，完成从 cold-start 到看到任务列表的全流程
 4. 写 `outputs/BUILD_REPORT.md`：每个 M1-M7 实际耗时、通过情况、任何遗留 TODO
 5. 跑 `pytest tests/ -v` 全过
