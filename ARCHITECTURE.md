@@ -6,8 +6,8 @@
 > **命名约定**：
 > - **产品名** = `Liasse`（用户看到的、品牌、UI、文档）
 > - **工作目录 / repo 名** = `Qwensper`（历史保留，不动）
-> - **Python 包** = `local_transcriber`（pending → `liasse`，独立 PR）
-> - 内部模块名出现在 import / 路径里时仍是 `local_transcriber`，不是错。
+> - **Python 包** = `liasse/`（2026-05-19 已从 `local_transcriber/` rename）
+> - 所有 `from liasse.X import ...` / `import liasse` 已在 launch_app.py、scripts/、tests/、pyproject.toml 中同步更新。
 
 ## 一句话
 
@@ -61,7 +61,7 @@
 ## 目录结构
 
 ```
-local_transcriber/                              # 后端 Python 包
+liasse/                              # 后端 Python 包
 ├── web_app.py                  423 行 — FastAPI app 装配（lifespan / mount / include_router /
 │                                          tasks CRUD 路由）
 ├── task_runner.py              655 行 — 单 worker 后台任务编排（mp.Process + progress_queue）

@@ -29,7 +29,7 @@ export const UploadZone = {
       errorMessage: null,
       config: {
         asrModel: "Qwen/Qwen3-ASR-0.6B",
-        language: "English",
+        language: "auto",
         speakerMode: "llm",
         diarize: false,
         numSpeakers: 2,
@@ -89,6 +89,12 @@ export const UploadZone = {
         case "creating-tasks": return t("upload.titleCreating", { n: this.pendingCount });
         default: return "";
       }
+    },
+    langDisplay() {
+      const key = this.config.language;
+      const map = { Chinese: "audioLang.Chinese", English: "audioLang.English",
+                     Cantonese: "audioLang.Cantonese", auto: "audioLang.auto" };
+      return t(map[key] || "audioLang.auto");
     },
     speakerSummary() {
       if (this.config.speakerMode === "fast") return t("upload.speakerModeFast");
@@ -435,10 +441,10 @@ export const UploadZone = {
             <label class="setting-pill setting-pill-select">
               <span class="setting-label">{{ t('upload.cfgLang') }}</span>
               <select class="setting-inline-select" v-model="config.language">
-                <option value="English">{{ t('audioLang.English') }}</option>
-                <option value="Chinese">{{ t('audioLang.Chinese') }}</option>
-                <option value="Cantonese">{{ t('audioLang.Cantonese') }}</option>
                 <option value="auto">{{ t('audioLang.auto') }}</option>
+                <option value="Chinese">{{ t('audioLang.Chinese') }}</option>
+                <option value="English">{{ t('audioLang.English') }}</option>
+                <option value="Cantonese">{{ t('audioLang.Cantonese') }}</option>
               </select>
             </label>
 
@@ -451,6 +457,15 @@ export const UploadZone = {
               <lucide-icon name="sparkles" :size="14" />
               {{ summarySummary }}
             </button>
+          </div>
+
+          <div
+            v-if="config.language !== 'auto'"
+            class="config-hint config-hint-warn"
+            :title="t('upload.langForceTip')"
+          >
+            <lucide-icon name="alert-triangle" :size="12" />
+            {{ t('upload.langForceWarn', { lang: langDisplay }) }}
           </div>
         </div>
 

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from local_transcriber.hf_paths import hub_dir, model_dir
+from liasse.hf_paths import hub_dir, model_dir
 
 
 def test_hub_dir_default(monkeypatch):

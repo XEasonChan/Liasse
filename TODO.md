@@ -16,11 +16,11 @@
 
 ## P0 — 修补类（合并为一个 plan）
 
-→ [plan-p0-housekeeping.md](docs/superpowers/plans/2026-05-19-plan-p0-housekeeping.md)
+→ [plan-p0-housekeeping.md](docs/superpowers/plans/2026-05-19-plan-p0-housekeeping.md)（已执行 2026-05-19）
 
-- [ ] **摘要 / 总结「重新生成」UI 入口**：当前总结写一次后无法重新触发；用户改了发言人名或大量编辑 segment 后总结对不上。详情页加按钮 → `POST /api/tasks/{id}/summary`（端点已存在）。
-- [ ] **删除任务时同步清理上传副本**：`web_app.py` DELETE 路由的 `delete_outputs=true` 只清 `task.outputs` 目录，遗漏 `outputs/uploaded_audio/<file>`，长期会膨胀。
-- [ ] **BM25 索引在用户编辑后自动失效重建**：现在 `qa_engine.build_index_for_task` 用当前 transcript 建索引，但编辑 segment 后旧索引仍 cached（如有 cache），下一次 chat 看到旧文。需在 `/edits/*` 路由里清缓存或加版本号。
+- [x] **摘要 / 总结「重新生成」UI 入口**（2026-05-19 验证已存在）— `task-detail.js:191-204` 的 `regenerateSummary` + `:summaryRegen / summaryGen` 文案早已实现，端点 `routers/qa.py::regenerate_summary` 存在。这是 BUILD_REPORT 过期 TODO。
+- [x] **删除任务时同步清理上传副本**（2026-05-19 修复）— `liasse/web_app.py::delete_task` 加 `is_relative_to(uploaded_audio)` 路径白名单后 unlink；`tests/test_web_api.py` 加 2 个回归（删副本 + 不动原生路径 + 默认 `delete_outputs=false` 保留）。
+- [ ] ~~**BM25 索引在用户编辑后自动失效重建**~~（误诊，撤销）— `qa_engine.build_index_for_task` 没有缓存，每次都重建。无失效问题。
 
 ---
 
@@ -33,7 +33,7 @@
   - 设置页 CRUD：词条（源语言 → 首选译法 + 可选备注/领域标签）
   - 项目级默认词库 + 单任务覆盖
   - 持久化 `outputs/glossaries/<name>.json`，完全离线
-- [ ] **翻译引擎 `local_transcriber/translate.py`**：默认 `qwen3:4b`；按 segment 分批调用 Ollama，prompt 注入词库要求严格遵循。
+- [ ] **翻译引擎 `liasse/translate.py`**：默认 `qwen3:4b`；按 segment 分批调用 Ollama，prompt 注入词库要求严格遵循。
 - [ ] **API**：
   - `GET / POST / PUT / DELETE /api/glossaries[/<name>]`
   - `POST /api/tasks/{id}/translate`（body `{target, glossaryName?}`）
@@ -46,7 +46,7 @@
 
 → [plan-p1b-long-audio-prechunker.md](docs/superpowers/plans/2026-05-19-plan-p1b-long-audio-prechunker.md)
 
-- [ ] **音频预切分模块 `local_transcriber/audio_chunker.py`**：silero-vad cut + 25-30min merge；fallback 到 ffmpeg 等长 30min 切片。
+- [ ] **音频预切分模块 `liasse/audio_chunker.py`**：silero-vad cut + 25-30min merge；fallback 到 ffmpeg 等长 30min 切片。
 - [ ] **TaskRow 加 `chunks` 列**：段级状态 `queued | running | done | failed`，可恢复。
 - [ ] **改造 `transcribe_pipeline.py`**：超过 `preChunkerMinSeconds` 阈值时按段循环；进度按段加 `chunk_completed` 消息。
 - [ ] **任务列表 / 详情页 UI**：显示「第 X/N 段 · 段内 Y%」；retry 时只重跑未完成段。

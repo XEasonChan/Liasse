@@ -48,6 +48,8 @@ export const zh = {
     cfgASRQuick: "0.6B 快速",
     cfgASRHigh: "1.7B 高质量",
     cfgLang: "语言",
+    langForceWarn: "强制 {lang} 输出 · 0.6B 模型跨语言时会出现重复/翻译",
+    langForceTip: "Qwen3-ASR 0.6B 小模型在「指定一种语言」时，如果实际音频是其它语言，会把内容翻译成指定语言并可能重复 token。除非你确定音频语言，否则选「自动检测」更稳。",
     speakersAuto: "人数自动",
     speakersN: "{n} 人",
     speakersPlus: "{n} 人以上",

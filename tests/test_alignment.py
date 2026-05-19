@@ -1,7 +1,7 @@
 import unittest
 
-from local_transcriber.alignment import assign_speakers, overlap_seconds
-from local_transcriber.models import SpeakerTurn, TranscriptSegment
+from liasse.alignment import assign_speakers, overlap_seconds
+from liasse.models import SpeakerTurn, TranscriptSegment
 
 
 class AlignmentTests(unittest.TestCase):

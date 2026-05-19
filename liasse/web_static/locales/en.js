@@ -48,6 +48,8 @@ export const en = {
     cfgASRQuick: "0.6B fast",
     cfgASRHigh: "1.7B high-quality",
     cfgLang: "Audio language",
+    langForceWarn: "Forcing {lang} output · 0.6B model may translate/repeat across languages",
+    langForceTip: "When you pin a single language, the 0.6B Qwen3-ASR model will translate the audio into that language if the actual speech is different, and may hallucinate repeated tokens. Pick \"auto\" unless you're certain about the audio language.",
     speakersAuto: "Auto",
     speakersN: "{n} speakers",
     speakersPlus: "{n}+ speakers",

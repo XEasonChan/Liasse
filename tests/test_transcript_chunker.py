@@ -1,5 +1,5 @@
-from local_transcriber.models import TranscriptSegment
-from local_transcriber.transcript_chunker import (
+from liasse.models import TranscriptSegment
+from liasse.transcript_chunker import (
     Chunk,
     chunk_interview,
     normalize_to_two_speakers,

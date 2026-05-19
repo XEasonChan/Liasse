@@ -11,7 +11,7 @@ def test_check_ollama_model_exact_match(monkeypatch):
         ]
     }).encode()
 
-    from local_transcriber.services import ollama_health
+    from liasse.services import ollama_health
     monkeypatch.setattr(ollama_health, "check_ollama", lambda: True)
 
     with patch("urllib.request.build_opener") as mock_opener:
@@ -28,7 +28,7 @@ def test_check_ollama_model_exact_present(monkeypatch):
         ]
     }).encode()
 
-    from local_transcriber.services import ollama_health
+    from liasse.services import ollama_health
     monkeypatch.setattr(ollama_health, "check_ollama", lambda: True)
 
     with patch("urllib.request.build_opener") as mock_opener:
@@ -46,7 +46,7 @@ def test_check_ollama_model_with_digest(monkeypatch):
         ]
     }).encode()
 
-    from local_transcriber.services import ollama_health
+    from liasse.services import ollama_health
     monkeypatch.setattr(ollama_health, "check_ollama", lambda: True)
 
     with patch("urllib.request.build_opener") as mock_opener:

@@ -10,7 +10,7 @@
 
 ## 进度
 
-- ✅ **M1 已完成（2026-05-18，pre-flight 跑通）** — 产物：`launch_app.py`、`local_transcriber/web_app.py`、`Start Liasse.command`，pywebview 已装。健康检查全绿，窗口能开。**Agent 从 M2 开始。**
+- ✅ **M1 已完成（2026-05-18，pre-flight 跑通）** — 产物：`launch_app.py`、`liasse/web_app.py`、`Start Liasse.command`，pywebview 已装。健康检查全绿，窗口能开。**Agent 从 M2 开始。**
 
 ## 已锁定决策（来自 frontend-spec.md D1-D8）
 
@@ -37,7 +37,7 @@
             │ HTTP / SSE
             ▼
 ┌──────────────────────────────────────────────────────────┐
-│  FastAPI 后端 (local_transcriber/web_app.py)             │
+│  FastAPI 后端 (liasse/web_app.py)             │
 │  ├─ /api/tasks               任务列表 / 上传 / 删除       │
 │  ├─ /api/tasks/{id}          任务详情                    │
 │  ├─ /api/tasks/{id}/edits    用户对逐字稿/发言人名的编辑 │
@@ -52,7 +52,7 @@
             │ 直接 import
             ▼
 ┌──────────────────────────────────────────────────────────┐
-│  现有后端管线（local_transcriber/pipeline.py 等）         │
+│  现有后端管线（liasse/pipeline.py 等）         │
 │  不动它。把 web_app 当作新的入口。                        │
 └──────────────────────────────────────────────────────────┘
 ```
@@ -67,7 +67,7 @@
 ## 文件清单（待创建）
 
 ```
-local_transcriber/
+liasse/
 ├── web_app.py              ← FastAPI 应用，主路由
 ├── web_models.py           ← Pydantic 请求/响应模型 + SQLAlchemy Task ORM
 ├── task_runner.py          ← 进程池 + 进度回传
@@ -103,7 +103,7 @@ requirements-mlx.txt        ← 添加 fastapi、uvicorn、pywebview、sqlalchem
 **做什么**：
 
 1. 装新依赖：`venv/bin/pip install pywebview` 然后 `pip freeze | grep -iE "pywebview|fastapi|uvicorn|sqlalchemy" >> requirements-mlx.txt`（去重）
-2. 建 `local_transcriber/web_app.py`，FastAPI 应用，2 个路由：
+2. 建 `liasse/web_app.py`，FastAPI 应用，2 个路由：
    - `GET /api/health` → `{ ok: true, checks: { ffmpeg, ollama, hf_cache, models } }`
    - `GET /` → 暂时返回 `"Liasse backend up"` 的 HTML
 3. 建 `launch_app.py`：用 uvicorn 在子线程跑 web_app，主线程用 pywebview 开 800x600 窗口
@@ -272,7 +272,7 @@ user: {question}
 **做什么**：
 
 1. 更新 `README.md`：用户角度的 quickstart（4 步：装 brew 依赖、跑 Setup MLX Test Env、配置 HF token、双击 Start Liasse）
-2. ✅ (2026-05-19) 已删除 `run_app.py`（旧入口）和 `Start Local Transcriber.command`；`local_transcriber/app.py`（旧 Tkinter UI）拆出单独清理
+2. ✅ (2026-05-19) 已删除 `run_app.py`（旧入口）和 `Start Local Transcriber.command`；`liasse/app.py`（旧 Tkinter UI）拆出单独清理
 3. 验证：在干净 zsh session 里双击 `Start Liasse.command`，完成从 cold-start 到看到任务列表的全流程
 4. 写 `outputs/BUILD_REPORT.md`：每个 M1-M7 实际耗时、通过情况、任何遗留 TODO
 5. 跑 `pytest tests/ -v` 全过
@@ -287,7 +287,7 @@ user: {question}
 1. **严格按 M1→M7 顺序做**，前一个的 DOD 没过不准进下一个
 2. 每个 M 开始前重读这一节，明确 DOD
 3. 卡住超 30 分钟：在 `outputs/BLOCKED-Mx.md` 写下卡点（含报错截图、试过什么、为什么不行），跳过该 milestone，进下一个能独立做的（M6 设置页和其他大部分独立，可以跳过 M5 先做）
-4. 不要重构后端管线 `local_transcriber/{pipeline,asr,diarization,exporters}.py`，它已经工作；新增文件而非修改
+4. 不要重构后端管线 `liasse/{pipeline,asr,diarization,exporters}.py`，它已经工作；新增文件而非修改
 5. **不要**为了完美延后：M4 的 UI 视觉上够用就行，不追求像素级 match mockup。「能用 → 好看」的顺序
 6. 严禁联网调外部 API（用户 IRB 不允许）。只用本地 ollama + 已下载的 HF 模型
 7. 用户在睡觉，**不要中途停下问问题**。所有问题都自己根据 CLAUDE.md + 本文档决定

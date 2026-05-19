@@ -19,13 +19,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from local_transcriber.models import (
+from liasse.models import (
     PipelineResult,
     SpeakerTurn,
     TranscriptionJob,
     TranscriptSegment,
 )
-from local_transcriber.transcribe_pipeline import TranscribePipeline
+from liasse.transcribe_pipeline import TranscribePipeline
 
 
 @pytest.fixture
@@ -68,9 +68,9 @@ def test_parallel_path_overlaps_asr_and_pyannote(fake_job):
     fake_backend = MagicMock()
     fake_backend.transcribe = slow_asr
 
-    with patch("local_transcriber.transcribe_pipeline.create_asr_backend",
+    with patch("liasse.transcribe_pipeline.create_asr_backend",
                return_value=fake_backend), \
-         patch("local_transcriber.diarization.PyannoteDiarizer.diarize",
+         patch("liasse.diarization.PyannoteDiarizer.diarize",
                slow_diar):
         result = TranscribePipeline().run(fake_job)
 
@@ -98,9 +98,9 @@ def test_parallel_path_disables_internal_diarize(fake_job):
         ])
         return m
 
-    with patch("local_transcriber.transcribe_pipeline.create_asr_backend",
+    with patch("liasse.transcribe_pipeline.create_asr_backend",
                side_effect=captured_create), \
-         patch("local_transcriber.diarization.PyannoteDiarizer.diarize",
+         patch("liasse.diarization.PyannoteDiarizer.diarize",
                return_value=[SpeakerTurn(start=0, end=5, speaker="SPEAKER_00")]):
         TranscribePipeline().run(fake_job)
 
@@ -120,9 +120,9 @@ def test_parallel_path_falls_back_on_pyannote_failure(fake_job):
     def boom(self_diar, audio_path):
         raise RuntimeError("pyannote 网络挂了")
 
-    with patch("local_transcriber.transcribe_pipeline.create_asr_backend",
+    with patch("liasse.transcribe_pipeline.create_asr_backend",
                return_value=fake_backend), \
-         patch("local_transcriber.diarization.PyannoteDiarizer.diarize", boom):
+         patch("liasse.diarization.PyannoteDiarizer.diarize", boom):
         result = TranscribePipeline().run(fake_job)
 
     # ASR 结果保留
@@ -154,9 +154,9 @@ def test_non_parallel_path_when_diarize_disabled(fake_job):
                           speaker="SPEAKER_00", source="mlx"),
     ])
 
-    with patch("local_transcriber.transcribe_pipeline.create_asr_backend",
+    with patch("liasse.transcribe_pipeline.create_asr_backend",
                return_value=fake_backend), \
-         patch("local_transcriber.diarization.PyannoteDiarizer.diarize", diar):
+         patch("liasse.diarization.PyannoteDiarizer.diarize", diar):
         TranscribePipeline().run(fake_job)
 
     assert pyannote_called["count"] == 0, "diarize off 时不应调 pyannote"
@@ -177,9 +177,9 @@ def test_parallel_path_aligns_segments_to_speaker_turns(fake_job):
         SpeakerTurn(start=5, end=10, speaker="SPK_Y"),
     ]
 
-    with patch("local_transcriber.transcribe_pipeline.create_asr_backend",
+    with patch("liasse.transcribe_pipeline.create_asr_backend",
                return_value=fake_backend), \
-         patch("local_transcriber.diarization.PyannoteDiarizer.diarize",
+         patch("liasse.diarization.PyannoteDiarizer.diarize",
                return_value=turns):
         result = TranscribePipeline().run(fake_job)
 

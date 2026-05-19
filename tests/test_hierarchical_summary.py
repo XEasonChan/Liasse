@@ -1,12 +1,12 @@
 import json
 from unittest.mock import patch
 
-from local_transcriber.hierarchical_summary import (
+from liasse.hierarchical_summary import (
     L1Result,
     extract_l1,
     L1_PROMPT_TEMPLATE,
 )
-from local_transcriber.transcript_chunker import Chunk
+from liasse.transcript_chunker import Chunk
 
 
 def _chunk(text="A: 你好\nB: 再见", idx=0):
@@ -34,7 +34,7 @@ def test_extract_l1_parses_json_response():
         "entities": ["X"],
         "questions_raised": [],
     }
-    with patch("local_transcriber.hierarchical_summary.OllamaClient") as Cls:
+    with patch("liasse.hierarchical_summary.OllamaClient") as Cls:
         Cls.return_value.generate.return_value = json.dumps(fake_json,
                                                             ensure_ascii=False)
         result = extract_l1(_chunk(), total_chunks=1)
@@ -44,7 +44,7 @@ def test_extract_l1_parses_json_response():
 
 
 def test_extract_l1_handles_malformed_json_gracefully():
-    with patch("local_transcriber.hierarchical_summary.OllamaClient") as Cls:
+    with patch("liasse.hierarchical_summary.OllamaClient") as Cls:
         Cls.return_value.generate.return_value = "（模型乱说，没有 JSON）"
         result = extract_l1(_chunk(), total_chunks=1)
     # 不抛异常，返回空结构 + raw_text
@@ -53,14 +53,14 @@ def test_extract_l1_handles_malformed_json_gracefully():
 
 
 def test_extract_l1_uses_4b_model():
-    with patch("local_transcriber.hierarchical_summary.OllamaClient") as Cls:
+    with patch("liasse.hierarchical_summary.OllamaClient") as Cls:
         Cls.return_value.generate.return_value = "{}"
         extract_l1(_chunk(), total_chunks=1)
     args, kwargs = Cls.return_value.generate.call_args
     assert kwargs.get("model") == "qwen3:4b" or args[0] == "qwen3:4b"
 
 
-from local_transcriber.hierarchical_summary import _parse_l1, _extract_first_json_object
+from liasse.hierarchical_summary import _parse_l1, _extract_first_json_object
 
 
 def test_parse_l1_handles_think_block_prefix():
@@ -92,12 +92,12 @@ def test_extract_first_json_object_returns_none_when_no_braces():
     assert _extract_first_json_object("no json here") is None
 
 
-from local_transcriber.hierarchical_summary import (
+from liasse.hierarchical_summary import (
     synthesize_l2,
     L2_PROMPT_TEMPLATE,
     format_l1_digest,
 )
-from local_transcriber.memory_monitor import MemoryBudget
+from liasse.memory_monitor import MemoryBudget
 
 
 def test_l2_prompt_includes_all_l1_results():
@@ -114,7 +114,7 @@ def test_l2_prompt_includes_all_l1_results():
 def test_l2_uses_8b_on_comfortable_memory():
     l1_results = [L1Result(chunk_index=0, topics=["t"])]
     budget = MemoryBudget(total_gb=16, available_gb=8)
-    with patch("local_transcriber.hierarchical_summary.OllamaClient") as Cls:
+    with patch("liasse.hierarchical_summary.OllamaClient") as Cls:
         Cls.return_value.generate.return_value = "## 总览\n内容"
         synthesize_l2(l1_results, budget=budget, user_pref="auto")
     kwargs = Cls.return_value.generate.call_args.kwargs
@@ -124,7 +124,7 @@ def test_l2_uses_8b_on_comfortable_memory():
 def test_l2_falls_back_to_4b_on_tight():
     l1_results = [L1Result(chunk_index=0, topics=["t"])]
     budget = MemoryBudget(total_gb=8, available_gb=3)
-    with patch("local_transcriber.hierarchical_summary.OllamaClient") as Cls:
+    with patch("liasse.hierarchical_summary.OllamaClient") as Cls:
         Cls.return_value.generate.return_value = "## 总览\n"
         synthesize_l2(l1_results, budget=budget, user_pref="auto")
     kwargs = Cls.return_value.generate.call_args.kwargs
@@ -134,8 +134,8 @@ def test_l2_falls_back_to_4b_on_tight():
 def test_l2_unloads_after_use_when_flag_set():
     l1_results = [L1Result(chunk_index=0, topics=["t"])]
     budget = MemoryBudget(total_gb=16, available_gb=8)
-    with patch("local_transcriber.hierarchical_summary.OllamaClient") as Cls, \
-         patch("local_transcriber.hierarchical_summary.unload_model") as un:
+    with patch("liasse.hierarchical_summary.OllamaClient") as Cls, \
+         patch("liasse.hierarchical_summary.unload_model") as un:
         Cls.return_value.generate.return_value = "## 总览\n"
         synthesize_l2(l1_results, budget=budget, user_pref="auto",
                       unload_after=True)

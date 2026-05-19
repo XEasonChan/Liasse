@@ -1,5 +1,5 @@
-from local_transcriber.transcript_chunker import Chunk
-from local_transcriber.transcript_index import TranscriptIndex
+from liasse.transcript_chunker import Chunk
+from liasse.transcript_index import TranscriptIndex
 
 
 def _chunk(idx, text, start=0.0, end=60.0):

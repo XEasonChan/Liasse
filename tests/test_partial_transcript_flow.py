@@ -12,8 +12,8 @@ from pathlib import Path
 
 import pytest
 
-from local_transcriber.db import TaskRow, init_db, session_scope
-from local_transcriber.transcribe_pipeline import TranscribePipeline
+from liasse.db import TaskRow, init_db, session_scope
+from liasse.transcribe_pipeline import TranscribePipeline
 
 
 @pytest.fixture
@@ -141,7 +141,7 @@ def test_task_row_to_api_exposes_partial_flag(isolated_db):
 def test_task_runner_apply_partial_only_when_running(isolated_db):
     """_apply_partial_transcript 必须只在 status==running 时写库。如果任务
     已 done 或 failed，partial 消息应被丢弃（防止打乱最终结果）。"""
-    from local_transcriber.task_runner import TaskRunner
+    from liasse.task_runner import TaskRunner
 
     # 真实构造 runner 会跑后台线程，这里只测私有方法。
     runner = TaskRunner.__new__(TaskRunner)

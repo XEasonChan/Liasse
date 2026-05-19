@@ -11,7 +11,7 @@ def test_health_finds_model_under_hf_home(monkeypatch, tmp_path):
     monkeypatch.setenv("HF_HOME", str(tmp_path))
 
     import importlib
-    from local_transcriber import web_app
+    from liasse import web_app
     importlib.reload(web_app)
     client = TestClient(web_app.app)
 
@@ -27,7 +27,7 @@ def test_models_endpoint_finds_model_under_hf_home(monkeypatch, tmp_path):
     monkeypatch.setenv("HF_HOME", str(tmp_path))
 
     import importlib
-    from local_transcriber import web_app
+    from liasse import web_app
     importlib.reload(web_app)
     client = TestClient(web_app.app)
 
@@ -45,7 +45,7 @@ def test_health_respects_empty_hf_home(monkeypatch, tmp_path):
     monkeypatch.delenv("HUGGINGFACE_HUB_CACHE", raising=False)
 
     import importlib
-    from local_transcriber import web_app
+    from liasse import web_app
     importlib.reload(web_app)
     client = TestClient(web_app.app)
 
@@ -62,7 +62,7 @@ def test_models_endpoint_respects_empty_hf_home(monkeypatch, tmp_path):
     monkeypatch.delenv("HUGGINGFACE_HUB_CACHE", raising=False)
 
     import importlib
-    from local_transcriber import web_app
+    from liasse import web_app
     importlib.reload(web_app)
     client = TestClient(web_app.app)
 

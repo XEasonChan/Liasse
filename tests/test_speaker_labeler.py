@@ -2,8 +2,8 @@ import urllib.error
 
 import pytest
 
-from local_transcriber.models import TranscriptSegment
-from local_transcriber import speaker_labeler
+from liasse.models import TranscriptSegment
+from liasse import speaker_labeler
 
 
 def test_label_segments_parses_json_assignments(monkeypatch):

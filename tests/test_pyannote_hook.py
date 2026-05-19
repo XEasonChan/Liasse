@@ -28,7 +28,7 @@ def reset_pyannote_patch_flag():
 
 def test_hook_factory_segmentation_event():
     """无 total/completed 时，单阶段事件只有 stage label，progress 保持 0.82。"""
-    from local_transcriber.task_runner import _make_pyannote_progress_hook
+    from liasse.task_runner import _make_pyannote_progress_hook
 
     q: queue.Queue = queue.Queue()
     hook = _make_pyannote_progress_hook(q)
@@ -43,7 +43,7 @@ def test_hook_factory_segmentation_event():
 
 def test_hook_factory_batched_progress():
     """带 total/completed 的事件应该把 N/M 写进 stage，progress 平滑推进。"""
-    from local_transcriber.task_runner import _make_pyannote_progress_hook
+    from liasse.task_runner import _make_pyannote_progress_hook
 
     q: queue.Queue = queue.Queue()
     hook = _make_pyannote_progress_hook(q)
@@ -58,7 +58,7 @@ def test_hook_factory_batched_progress():
 
 def test_hook_factory_full_progression():
     """连续多事件 →  queue 收集成有序序列。"""
-    from local_transcriber.task_runner import _make_pyannote_progress_hook
+    from liasse.task_runner import _make_pyannote_progress_hook
 
     q: queue.Queue = queue.Queue()
     hook = _make_pyannote_progress_hook(q)
@@ -82,7 +82,7 @@ def test_hook_factory_full_progression():
 
 def test_hook_factory_unknown_step_falls_back_to_raw():
     """没见过的 step_name 直接显示原名而不是炸掉。"""
-    from local_transcriber.task_runner import _make_pyannote_progress_hook
+    from liasse.task_runner import _make_pyannote_progress_hook
 
     q: queue.Queue = queue.Queue()
     hook = _make_pyannote_progress_hook(q)
@@ -95,7 +95,7 @@ def test_hook_factory_unknown_step_falls_back_to_raw():
 
 def test_install_sets_class_flag(reset_pyannote_patch_flag):
     """install 后 Pipeline 类应当标记为已 patched。"""
-    from local_transcriber.task_runner import _install_pyannote_progress_hook
+    from liasse.task_runner import _install_pyannote_progress_hook
     import pyannote.audio.core.pipeline as _pyp
 
     q: queue.Queue = queue.Queue()
@@ -107,7 +107,7 @@ def test_install_sets_class_flag(reset_pyannote_patch_flag):
 
 def test_install_is_idempotent(reset_pyannote_patch_flag):
     """二次调用不应该堆叠包装（否则同一事件会发两次）。"""
-    from local_transcriber.task_runner import _install_pyannote_progress_hook
+    from liasse.task_runner import _install_pyannote_progress_hook
     import pyannote.audio.core.pipeline as _pyp
 
     q: queue.Queue = queue.Queue()

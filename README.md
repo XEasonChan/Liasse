@@ -1,191 +1,214 @@
-# Liasse
+<p align="center">
+  <img src="docs/assets/liasse-hero.png" alt="Liasse — private local transcription for interviews and case files" width="100%">
+</p>
+
+<h1 align="center"><em>Liasse</em></h1>
 
 <p align="center">
-  <img src="docs/assets/qwensper-hero.svg" alt="Liasse: local-first interview transcription and AI analysis" width="100%">
+  <em>Private local transcription for interviews and case files.</em><br>
+  <sub>本地访谈转录 · 不上传云端 · 不调用第三方 API</sub>
 </p>
 
 <p align="center">
-  <a href="#中文">中文</a> · <a href="#english">English</a>
+  <a href="#中文">中文</a> · <a href="#english">English</a> · <a href="#use-cases">Use cases</a> · <a href="#customize-with-codex">Customize</a>
 </p>
+
+---
 
 ## 中文
 
-Liasse 是一个面向访谈研究、法律实务、口述史和高敏感资料整理的本地转录桌面应用。它把长音频转成带时间戳和发言人的逐字稿，并用本地 Qwen 模型完成总结、对话问答和轻量 RAG 检索。核心目标很朴素：敏感音频、逐字稿、摘要和问答上下文都不上传云端。
+> Liasse（法语：一束被妥善收束起来的档案材料）是一个把访谈录音变成可引用、可归档、不离开本机的逐字稿的桌面应用。  
+> 它的目标用户不是开发者，而是研究者、律师、合规官、口述史学者、田野调查者——任何手里有"不能上传"的录音的人。
 
-**设计重点之一，是让常见配置的 Mac 也能跑通全流程**——例如研究生、访员手里那台 **8GB 内存的 MacBook Air**，而不是必须买一台内存很大、很笨重的工作站。默认选用较小的 Qwen3-ASR-0.6B 与 Ollama `qwen3:4b`，串行队列、按可用内存自动降级模型，在轻量机器上优先保证「能转、能总结、能问答」，速度可以慢一些，但不要求顶配硬件。
+Liasse 不打算成为又一个"AI 录音工具"。它的形态参考的是研究者桌上那一束被丝带束起来的访谈材料：所有原件都在你这里，工具只是帮你把它们整理得更整齐。音频、逐字稿、总结、问答上下文，从下载模型那一刻起到导出 PDF，都不离开这台机器。
 
-> 当前状态：alpha / research tool。后端管线已经跑通，桌面 UI MVP 可用。默认 ASR 使用 Qwen3-ASR-0.6B，Apple Silicon 上通过 MLX/Metal 本地推理。
+它在 **Apple Silicon Mac 上完全本地运行**——常见的 8GB MacBook Air 就够（速度慢一些但跑得通），16GB 是日常档，24GB+ 可上 1.7B ASR + Qwen3-8B 总结。**完全离线**开关一打开，连首次下载模型之外的所有网络调用都被禁用。
 
-## 为什么做这个
+> 当前状态：alpha · 后端管线打通，桌面 UI 可用。如果你是机构采购或合规官，先翻到 [Privacy 一节](#隐私模型)。
 
-很多学术访谈、法律材料、咨询纪要和内部调查录音都不能丢给云端转录服务。Liasse 的方向是把「转录 + 发言人识别 + 访谈总结 + 针对本次访谈的 AI 问答」放回研究者或专业工作者自己的电脑上：
+<a id="use-cases"></a>
 
-- **本地优先**：ASR、发言人识别、总结和问答都在本机执行，不调用云 API。
-- **轻量硬件友好**：面向 Apple Silicon Mac，**8GB 统一内存（如 M2/M3 MacBook Air）即可作为目标配置**；16GB 更从容，24GB+ 可选用更大模型。一次只跑一个转录任务，避免内存争抢。
-- **适合长访谈**：面向 30 分钟到 4 小时级别的访谈音频，串行队列处理；内存紧张时总结 / 问答自动走 4B，不强行加载 8B。
-- **可追溯导出**：输出 Markdown / JSON / SRT，保留时间戳、发言人和编辑后的文本。
-- **本地 AI 分析**：通过 Ollama 调 Qwen3，生成摘要、结构化要点，并支持围绕当前访谈继续提问。
-- **隐私控制**：设置中提供「完全离线」模式，强制 Hugging Face / Transformers 走离线缓存。
+## Use cases · 六个真实场景
 
-<p align="center">
-  <img src="docs/assets/qwensper-workflow.svg" alt="Liasse local workflow" width="100%">
-</p>
+Liasse 的命名和形态来自 2026 年 5 月的一次多角色品牌沙盘——六个目标用户在同一个产品环境里给出了反馈与画像（[完整调研](outputs/brand_consulting_report.html)）。下面是被那次调研抽出来的六种使用方式。
 
-## 已有能力
+<table>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-1-academic.png" alt="Sensitive Interviews for EU academic researchers"><br>
+<strong>Sensitive Interviews · 学术访谈</strong><br>
+<sub>For academic researchers</sub><br><br>
+GDPR-clean, IRB-bound, never uploaded. 可直接写进 Data Management Plan，伦理审查材料引用 Liasse 作为本地处理工具。
+</td>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-2-compliance.png" alt="Compliance and audit for DPO / IRB officers"><br>
+<strong>Compliance &amp; Audit · 合规与审计</strong><br>
+<sub>For DPO &amp; IRB officers</sub><br><br>
+DMP-ready · audit-friendly · no cloud anywhere. 输出 audit bundle，包含转录、说话人、保留期限和完整本地处理日志。
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-3-litigation.png" alt="Deposition prep for US litigators"><br>
+<strong>Deposition Prep · 庭前准备</strong><br>
+<sub>For litigators</sub><br><br>
+Privileged · confidential · on your machine. 笔录可作脚注引用，不进任何 vendor log。Privilege 不外泄。
+</td>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-4-paralegal.png" alt="Case management at scale for paralegals"><br>
+<strong>Case Management at Scale · 批量案件</strong><br>
+<sub>For paralegals &amp; legal ops</sub><br><br>
+Hundreds of hours, batched and bound. 按 matter number 编排队列，导出 Markdown / SRT / JSON，本地全程。
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-5-oralhistory.png" alt="Oral history for humanities researchers"><br>
+<strong>Oral History · 口述史</strong><br>
+<sub>For oral historians</sub><br><br>
+Voices preserved · pages bound. 长达 3-4 小时的访谈，多说话人精确标签，可作专著方法论章节引用。
+</td>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-6-field.png" alt="Bilingual field research"><br>
+<strong>Field Research, Bilingual · 田野研究</strong><br>
+<sub>For field researchers</sub><br><br>
+Bilingüe · both private. 中 / 英 / 西多语言转录与本地保留，离线机器在田野也可用。
+</td>
+</tr>
+</table>
 
-| 模块 | 当前实现 |
-|---|---|
-| 桌面壳 | `pywebview` 打开本地 FastAPI + Vue 3 UI |
-| ASR | Qwen3-ASR-0.6B 默认，Qwen3-ASR-1.7B 作为高质量可选项 |
-| 发言人识别 | pyannote 4.x `speaker-diarization-community-1` |
-| 任务系统 | SQLite 持久化、队列串行执行、失败/中断后可重试 |
-| 前端 | Vue 3 CDN，无 npm 构建；支持中 / 英 / 西 UI 语言 |
-| 总结 | Ollama 本地 Qwen3 生成 Markdown 总结 |
-| Q&A / RAG | 首次提问生成访谈 digest，后续问答基于 digest 和检索上下文 |
-| 导出 | Markdown / JSON / SRT |
-| 离线 | 完全离线开关，不上报 telemetry，不自动检查更新 |
+> 这些不是 hypothetical 用例——它们对应六个具体的画像（欧洲社科 PI、大学 DPO / IRB、美国诉讼律师、paralegal、口述史研究者、西语 / 拉美研究项目负责人）。每个画像在调研里都被独立打分，每一项都让 Liasse 排第一。
 
-## 适合谁
+## 这不是一个"开发者工具"
 
-<p align="center">
-  <img src="docs/assets/qwensper-use-cases.svg" alt="Liasse use cases: academic, legal, oral history, internal research" width="100%">
-</p>
+Liasse 是一个**有 taste 的本地 LLM 产品**——目标是让任何人都能装、能用、能信任。但它也不是一个封闭的黑盒：
 
-- 学术研究者：访谈逐字稿、主题提取、后续编码前的材料整理。
-- 法律和合规团队：敏感录音的本地转写、初步摘要和证据材料索引。
-- 口述史 / 田野调查：多人访谈、长音频、发言人标签和时间戳。
-- 企业内部研究：用户访谈、内部会议、不能外发的调研素材。
+- **默认即用** — 双击 `Start Liasse.command`，跑完安装就能转录。不需要懂 Python、不需要懂 ML。
+- **可读可改** — 整个产品是 Python + Vue 3 CDN，没有 webpack、没有 npm 构建、没有 React 框架。任何懂一点点代码的人，加上一个 AI agent（Codex / Claude Code / Cursor），就能在半小时里把界面、文案、模型选型改成自己的样子。详见下面 [Customize with Codex](#customize-with-codex)。
+- **零云依赖** — 一旦模型在本地，App 永远不联网。设置里的"完全离线"开关把 `HF_HUB_OFFLINE=1` 和 `TRANSFORMERS_OFFLINE=1` 都强制开启。
 
-## 硬件与内存
+<a id="customize-with-codex"></a>
 
-| 配置 | 说明 |
-|---|---|
-| **推荐最低** | Apple Silicon Mac，**8GB 统一内存**（常见于 MacBook Air）。关闭其他占内存应用后，可完成转录 + 4B 总结 / 问答；长访谈耗时会明显变长。 |
-| **推荐日常** | **16GB**（MacBook Air / Pro、入门 iMac）。开发与实测主要在这一档；速度参考见下文。 |
-| **更宽裕** | 24GB+。可安装 `qwen3:8b`、选用 1.7B ASR，质量更高，仍保持本地离线。 |
+## Customize with Codex
 
-运行时按本机可用内存分档（`memory_monitor`）：总内存不足 10GB 为 **tight**（典型 8GB 机器），总结与 Q&A 固定使用 `qwen3:4b`；内存充足时再尝试 8B。不需要独立显卡或台式工作站。
-
-**不建议**：Intel Mac、8GB 以下、或同时开很多浏览器标签 / 虚拟机仍期望实时转录——不是做不到，而是 swap 会让体验很差。
-
-## 快速开始
-
-目前面向 **Apple Silicon macOS**（含 8GB MacBook Air）。
-
-```bash
-brew install python@3.12 ffmpeg ollama
-```
-
-准备 Hugging Face token，用于首次下载 pyannote 发言人识别模型：
-
-```dotenv
-HF_TOKEN=hf_xxx
-PYANNOTE_AUTH_TOKEN=hf_xxx
-```
-
-安装 Python 环境和依赖：
-
-```bash
-./Setup\ MLX\ Test\ Env.command
-```
-
-下载本地总结 / 问答模型（**8GB 机器只需 4B**）：
+Liasse 故意保持小、可读、无构建步骤——这样**任何 AI coding agent 都能在你的机器上理解并修改它**：
 
 ```bash
-ollama pull qwen3:4b
-# 可选：16GB+ 且追求更高质量时再装（约 5GB+ 运行时内存）
-ollama pull qwen3:8b
+# 用 Claude Code（推荐）
+cd "Liasse 项目目录"
+claude
+
+# 或者 Codex CLI
+codex
 ```
 
-启动 Ollama 后打开桌面应用：
+然后用自然语言提需求即可：
 
-```bash
-ollama serve
-./Start\ Liasse.command
-```
+- "把侧边栏的 Liasse 字标换成我们实验室的名字。"
+- "新增一个『去隐私信息』功能，自动把转录里的人名替换为 [P1] [P2]。"
+- "把总结模板改成 IRB 报告格式。"
+- "西语场景里默认使用 1.7B ASR，其他语言用 0.6B。"
 
-`Start Liasse.command` 只检查 Ollama 是否在运行，不会擅自启动守护进程。
-
-## 使用流程
-
-1. 选择音频文件或文件夹，支持 `mp3 / wav / m4a / flac / aac / ogg / wma / mp4`。
-2. 选择本次任务参数：是否发言人识别、人数、是否总结、ASR 模型、音频语言。
-3. 任务进入本地队列，后台串行转录。
-4. 打开任务详情，编辑逐字稿、重命名发言人、查看总结。
-5. 在右侧 Q&A 面板围绕当前访谈提问。
-6. 导出 Markdown / JSON / SRT。
+代码组织（`liasse/` Python 包 + `web_static/` Vue 3 前端）和设计系统（[`design.md`](design.md) 是 single source of truth）都为这种"AI 协作改造"做了准备。
 
 ## 隐私模型
 
 Liasse 的隐私边界是「你的本机」：
 
-- 音频文件不会上传到云端转录 API。
+- 音频文件不会上传到任何云转录 API。
 - 逐字稿、总结、digest、问答历史保存在本地 `outputs/` 和 SQLite。
-- 首次下载模型需要联网；下载完成后可开启「完全离线」。
-- 不做 telemetry，不检查更新，不把材料发送到第三方服务。
+- 首次下载模型需要联网；下载完后开启「完全离线」模式即可永久断网运行。
+- 不做 telemetry，不检查更新，不把任何材料发送给第三方服务。
+- 模型推理全部在本机 Apple Silicon GPU（MLX / Metal）上完成。
+- 错误日志和崩溃报告也只写到 `~/Library/Logs/Liasse/`，不上传。
+
+## How it works
+
+<p align="center">
+  <img src="docs/assets/liasse-workflow.png" alt="Liasse local workflow: drop audio → ASR → speaker labeling → summary → export" width="100%">
+</p>
+
+五步，都在本机：
+
+1. **拖入音频** — `mp3 / wav / m4a / flac / aac / ogg / wma / mp4`
+2. **Qwen3-ASR 转录** — 默认 0.6B，质量模式可切 1.7B（Apple Silicon Metal GPU）
+3. **说话人标记** — pyannote 4.x community-1，或更轻的 LLM 文本标记
+4. **总结与 Q&A** — Ollama 本地 Qwen3:4b 或 8b
+5. **导出 bundle** — Markdown / JSON / SRT；law-firm 场景可走 PDF 打印模板
+
+## 已有能力
+
+| 模块 | 当前实现 |
+|---|---|
+| 桌面壳 | pywebview + 本地 FastAPI + Vue 3（无 npm 构建） |
+| ASR | Qwen3-ASR-0.6B 默认，Qwen3-ASR-1.7B 可选 |
+| 说话人识别 | pyannote 4.x `speaker-diarization-community-1` 或 LLM 文本标记 |
+| 任务系统 | SQLite 持久化，队列串行执行，失败/中断可重试 |
+| 多语言 UI | 中 · 英 · 西 |
+| 总结 | Ollama 本地 Qwen3 生成 Markdown 总结 |
+| Q&A / RAG | digest + 检索上下文 |
+| 导出 | Markdown / JSON / SRT，PDF 走 `@media print` 模板 |
+| 离线 | "完全离线"开关，强制 HF / Transformers 走本地缓存 |
+
+## 硬件与内存
+
+| 配置 | 说明 |
+|---|---|
+| **推荐最低** | Apple Silicon Mac，**8GB 统一内存**（常见于 MacBook Air）。可完成转录 + 4B 总结 / 问答；长访谈耗时会明显变长。 |
+| **推荐日常** | **16GB**（MacBook Air / Pro、入门 iMac）。开发与实测主要在这一档。 |
+| **更宽裕** | 24GB+。可安装 `qwen3:8b`、选用 1.7B ASR，质量更高。 |
+
+不需要独立显卡或台式工作站。**不建议** Intel Mac、8GB 以下、或同时开很多浏览器标签 / 虚拟机的环境。
+
+## 快速开始
+
+```bash
+# 1. 系统依赖
+brew install python@3.12 ffmpeg ollama
+
+# 2. Hugging Face token（用于首次下载 pyannote 模型）
+echo "HF_TOKEN=hf_xxx" >> .env
+echo "PYANNOTE_AUTH_TOKEN=hf_xxx" >> .env
+
+# 3. Python 环境
+./Setup\ MLX\ Test\ Env.command
+
+# 4. 本地总结 / 问答模型（8GB 机器只装 4B）
+ollama pull qwen3:4b
+# 可选：16GB+ 可加 8B
+ollama pull qwen3:8b
+
+# 5. 跑起来
+ollama serve            # 单独终端
+./Start\ Liasse.command  # 双击或命令行
+```
+
+`Start Liasse.command` 只检查 Ollama 在跑，不主动启动守护进程。
 
 ## 速度参考
 
-Qwen3-ASR-0.6B + 发言人识别（**约 0.6–0.7× 实时**，因机型与后台负载而异）：
+Qwen3-ASR-0.6B + 说话人识别（约 0.6–0.7× 实时）：
 
-| 音频长度 | 16GB（参考） | 8GB（约略更慢，swap 时更明显） |
+| 音频长度 | 16GB | 8GB |
 |---|---|---|
-| 60 秒 | 约 90 秒 | 约 1.5–2.5 分钟 |
-| 5 分钟 | 约 7–8 分钟 | 约 10–15 分钟 |
-| 30 分钟 | 约 45 分钟 | 约 1–1.5 小时 |
-| 3 小时 50 分钟 | 约 5–6 小时 | 建议过夜或分段处理 |
+| 60 秒 | ~90 秒 | ~1.5–2.5 分钟 |
+| 5 分钟 | ~7–8 分钟 | ~10–15 分钟 |
+| 30 分钟 | ~45 分钟 | ~1–1.5 小时 |
+| 3 小时 50 分钟 | ~5–6 小时 | 建议过夜或分段 |
 
-8GB 档数字为经验范围，不是硬性 SLA；转录时尽量关闭 Chrome 多标签、Zoom 等占内存应用。
-
-长音频目前是「从头重试」，不是 chunk checkpoint resume。后续计划把音频预切成 10-30 分钟段，以便更细粒度进度、失败恢复和检索。
+长音频目前是「整段重试」，未来计划切成 10-30 分钟段做局部 resume。
 
 ## 项目结构
 
-```text
-launch_app.py                     # pywebview 入口：启动 FastAPI 并打开桌面窗口
-Start Liasse.command         # 双击启动
-local_transcriber/
-├── web_app.py                    # FastAPI REST + SSE
-├── task_runner.py                # 后台任务队列
-├── web_models.py                 # SQLite / SQLAlchemy / Pydantic 模型
-├── chat.py                       # 总结、digest、Q&A / RAG
-├── pipeline.py                   # ASR → diarization → summary → export 编排
-├── asr.py / diarization.py / alignment.py
-├── exporters.py                  # Markdown / JSON / SRT
-└── web_static/                   # Vue 3 前端，无构建步骤
-docs/
-├── frontend-spec.md
-├── dev-plan.md
-└── assets/                       # README 展示图
-tests/
-```
-
-## 开发命令
-
-环境检查：
-
-```bash
-./Check\ Runtime.command
-```
-
-单元测试：
-
-```bash
-venv/bin/python -m pytest tests/ -v
-```
-
-60 秒样本端到端测试：
-
-```bash
-venv/bin/python scripts/run_test_audio.py --seconds 60 --diarize --num-speakers 2
-```
+代码组织参见 [ARCHITECTURE.md](ARCHITECTURE.md)；设计系统参见 [design.md](design.md)。
 
 ## Roadmap
 
-- 长音频 chunking：更细进度、局部失败恢复、未来支持分块 RAG。
-- 0.6B / 1.7B ASR 质量评估：建立中文、英文、粤语访谈样本评测。
-- 更完整的本地检索：按时间段、发言人、主题和关键词召回片段。
-- 更稳的打包分发：macOS app bundle / DMG / 首次启动向导。
+- 长音频 chunking + 局部恢复
+- 按时间段 / 说话人 / 主题的本地语义检索
+- macOS App Bundle / DMG / 首次启动向导
+- 暗色模式（v0.3）
+- PDF 导出模板的法律 / 学术两种 preset
 
 ## 许可
 
@@ -193,179 +216,129 @@ venv/bin/python scripts/run_test_audio.py --seconds 60 --diarize --num-speakers 
 
 ---
 
+<a id="english"></a>
+
 ## English
 
-Liasse is a local-first desktop app for interview transcription and private AI analysis. It is designed for academic research, legal work, oral history, internal research, and other workflows where audio recordings and transcripts are too sensitive to send to a cloud transcription service.
+> Liasse (French: *a bound bundle of documents tied with a ribbon*) turns interview recordings into citable, archivable transcripts that never leave your machine.  
+> It is not for developers. It is for researchers, lawyers, compliance officers, oral historians, and field workers — anyone whose recordings cannot be uploaded.
 
-It turns long recordings into timestamped, speaker-aware transcripts, then uses local Qwen models for summaries, interview Q&A, and lightweight local retrieval. The core promise is simple: sensitive recordings, transcripts, summaries, and chat context stay on your own machine.
+Liasse is not another "AI recorder." Its shape is borrowed from the bundle of interview materials on a researcher's desk: the originals stay with you; the tool only helps you keep them tidy. Audio, transcripts, summaries, Q&A context — from the moment models are downloaded to the moment you export a PDF — never leave this machine.
 
-**A major design goal is compatibility with the Macs researchers actually carry**—including an **8GB MacBook Air**—not a heavy workstation with lots of RAM. Defaults favor Qwen3-ASR-0.6B and Ollama `qwen3:4b`, serial task execution, and automatic downgrades when memory is tight: slower is acceptable; requiring top-tier hardware is not.
+It runs **fully locally on Apple Silicon Mac**. An ordinary **8GB MacBook Air is enough** (slower, but it works); 16GB is the daily driver; 24GB+ lets you use the 1.7B ASR and the 8B summarizer. With **fully-offline mode** on, no network calls happen at all after the first model download.
 
-> Status: alpha / research tool. The backend pipeline is already working, and the desktop UI MVP is usable. The default ASR model is Qwen3-ASR-0.6B running locally on Apple Silicon through MLX / Metal.
+> Status: alpha · backend pipeline working, desktop UI usable. If you are an institutional buyer or a compliance officer, start with the [Privacy](#privacy-model) section.
 
-## Why This Exists
+### Use Cases · six real scenarios
 
-Researchers, lawyers, compliance teams, and fieldworkers often handle recordings that should not be uploaded to third-party services. Liasse brings the full workflow back onto the user’s Mac:
+The shape and name of Liasse came from a 2026-05 multi-persona brand sandbox — six target users gave structured feedback in the same product environment ([full research](outputs/brand_consulting_report.html)). The six use cases below are the patterns that emerged.
 
-- **Local-first**: ASR, diarization, summaries, and Q&A all run locally. No cloud API is used for core processing.
-- **Lightweight-hardware friendly**: Targets Apple Silicon Macs with **8GB unified memory** (e.g. M2/M3 MacBook Air) as a supported baseline; 16GB is the comfortable daily driver; 24GB+ unlocks larger models. One transcription job at a time to avoid memory contention.
-- **Built for long interviews**: Handles 30-minute to 4-hour recordings through a serial queue; on tight memory, summaries and Q&A stay on 4B instead of forcing 8B.
-- **Traceable exports**: Exports Markdown, JSON, and SRT with timestamps, speaker labels, and edited text.
-- **Local AI analysis**: Uses Ollama-hosted Qwen models to generate summaries, structured digests, and task-specific Q&A.
-- **Privacy controls**: Includes a fully offline mode that forces Hugging Face / Transformers to use local cache only.
+<table>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-1-academic.png" alt="Sensitive Interviews"><br>
+<strong>Sensitive Interviews</strong><br>
+<sub>For academic researchers</sub><br><br>
+GDPR-clean, IRB-bound, never uploaded. Can be written directly into the Data Management Plan.
+</td>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-2-compliance.png" alt="Compliance &amp; Audit"><br>
+<strong>Compliance &amp; Audit</strong><br>
+<sub>For DPO &amp; IRB</sub><br><br>
+DMP-ready · audit-friendly · no cloud anywhere. Export an audit bundle with retention, processors, full local log.
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-3-litigation.png" alt="Deposition Prep"><br>
+<strong>Deposition Prep</strong><br>
+<sub>For litigators</sub><br><br>
+Privileged · confidential · on your machine. Transcripts citable in court filings without entering any vendor log.
+</td>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-4-paralegal.png" alt="Case Management at Scale"><br>
+<strong>Case Management at Scale</strong><br>
+<sub>For paralegals &amp; legal ops</sub><br><br>
+Hundreds of hours, batched and bound. Queue by matter number, export Markdown / SRT / JSON, all local.
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-5-oralhistory.png" alt="Oral History"><br>
+<strong>Oral History</strong><br>
+<sub>For oral historians</sub><br><br>
+Voices preserved · pages bound. Long-form, speaker-labeled, citable for a monograph's methodology chapter.
+</td>
+<td width="50%" valign="top">
+<img src="docs/assets/use-case-6-field.png" alt="Field Research, Bilingual"><br>
+<strong>Field Research, Bilingual</strong><br>
+<sub>For field researchers</sub><br><br>
+Bilingüe · both private. EN / ES / ZH transcription kept locally — works offline in the field.
+</td>
+</tr>
+</table>
 
-## Current Capabilities
+### This is not "a developer tool"
 
-| Area | Current implementation |
-|---|---|
-| Desktop shell | `pywebview` running a local FastAPI + Vue 3 app |
-| ASR | Qwen3-ASR-0.6B by default, with Qwen3-ASR-1.7B planned as a higher-quality option |
-| Speaker diarization | pyannote 4.x `speaker-diarization-community-1` |
-| Task system | SQLite persistence, serial queue, retry after failure or interruption |
-| Frontend | Vue 3 via CDN, no npm build step; English / Chinese / Spanish UI |
-| Summary | Local Qwen through Ollama generates Markdown summaries |
-| Q&A / RAG | First question builds an interview digest; later answers use the digest plus locally retrieved transcript snippets |
-| Export | Markdown / JSON / SRT |
-| Offline mode | No telemetry, no update checks, local-cache-only option |
+Liasse is **a tasteful local-LLM product**, designed so anyone can install, use, and trust it. But it is not a black box either:
 
-## Who It Is For
+- **Default-just-works** — Double-click `Start Liasse.command`, finish the setup, transcribe. No Python, no ML knowledge required.
+- **Readable and modifiable** — The whole product is Python + Vue 3 from CDN. No webpack, no npm build, no React framework. Anyone with a little code experience, plus an AI agent (Codex / Claude Code / Cursor), can reshape the UI, copy, or model choices in under an hour. See [Customize with Codex](#customize-with-codex) above.
+- **Zero cloud dependence** — Once models are local, the app never goes online. A "fully offline" toggle in settings forces `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`.
 
-- Academic researchers: interview transcripts, theme extraction, and material preparation before coding.
-- Legal and compliance teams: local transcription of sensitive recordings with timestamped references.
-- Oral history and fieldwork: long recordings, multiple speakers, speaker labels, and archival exports.
-- Internal research teams: user interviews, internal meetings, and non-shareable research material.
+<a id="privacy-model"></a>
 
-## Hardware and memory
+### Privacy Model
 
-| Setup | Notes |
-|---|---|
-| **Minimum target** | Apple Silicon Mac with **8GB unified memory** (common MacBook Air). With other heavy apps closed, full local transcription plus 4B summaries/Q&A is feasible; long jobs take much longer. |
-| **Recommended daily use** | **16GB** (Air / Pro, entry iMac). Primary dev and benchmark tier; see speed table below. |
-| **Room to spare** | 24GB+. Optional `qwen3:8b` and 1.7B ASR for higher quality, still fully local. |
+Liasse's privacy boundary is "your machine":
 
-At runtime, available RAM selects a tier (`memory_monitor`): under 10GB total is **tight** (typical 8GB machines)—summaries and Q&A use `qwen3:4b` only; 8B is attempted only when memory allows. No discrete GPU or desktop tower required.
+- Audio is never uploaded to a cloud transcription API.
+- Transcripts, summaries, digests, and Q&A history stay in local `outputs/` and SQLite.
+- The only network call is the first model download. After that, toggle "Fully offline" — done.
+- No telemetry, no update checks, no third-party reporting.
+- Inference runs on local Apple Silicon GPU (MLX / Metal).
+- Crash logs go only to `~/Library/Logs/Liasse/` and are not sent anywhere.
 
-**Not recommended**: Intel Macs, under 8GB, or expecting real-time transcription while running many browser tabs or VMs—swap will hurt badly.
-
-## Quick Start
-
-Liasse targets **Apple Silicon macOS**, including 8GB MacBook Air.
+### Quickstart
 
 ```bash
 brew install python@3.12 ffmpeg ollama
-```
 
-Create a Hugging Face token for the first pyannote diarization model download:
+echo "HF_TOKEN=hf_xxx" >> .env
+echo "PYANNOTE_AUTH_TOKEN=hf_xxx" >> .env
 
-```dotenv
-HF_TOKEN=hf_xxx
-PYANNOTE_AUTH_TOKEN=hf_xxx
-```
-
-Install the Python environment and dependencies:
-
-```bash
 ./Setup\ MLX\ Test\ Env.command
+
+ollama pull qwen3:4b              # for 8GB machines
+ollama pull qwen3:8b              # optional, 16GB+
+
+ollama serve                       # separate terminal
+./Start\ Liasse.command            # double-click launcher
 ```
 
-Download a local model for summaries and Q&A (**8GB machines only need 4B**):
+### Speed Reference
 
-```bash
-ollama pull qwen3:4b
-# Optional on 16GB+: higher quality, ~5GB+ RAM at runtime
-ollama pull qwen3:8b
-```
+Qwen3-ASR-0.6B + diarization (about 0.6–0.7× realtime):
 
-Start Ollama, then open the desktop app:
-
-```bash
-ollama serve
-./Start\ Liasse.command
-```
-
-`Start Liasse.command` only checks whether Ollama is already running. It does not start the daemon automatically.
-
-## Workflow
-
-1. Select audio files or a folder. Supported formats: `mp3 / wav / m4a / flac / aac / ogg / wma / mp4`.
-2. Choose task options: speaker diarization, number of speakers, summary generation, ASR model, and audio language.
-3. The task enters a local serial queue and runs in the background.
-4. Open the task detail view to edit transcripts, rename speakers, and read the summary.
-5. Ask questions about the current interview in the right-side Q&A panel.
-6. Export Markdown, JSON, or SRT.
-
-## Privacy Model
-
-Liasse’s privacy boundary is your own machine:
-
-- Audio files are not uploaded to a cloud transcription API.
-- Transcripts, summaries, digests, and chat history are stored locally under `outputs/` and SQLite.
-- The first model download requires network access; after that, fully offline mode can be enabled.
-- No telemetry, no automatic update checks, and no third-party processing service.
-
-## Performance Reference
-
-Qwen3-ASR-0.6B + speaker diarization (**roughly 0.6–0.7× realtime**, varies by machine and background load):
-
-| Audio length | 16GB (reference) | 8GB (often slower; swap makes it worse) |
+| Audio length | 16GB | 8GB |
 |---|---|---|
-| 60 seconds | About 90 seconds | About 1.5–2.5 minutes |
-| 5 minutes | About 7–8 minutes | About 10–15 minutes |
-| 30 minutes | About 45 minutes | About 1–1.5 hours |
-| 3 hours 50 minutes | About 5–6 hours | Plan overnight or split the file |
+| 60 s | ~90 s | ~1.5–2.5 min |
+| 5 min | ~7–8 min | ~10–15 min |
+| 30 min | ~45 min | ~1–1.5 h |
+| 3 h 50 min | ~5–6 h | overnight / split |
 
-8GB figures are empirical ranges, not guarantees. Close memory-hungry apps (many browser tabs, Zoom, etc.) while transcribing.
+Long audio currently retries from the start. Chunked resume is on the roadmap.
 
-Long recordings currently retry from the beginning rather than resuming from a chunk checkpoint. A future chunking layer should enable finer progress, partial recovery, and stronger retrieval.
+### Project Structure
 
-## Project Structure
+See [ARCHITECTURE.md](ARCHITECTURE.md); design system in [design.md](design.md).
 
-```text
-launch_app.py                     # pywebview entry: starts FastAPI and opens the desktop window
-Start Liasse.command         # double-click launcher
-local_transcriber/
-├── web_app.py                    # FastAPI REST + SSE
-├── task_runner.py                # background task queue
-├── web_models.py                 # SQLite / SQLAlchemy / Pydantic models
-├── chat.py                       # summary, digest, Q&A / RAG
-├── pipeline.py                   # ASR → diarization → summary → export orchestration
-├── asr.py / diarization.py / alignment.py
-├── exporters.py                  # Markdown / JSON / SRT
-└── web_static/                   # Vue 3 frontend, no build step
-docs/
-├── frontend-spec.md
-├── dev-plan.md
-└── assets/                       # README visuals
-tests/
-```
+### License
 
-## Development
+No open-source license selected yet. Please do not treat it as freely redistributable.
 
-Runtime check:
+---
 
-```bash
-./Check\ Runtime.command
-```
-
-Unit tests:
-
-```bash
-venv/bin/python -m pytest tests/ -v
-```
-
-60-second end-to-end smoke test:
-
-```bash
-venv/bin/python scripts/run_test_audio.py --seconds 60 --diarize --num-speakers 2
-```
-
-## Roadmap
-
-- Long-audio chunking for finer progress, partial recovery, and chunk-level RAG.
-- 0.6B / 1.7B ASR quality evaluation on Chinese, English, and Cantonese interview samples.
-- Richer local retrieval by timestamp, speaker, topic, and keyword.
-- More robust macOS packaging: app bundle, DMG, and first-run setup wizard.
-
-## License
-
-No open-source license has been selected yet. Please do not treat this as freely redistributable software for now.
+<p align="center">
+  <sub><em>Liasse</em> · A research instrument that happens to be software.</sub>
+</p>

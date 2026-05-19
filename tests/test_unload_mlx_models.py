@@ -8,7 +8,7 @@
 import inspect
 from unittest.mock import MagicMock, patch
 
-from local_transcriber.asr import unload_mlx_models
+from liasse.asr import unload_mlx_models
 
 
 def test_unload_is_callable_even_without_mlx():
@@ -53,7 +53,7 @@ def test_unload_calls_mlx_metal_cache_clear():
 def test_task_runner_unloads_mlx_before_llm_speaker_labeling():
     """反向回归：task_runner._worker_entry 必须在 llm speaker labeling
     前调 unload_mlx_models。如果有人删了这行，8GB Air 用户会重新踩坑。"""
-    from local_transcriber import task_runner
+    from liasse import task_runner
 
     source = inspect.getsource(task_runner)
     # 查找 llm_speaker_enabled 分支并验证它调了 unload
@@ -71,7 +71,7 @@ def test_task_runner_unloads_in_both_llm_and_summary_paths():
     1. llm_speaker_enabled → label_segments
     2. summarize_requested → summary_pipeline.analyze
     源码里 `from .asr import unload_mlx_models` 应至少出现 2 次（每条路径一次）。"""
-    from local_transcriber import task_runner
+    from liasse import task_runner
 
     source = inspect.getsource(task_runner)
     n_imports = source.count("from .asr import unload_mlx_models")

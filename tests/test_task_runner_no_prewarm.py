@@ -1,7 +1,7 @@
 import inspect
 
-from local_transcriber import task_runner
-from local_transcriber.task_runner import TaskRunner
+from liasse import task_runner
+from liasse.task_runner import TaskRunner
 
 
 def test_task_runner_has_no_prewarm_digest_method():
@@ -17,7 +17,7 @@ def test_task_runner_does_not_import_chat_module():
     assert "from . import chat" not in source, (
         "task_runner 不应再 'from . import chat'"
     )
-    assert "import local_transcriber.chat" not in source
+    assert "import liasse.chat" not in source
 
 
 def test_task_runner_does_not_reference_prewarm_chat_variable():

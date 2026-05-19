@@ -1,6 +1,6 @@
-from local_transcriber.settings_store import normalize_settings
-from local_transcriber.task_runner import _resolve_speaker_execution
-from local_transcriber.schemas import TaskConfig, normalize_task_config
+from liasse.settings_store import normalize_settings
+from liasse.task_runner import _resolve_speaker_execution
+from liasse.schemas import TaskConfig, normalize_task_config
 
 
 def test_task_config_defaults_to_llm_mode():

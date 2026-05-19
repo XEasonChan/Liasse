@@ -46,7 +46,7 @@ export const Sidebar = {
           <div class="model-row-name">
             <span class="status-dot" :class="statusClass(asrModel)"></span>
             <span>Qwen3-ASR 0.6B</span>
-            <span class="muted" style="font-size:11px;margin-left:auto">{{ statusLabel(asrModel) }}</span>
+            <span class="model-status-text" :class="statusClass(asrModel)" style="font-size:11px;margin-left:auto">{{ statusLabel(asrModel) }}</span>
           </div>
         </div>
 
@@ -55,7 +55,7 @@ export const Sidebar = {
           <div class="model-row-name">
             <span class="status-dot" :class="statusClass(diarModel)"></span>
             <span>pyannote 4.x</span>
-            <span class="muted" style="font-size:11px;margin-left:auto">{{ statusLabel(diarModel) }}</span>
+            <span class="model-status-text" :class="statusClass(diarModel)" style="font-size:11px;margin-left:auto">{{ statusLabel(diarModel) }}</span>
           </div>
         </div>
 
@@ -64,7 +64,7 @@ export const Sidebar = {
           <div class="model-row-name">
             <span class="status-dot" :class="statusClass(llmModel)"></span>
             <span>Qwen3 4B</span>
-            <span class="muted" style="font-size:11px;margin-left:auto">{{ statusLabel(llmModel) }}</span>
+            <span class="model-status-text" :class="statusClass(llmModel)" style="font-size:11px;margin-left:auto">{{ statusLabel(llmModel) }}</span>
           </div>
         </div>
 

@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from local_transcriber.models import TranscriptionJob, TranscriptSegment
-from local_transcriber.transcribe_pipeline import TranscribePipeline
+from liasse.models import TranscriptionJob, TranscriptSegment
+from liasse.transcribe_pipeline import TranscribePipeline
 
 
 class FakeChunkedASRBackend:
@@ -45,7 +45,7 @@ def test_pipeline_maps_chunk_progress_to_precise_task_progress(tmp_path, monkeyp
     events = []
 
     monkeypatch.setattr(
-        "local_transcriber.transcribe_pipeline.create_asr_backend",
+        "liasse.transcribe_pipeline.create_asr_backend",
         lambda **_: FakeChunkedASRBackend(),
     )
 
@@ -72,7 +72,7 @@ def test_pipeline_emits_and_writes_partial_raw_transcript(tmp_path, monkeypatch)
     partials = []
 
     monkeypatch.setattr(
-        "local_transcriber.transcribe_pipeline.create_asr_backend",
+        "liasse.transcribe_pipeline.create_asr_backend",
         lambda **_: FakeChunkedASRBackend(),
     )
 

@@ -295,105 +295,134 @@ body::before {
 
 ---
 
-## 6. 字体系统 — Serif first
+## 6. 字体系统 — Sans-first with serif accents
 
-**主显示字体（display）**：DM Serif Display — 现代衬线，slab-edged，用于标题、wordmark、强调引言。  
-**主正文字体（text）**：DM Serif Text — DM 系列的工作版本，长文段不刺眼。  
-**辅助字体（meta / 元信息）**：Source Serif 4 — 给小字标签、letterspacing 大写小字。  
-**CJK fallback**：苹方 / 思源宋体（macOS / Windows 系统衬线优先）。
+参考 Claude / Granola 的做法：**serif 只在品牌时刻和极少数 hero 开场使用；产品 UI 里所有交互密集的功能性元素都走 sans-serif**。理由很直接——serif 美但慢扫；sans 清晰，用户在工作面板上每天扫几百次的元素必须 sans。
+
+### 6.1 双字体规则（强约束）
+
+| 字体 | 使用场景 | 不要用在 |
+| --- | --- | --- |
+| **Serif (Cormorant Garamond 300 italic)** | 品牌 wordmark "Liasse"、营销 hero、empty-state 开场、README marketing 区 | 任何按钮、nav、表头、status chip、settings 表单 |
+| **Sans-serif (SF Pro via system stack)** | Page title、section title、nav、buttons、tables、chips、forms、settings、所有交互文案 | brand wordmark 本身 |
+
+> Cormorant Garamond 用 **300 light italic** 重量——比 DM Serif Display 细一档，更像 2026 年的 AI 产品，而不是 19 世纪书皮。
+
+### 6.2 Token 声明
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,500;1,8..60,400&display=swap');
 
 :root {
+  /* SERIF — for brand + display-hero moments only */
   --font-display:
-    'DM Serif Display',
-    'EB Garamond',
-    'Source Han Serif SC',
-    '思源宋体',
-    Georgia,
-    'Times New Roman',
-    serif;
-
-  --font-text:
-    'DM Serif Text',
-    'EB Garamond',
-    'Source Han Serif SC',
-    '思源宋体',
-    Georgia,
-    'Times New Roman',
-    serif;
-
-  --font-meta:
+    'Cormorant Garamond',
     'Source Serif 4',
-    'DM Serif Text',
+    'Source Han Serif SC',
+    '思源宋体',
     Georgia,
+    'Times New Roman',
     serif;
 
-  /* tabular numerals — for time codes, file sizes, durations */
-  --font-numeric: 'DM Serif Text', Georgia, serif;
+  /* SANS — SF Pro via macOS system stack (no webfont needed, native render).
+     This is the workhorse for all UX. */
+  --font-ui:
+    -apple-system, BlinkMacSystemFont,
+    'SF Pro Text', 'SF Pro Display', system-ui,
+    'PingFang SC', 'Microsoft YaHei',
+    'Helvetica Neue', 'Segoe UI', sans-serif;
+
+  /* Legacy aliases — all sans now */
+  --font-text: var(--font-ui);
+  --font-meta: var(--font-ui);
 }
 
 html, body {
-  font-family: var(--font-text);
-  font-feature-settings: "kern" 1, "liga" 1, "onum" 1, "calt" 1;
+  font-family: var(--font-ui);
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.display, h1, h2, .page-title, .brand-name {
+/* SERIF MOMENTS — exhaustive list, do not add more without a brand reason */
+.brand-name {
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 300;
+  font-style: italic;
   letter-spacing: -0.012em;
+  color: var(--cobalt);   /* brand mark sits in cream sidebar in cobalt italic */
+}
+.display-hero {           /* empty-state greeting, onboarding splash */
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-style: italic;
+  letter-spacing: -0.012em;
+  color: var(--ink);
 }
 
-.meta, .eyebrow, .label, .nav-item, .pill, th, .status-chip {
-  font-family: var(--font-meta);
-  letter-spacing: 0.04em;
+/* SANS MOMENTS — page titles, headings, nav, chips, buttons all use sans */
+.page-title, h1, h2, h3 {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.nav-item, .pill, .status-chip, .eyebrow, .btn, .label, th, .settings-row-label {
+  font-family: var(--font-ui);
 }
 
 .eyebrow {
   font-size: 11px;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--muted);
+  font-weight: 500;
 }
 
-/* italic 是 lavender 强调的默认形态 */
-em, .italic, .accent-italic {
-  font-style: italic;
-  color: var(--lavender-deep);
-}
+/* Italic emphasis stays italic but uses the inherited family.
+   In app: sans italic. In README marketing: serif italic. */
+em, .italic { font-style: italic; }
 ```
 
-字号规范：
+### 6.3 字号规范
 
 ```css
 :root {
-  --font-display-xl: 48px;   /* hero */
-  --font-display-lg: 36px;   /* page title */
-  --font-display-md: 26px;   /* section title */
-  --font-display-sm: 20px;   /* card title */
-  --font-body:       16px;
-  --font-small:      14px;
-  --font-meta:       12px;
-  --font-micro:      11px;   /* eyebrow / label，搭配 0.22em letterspacing */
+  --font-page-title:    32px;   /* h1, .page-title */
+  --font-section-title: 20px;   /* h2 */
+  --font-card-title:    16px;   /* h3 */
+  --font-body:          14px;
+  --font-small:         13px;
+  --font-meta:          12px;
+  --font-micro:         11px;   /* eyebrow / label */
 
-  --leading-tight:   1.12;
-  --leading-snug:    1.35;
-  --leading-body:    1.55;
-  --leading-loose:   1.7;
+  --leading-tight: 1.15;
+  --leading-snug:  1.35;
+  --leading-body:  1.55;
 }
 ```
 
-字重规范（serif 字体字重普遍较少）：
+### 6.4 字重规范
 
 ```css
+--weight-light:    300;   /* serif display 唯一使用的重量 */
 --weight-regular:  400;
 --weight-medium:   500;
---weight-italic:   400 italic;
+--weight-semibold: 600;   /* page-title, section-title, nav-item.active */
 ```
 
-> **注意**：DM Serif Display 和 DM Serif Text 都只有 400 重量。需要"加粗"的视觉强调一律用斜体 italic 而不是 weight。这是欧洲学术出版物里典型的强调系统。
+加粗用 weight 500/600；强调用 italic（继承字体的 italic style，不强制变 color）。
+
+### 6.5 两区使用建议（System D 的视觉分工）
+
+| 区域 | 背景 | 主字体 | 主 accent | 字体角色 |
+| --- | --- | --- | --- | --- |
+| **Sidebar**（institutional） | cream paper | SF Pro 14px 400/600 | cobalt | brand wordmark 用 serif italic 300（唯一 serif） |
+| **Main content**（content / 工作） | white | SF Pro 14px 400/600 | lavender | 全 sans，page-title 也 sans semibold |
+
+这条规则让 UI 的"信息密度区"全部 sans 清晰可扫；"品牌呼吸点"留给 Cormorant 300 italic 一处。
 
 ---
 

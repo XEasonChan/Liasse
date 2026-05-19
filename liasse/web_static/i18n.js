@@ -5,11 +5,21 @@ import { es } from "./locales/es.js";
 const { reactive } = window.Vue;
 
 const dicts = { en, zh, es };
-const LS_KEY = "whisperqwen.locale";
+const LS_KEY = "liasse.locale";
+const LEGACY_LS_KEY = "whisperqwen.locale";
 
 function loadLocale() {
   try {
-    const saved = localStorage.getItem(LS_KEY);
+    let saved = localStorage.getItem(LS_KEY);
+    if (!saved) {
+      // Migrate legacy key once, then drop it.
+      const legacy = localStorage.getItem(LEGACY_LS_KEY);
+      if (legacy && dicts[legacy]) {
+        localStorage.setItem(LS_KEY, legacy);
+        localStorage.removeItem(LEGACY_LS_KEY);
+        saved = legacy;
+      }
+    }
     if (saved && dicts[saved]) return saved;
   } catch (_) { /* ignore */ }
   return "zh";

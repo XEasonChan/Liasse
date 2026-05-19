@@ -11,7 +11,7 @@
 产物在 `dist/Liasse-<version>.dmg`。
 
 默认行为：
-- 把项目源码 + `Start Liasse.command` + `launch_app.py` + `local_transcriber/` 整个拷进 `.app/Contents/Resources/app/`
+- 把项目源码 + `Start Liasse.command` + `launch_app.py` + `liasse/` 整个拷进 `.app/Contents/Resources/app/`
 - 排除 `.env` / `outputs/` / `tests/` / `docs/` / `vendor/` / `venv/` / `CLAUDE.md` / `.claude/` 等内部文件
 - 把 **Qwen3-ASR 0.6B** 和 **Qwen3-ForcedAligner 0.6B** 模型（共约 3.5 GB）从本机 `~/.cache/huggingface/hub/` 复制到 `.app/Contents/Resources/app/.hf_cache/hub/`
 - 调 `hdiutil create` 生成 UDZO 压缩的 .dmg

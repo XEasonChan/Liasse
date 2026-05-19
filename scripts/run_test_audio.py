@@ -26,8 +26,8 @@ if _env_file.exists():
                 _k, _v = _line.split("=", 1)
                 os.environ.setdefault(_k.strip(), _v.strip())
 
-from local_transcriber.models import TranscriptionJob
-from local_transcriber.transcribe_pipeline import TranscribePipeline
+from liasse.models import TranscriptionJob
+from liasse.transcribe_pipeline import TranscribePipeline
 
 
 def build_parser() -> argparse.ArgumentParser:

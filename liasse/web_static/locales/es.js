@@ -48,6 +48,8 @@ export const es = {
     cfgASRQuick: "0.6B rápido",
     cfgASRHigh: "1.7B alta calidad",
     cfgLang: "Idioma del audio",
+    langForceWarn: "Forzando salida en {lang} · el modelo 0.6B puede traducir/repetir tokens",
+    langForceTip: "Cuando fijas un idioma, el modelo Qwen3-ASR 0.6B traducirá el audio a ese idioma si el habla real es diferente, y puede alucinar tokens repetidos. Elige «auto» salvo que estés seguro del idioma del audio.",
     speakersAuto: "Automático",
     speakersN: "{n} hablantes",
     speakersPlus: "{n}+ hablantes",

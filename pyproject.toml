@@ -3,9 +3,9 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "qwensper"
+name = "liasse"
 version = "0.2.0"
-description = "本地访谈转录桌面应用 — Qwen3-ASR + pyannote/LLM diarization + 本地 LLM 摘要 + RAG 问答。完全离线，IRB 合规。"
+description = "Liasse — 本地访谈转录桌面应用，面向欧洲学术与美国法律的隐私敏感工作流。Qwen3-ASR + pyannote/LLM diarization + 本地 LLM 摘要 + RAG 问答。完全离线，IRB 合规。"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 license = {file = "LICENSE"}
@@ -27,7 +27,7 @@ classifiers = [
 
 # Bootstrap 依赖：装完就能起 launch_app.py 让用户看到 UI。
 # 这一组刻意不引 mlx / torch / pyannote 这些大包；它们在 [project.optional-dependencies]
-# 的 [asr] extra 里。完整安装：pip install qwensper[asr,dev]
+# 的 [asr] extra 里。完整安装：pip install liasse[asr,dev]
 dependencies = [
     "fastapi",
     "uvicorn",
@@ -59,19 +59,19 @@ Issues = "https://github.com/XEasonChan/Qwensper/issues"
 
 [project.scripts]
 # CLI 入口（批处理转录，不开 UI）
-qwensper-cli = "local_transcriber.cli:main"
+liasse-cli = "liasse.cli:main"
 
 [project.gui-scripts]
 # GUI 入口（pywebview 桌面窗口 + FastAPI 后端）
-qwensper = "launch_app:main"
+liasse = "launch_app:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["local_transcriber*"]
+include = ["liasse*"]
 exclude = ["tests*", "scripts*", "packaging*", "outputs*", "reference*", "docs*"]
 
 [tool.setuptools.package-data]
-local_transcriber = [
+liasse = [
     "web_static/*.html",
     "web_static/*.css",
     "web_static/*.js",

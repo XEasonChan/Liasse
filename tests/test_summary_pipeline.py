@@ -2,9 +2,9 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from local_transcriber.memory_monitor import MemoryBudget
-from local_transcriber.models import TranscriptSegment
-from local_transcriber.summary_pipeline import (
+from liasse.memory_monitor import MemoryBudget
+from liasse.models import TranscriptSegment
+from liasse.summary_pipeline import (
     AnalysisResult,
     ProgressEvent,
     analyze,
@@ -31,9 +31,9 @@ def _l1(idx):
 
 
 def test_analyze_runs_l1_for_each_chunk(tmp_path):
-    with patch("local_transcriber.summary_pipeline.extract_l1",
+    with patch("liasse.summary_pipeline.extract_l1",
                side_effect=lambda chunk, total_chunks, **kw: _l1(chunk.index)) as l1_mock, \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览\n") as l2_mock:
         result = analyze(_segs(), output_dir=tmp_path,
                          task_id="t1", budget=MemoryBudget(16, 8))
@@ -44,11 +44,11 @@ def test_analyze_runs_l1_for_each_chunk(tmp_path):
 
 
 def test_analyze_unloads_4b_before_loading_8b_on_comfortable(tmp_path):
-    with patch("local_transcriber.summary_pipeline.extract_l1",
+    with patch("liasse.summary_pipeline.extract_l1",
                side_effect=lambda chunk, total_chunks, **kw: _l1(chunk.index)), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览\n"), \
-         patch("local_transcriber.summary_pipeline.unload_model") as un:
+         patch("liasse.summary_pipeline.unload_model") as un:
         analyze(_segs(), output_dir=tmp_path, task_id="t2",
                 budget=MemoryBudget(16, 8))
     calls = [c.args[0] for c in un.call_args_list]
@@ -56,11 +56,11 @@ def test_analyze_unloads_4b_before_loading_8b_on_comfortable(tmp_path):
 
 
 def test_analyze_does_not_switch_on_tight(tmp_path):
-    with patch("local_transcriber.summary_pipeline.extract_l1",
+    with patch("liasse.summary_pipeline.extract_l1",
                side_effect=lambda chunk, total_chunks, **kw: _l1(chunk.index)), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览\n"), \
-         patch("local_transcriber.summary_pipeline.unload_model") as un:
+         patch("liasse.summary_pipeline.unload_model") as un:
         analyze(_segs(), output_dir=tmp_path, task_id="t3",
                 budget=MemoryBudget(8, 3))
     calls = [c.args[0] for c in un.call_args_list]
@@ -72,9 +72,9 @@ def test_analyze_does_not_switch_on_tight(tmp_path):
 
 
 def test_analyze_builds_and_persists_index(tmp_path):
-    with patch("local_transcriber.summary_pipeline.extract_l1",
+    with patch("liasse.summary_pipeline.extract_l1",
                side_effect=lambda chunk, total_chunks, **kw: _l1(chunk.index)), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览\n"):
         result = analyze(_segs(), output_dir=tmp_path, task_id="t4",
                          budget=MemoryBudget(16, 8))
@@ -86,9 +86,9 @@ def test_analyze_emits_progress_events(tmp_path):
     def progress(ev: ProgressEvent):
         events.append(ev)
 
-    with patch("local_transcriber.summary_pipeline.extract_l1",
+    with patch("liasse.summary_pipeline.extract_l1",
                side_effect=lambda chunk, total_chunks, **kw: _l1(chunk.index)), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览\n"):
         analyze(_segs(), output_dir=tmp_path, task_id="t5",
                 budget=MemoryBudget(16, 8), on_progress=progress)
@@ -115,9 +115,9 @@ def test_analyze_resumes_from_sqlite_when_l1_already_done(tmp_path):
     task_id = "resume-task"
 
     # 先跑一次完整流程，保存 L1 结果
-    with patch("local_transcriber.summary_pipeline.extract_l1",
+    with patch("liasse.summary_pipeline.extract_l1",
                side_effect=lambda chunk, total_chunks, **kw: _l1(chunk.index)), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览\n"):
         analyze(_segs(), output_dir=output_dir, task_id=task_id,
                 budget=MemoryBudget(16, 8))
@@ -127,8 +127,8 @@ def test_analyze_resumes_from_sqlite_when_l1_already_done(tmp_path):
     assert len(existing) >= 1
 
     # 第二次跑：extract_l1 不应再被调用
-    with patch("local_transcriber.summary_pipeline.extract_l1") as l1_mock, \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+    with patch("liasse.summary_pipeline.extract_l1") as l1_mock, \
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览（重跑）\n"):
         result = analyze(_segs(), output_dir=output_dir, task_id=task_id,
                          budget=MemoryBudget(16, 8))
@@ -161,9 +161,9 @@ def test_analyze_runs_l1_concurrently_on_comfortable(tmp_path, monkeypatch):
             in_flight["current"] -= 1
         return _l1(chunk.index)
 
-    with patch("local_transcriber.summary_pipeline.extract_l1", side_effect=slow_l1), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2", return_value="ok"), \
-         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+    with patch("liasse.summary_pipeline.extract_l1", side_effect=slow_l1), \
+         patch("liasse.summary_pipeline.synthesize_l2", return_value="ok"), \
+         patch("liasse.summary_pipeline.TranscriptIndex.build",
                return_value=MagicMock(save=lambda: None)):
         t0 = time.time()
         analyze(segs, output_dir=tmp_path, task_id="par",
@@ -197,11 +197,11 @@ def test_analyze_runs_l1_serially_on_tight(tmp_path, monkeypatch):
             in_flight["current"] -= 1
         return _l1(chunk.index)
 
-    with patch("local_transcriber.summary_pipeline.extract_l1", side_effect=slow_l1), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2", return_value="ok"), \
-         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+    with patch("liasse.summary_pipeline.extract_l1", side_effect=slow_l1), \
+         patch("liasse.summary_pipeline.synthesize_l2", return_value="ok"), \
+         patch("liasse.summary_pipeline.TranscriptIndex.build",
                return_value=MagicMock(save=lambda: None)), \
-         patch("local_transcriber.summary_pipeline.unload_model"):
+         patch("liasse.summary_pipeline.unload_model"):
         analyze(segs, output_dir=tmp_path, task_id="ser",
                 budget=MemoryBudget(8, 2))  # tight: total=8GB, free=2GB
 
@@ -210,7 +210,7 @@ def test_analyze_runs_l1_serially_on_tight(tmp_path, monkeypatch):
 
 def test_l1_concurrency_env_override(monkeypatch):
     """WHISPERQWEN_L1_CONCURRENCY env 必须能强制覆盖（测试 / 调优用）。"""
-    from local_transcriber.summary_pipeline import _l1_concurrency
+    from liasse.summary_pipeline import _l1_concurrency
 
     budget_tight = MemoryBudget(8, 2)
     budget_comfy = MemoryBudget(16, 8)
@@ -243,9 +243,9 @@ def test_analyze_preserves_chunk_order_under_concurrency(tmp_path):
         time.sleep(random.uniform(0.0, 0.05))
         return _l1(chunk.index)
 
-    with patch("local_transcriber.summary_pipeline.extract_l1", side_effect=jittered_l1), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2", return_value="ok"), \
-         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+    with patch("liasse.summary_pipeline.extract_l1", side_effect=jittered_l1), \
+         patch("liasse.summary_pipeline.synthesize_l2", return_value="ok"), \
+         patch("liasse.summary_pipeline.TranscriptIndex.build",
                return_value=MagicMock(save=lambda: None)):
         result = analyze(segs, output_dir=tmp_path, task_id="ord",
                          budget=MemoryBudget(16, 8))

@@ -86,8 +86,16 @@ export const SettingsPage = {
         <p class="page-subtitle">{{ t('settings.subtitle') }}</p>
       </div>
 
-      <div v-if="loading" class="muted">…</div>
-      <template v-else-if="settings">
+      <div v-if="loading" class="settings-empty-state">
+        <span class="muted">Loading settings…</span>
+      </div>
+      <div v-else-if="!settings" class="settings-empty-state">
+        <p class="muted" style="margin-bottom: 12px;">
+          {{ message ? message.text : 'Settings could not be loaded.' }}
+        </p>
+        <button class="btn btn-sm" @click="load">Retry</button>
+      </div>
+      <template v-else>
 
         <div class="settings-card">
           <div class="section-head"><h2 class="section-title">{{ t('settings.sectionAppearance') }}</h2></div>

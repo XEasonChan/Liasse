@@ -2,8 +2,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from local_transcriber.exporters import export_srt
-from local_transcriber.models import TranscriptSegment
+from liasse.exporters import export_srt
+from liasse.models import TranscriptSegment
 
 
 class ExporterTests(unittest.TestCase):

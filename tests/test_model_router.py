@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
-from local_transcriber.memory_monitor import MemoryBudget, MemoryTier
-from local_transcriber.model_router import ModelChoice, TaskKind, route
+from liasse.memory_monitor import MemoryBudget, MemoryTier
+from liasse.model_router import ModelChoice, TaskKind, route
 
 
 def _budget(total: float, available: float) -> MemoryBudget:

@@ -36,8 +36,8 @@ if env_file.exists():
 
 import psutil
 
-from local_transcriber.models import TranscriptionJob
-from local_transcriber.transcribe_pipeline import TranscribePipeline
+from liasse.models import TranscriptionJob
+from liasse.transcribe_pipeline import TranscribePipeline
 
 
 AUDIO = ROOT / "test_audio" / "cut-2min-mid.m4a"
@@ -111,8 +111,8 @@ def run_one(mode: str) -> Dict[str, Any]:
     if mode == "llm":
         log("llm_speaker_labeling_start", 0.88)
         try:
-            from local_transcriber.diarization import speaker_turns_from_segments
-            from local_transcriber.speaker_labeler import label_segments
+            from liasse.diarization import speaker_turns_from_segments
+            from liasse.speaker_labeler import label_segments
 
             labeling = label_segments(
                 result.segments,

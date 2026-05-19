@@ -16,8 +16,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from local_transcriber.memory_monitor import MemoryBudget, MemoryTier
-from local_transcriber.model_router import TaskKind, route
+from liasse.memory_monitor import MemoryBudget, MemoryTier
+from liasse.model_router import TaskKind, route
 
 
 # ---------- M2 Air 8GB 系统快照 fixtures ----------
@@ -107,7 +107,7 @@ def test_router_speed_pref_always_4b(air_8gb_idle):
 
 def test_summary_l1_concurrency_locked_to_1_on_tight():
     """tight tier 必须串行跑 L1，否则 3 并发 × 4B 内存峰值会让 8GB Air OOM。"""
-    from local_transcriber.summary_pipeline import _l1_concurrency
+    from liasse.summary_pipeline import _l1_concurrency
 
     assert _l1_concurrency(MemoryBudget(8.0, 5.0)) == 1
     assert _l1_concurrency(MemoryBudget(8.0, 3.0)) == 1
@@ -116,7 +116,7 @@ def test_summary_l1_concurrency_locked_to_1_on_tight():
 
 def test_summary_l1_concurrency_3_on_comfortable():
     """16GB 才允许 3 并发。"""
-    from local_transcriber.summary_pipeline import _l1_concurrency
+    from liasse.summary_pipeline import _l1_concurrency
 
     assert _l1_concurrency(MemoryBudget(16.0, 8.0)) == 3
 
@@ -127,8 +127,8 @@ def test_summary_l1_concurrency_3_on_comfortable():
 def test_summary_unloads_l2_model_on_tight(tmp_path):
     """tight 跑完 L2 后必须 unload_model 释放 RAM 给 QA。8GB Air 上
     L2 的 4B + Qwen3-ASR 残留 + 系统已经吃满，必须主动让位。"""
-    from local_transcriber.models import TranscriptSegment
-    from local_transcriber.summary_pipeline import analyze
+    from liasse.models import TranscriptSegment
+    from liasse.summary_pipeline import analyze
 
     segs = [
         TranscriptSegment(start=0, end=10, text="问题" + "内容" * 200, speaker="A"),
@@ -143,12 +143,12 @@ def test_summary_unloads_l2_model_on_tight(tmp_path):
                          "entities": [], "questions_raised": []},
     )
 
-    with patch("local_transcriber.summary_pipeline.extract_l1", return_value=fake_l1), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2",
+    with patch("liasse.summary_pipeline.extract_l1", return_value=fake_l1), \
+         patch("liasse.summary_pipeline.synthesize_l2",
                return_value="## 总览"), \
-         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+         patch("liasse.summary_pipeline.TranscriptIndex.build",
                return_value=MagicMock(save=lambda: None)), \
-         patch("local_transcriber.summary_pipeline.unload_model") as unload_mock:
+         patch("liasse.summary_pipeline.unload_model") as unload_mock:
         analyze(segs, output_dir=tmp_path, task_id="tight",
                 budget=MemoryBudget(8.0, 3.0))  # TIGHT
 
@@ -158,8 +158,8 @@ def test_summary_unloads_l2_model_on_tight(tmp_path):
 
 def test_summary_does_not_unload_on_comfortable(tmp_path):
     """对应地，comfortable tier 不应主动 unload（保留模型给后续 QA）。"""
-    from local_transcriber.models import TranscriptSegment
-    from local_transcriber.summary_pipeline import analyze
+    from liasse.models import TranscriptSegment
+    from liasse.summary_pipeline import analyze
 
     segs = [
         TranscriptSegment(start=0, end=10, text="x" * 600, speaker="A"),
@@ -173,11 +173,11 @@ def test_summary_does_not_unload_on_comfortable(tmp_path):
                          "entities": [], "questions_raised": []},
     )
 
-    with patch("local_transcriber.summary_pipeline.extract_l1", return_value=fake_l1), \
-         patch("local_transcriber.summary_pipeline.synthesize_l2", return_value="ok"), \
-         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+    with patch("liasse.summary_pipeline.extract_l1", return_value=fake_l1), \
+         patch("liasse.summary_pipeline.synthesize_l2", return_value="ok"), \
+         patch("liasse.summary_pipeline.TranscriptIndex.build",
                return_value=MagicMock(save=lambda: None)), \
-         patch("local_transcriber.summary_pipeline.unload_model") as unload_mock:
+         patch("liasse.summary_pipeline.unload_model") as unload_mock:
         analyze(segs, output_dir=tmp_path, task_id="comfy",
                 budget=MemoryBudget(16.0, 8.0))  # COMFORTABLE
 

@@ -532,6 +532,24 @@ input, select, textarea { font-family: inherit; }
   background: var(--warning-soft);
   border-color: var(--warning-border);
 }
+/* upload-zone 行内提示（例如强制 language 时的 brass 警告） */
+.config-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
+  cursor: default;
+}
+.config-hint-warn {
+  color: var(--warning);
+  background: var(--warning-soft);
+  border: 1px solid var(--warning-border);
+}
 .setting-pill:disabled,
 .setting-pill button:disabled {
   opacity: .55;
