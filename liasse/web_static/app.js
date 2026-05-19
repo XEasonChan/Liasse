@@ -339,8 +339,11 @@ const App = {
         v-else-if="route.name === 'task'"
         :task-id="route.taskId"
         :now="now"
+        :models="models"
+        :llm-ready="llmReady"
         @back="onNavigate('home')"
         @deleted="onNavigate('home')"
+        @need-model="onNeedModel"
       />
 
       <settings-page

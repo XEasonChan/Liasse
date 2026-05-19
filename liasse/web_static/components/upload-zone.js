@@ -44,7 +44,10 @@ export const UploadZone = {
       if (!resp.ok) return;
       const s = await resp.json();
       if (s.defaultASRModel) this.config.asrModel = s.defaultASRModel;
+      // Language: user-facing picker is kept (default "auto"). If the user
+      // has a saved default in settings, prefer that on first render.
       if (s.defaultLanguage) this.config.language = s.defaultLanguage;
+      // defaultSummarize is ignored — summarize is decided by llmReady at submit.
       if (s.defaultSpeakerMode) {
         this.config.speakerMode = s.defaultSpeakerMode;
       } else if (typeof s.defaultDiarize === "boolean") {
@@ -52,7 +55,6 @@ export const UploadZone = {
       }
       this.config.diarize = this.config.speakerMode === "pyannote";
       if (s.defaultNumSpeakers !== undefined) this.config.numSpeakers = s.defaultNumSpeakers;
-      if (typeof s.defaultSummarize === "boolean") this.config.summarize = s.defaultSummarize;
     } catch (_) { /* ignore */ }
   },
   computed: {
@@ -345,11 +347,12 @@ export const UploadZone = {
 
     buildConfig() {
       const cfg = { ...this.config };
-      if (!this.llmReady) {
-        cfg.summarize = false;
-        cfg.enableChat = false;
-        if (cfg.speakerMode === "llm") cfg.speakerMode = "fast";
-      }
+      // Language: respect user selection (default "auto" — Qwen3-ASR detects).
+      // Summarize: opt-in IFF the local LLM model is loaded. If not, user is
+      // prompted on task-detail when they click "Generate summary".
+      cfg.summarize = this.llmReady;
+      cfg.enableChat = this.llmReady;
+      if (!this.llmReady && cfg.speakerMode === "llm") cfg.speakerMode = "fast";
       if (!this.diarizeReady && cfg.speakerMode === "pyannote") cfg.speakerMode = "fast";
       cfg.autoSegment = true;
       cfg.diarize = cfg.speakerMode === "pyannote";
@@ -435,9 +438,12 @@ export const UploadZone = {
                 <option :value="5">{{ t('upload.speakersPlus', { n: 5 }) }}</option>
               </select>
             </div>
-          </div>
 
-          <div class="config-line">
+            <!-- Language picker: default auto (Qwen3-ASR detects).
+                 Kept on the same row as the speaker controls to avoid a
+                 second config row. Summary toggle was removed — summary
+                 auto-runs when LLM model is loaded; otherwise the user is
+                 prompted to download on the task-detail page. -->
             <label class="setting-pill setting-pill-select">
               <span class="setting-label">{{ t('upload.cfgLang') }}</span>
               <select class="setting-inline-select" v-model="config.language">
@@ -447,25 +453,6 @@ export const UploadZone = {
                 <option value="Cantonese">{{ t('audioLang.Cantonese') }}</option>
               </select>
             </label>
-
-            <button
-              class="setting-pill"
-              :class="summaryToggleClass"
-              :title="summaryTooltip"
-              @click="handleSummaryClick"
-            >
-              <lucide-icon name="sparkles" :size="14" />
-              {{ summarySummary }}
-            </button>
-          </div>
-
-          <div
-            v-if="config.language !== 'auto'"
-            class="config-hint config-hint-warn"
-            :title="t('upload.langForceTip')"
-          >
-            <lucide-icon name="alert-triangle" :size="12" />
-            {{ t('upload.langForceWarn', { lang: langDisplay }) }}
           </div>
         </div>
 
