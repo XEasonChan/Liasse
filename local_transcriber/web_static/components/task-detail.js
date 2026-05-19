@@ -34,6 +34,12 @@ export const TaskDetail = {
     transcriptWarnings() {
       return ((this.task && this.task.transcript && this.task.transcript.warnings) || []);
     },
+    transcriptPartial() {
+      return Boolean(this.task && this.task.transcript && this.task.transcript.partial);
+    },
+    transcriptReady() {
+      return this.segments.length > 0;
+    },
     isRunning() { return this.task && this.task.status === "running"; },
     isQueued() { return this.task && this.task.status === "queued"; },
     isFailed() { return this.task && this.task.status === "failed"; },
@@ -268,6 +274,21 @@ export const TaskDetail = {
             </div>
             <div class="progress" style="width:200px">
               <div class="progress-fill is-running" :style="{ width: progressValue + '%' }"></div>
+            </div>
+          </div>
+
+          <div
+            v-if="isRunning && transcriptReady && transcriptPartial"
+            class="detail-banner banner-partial-ready"
+          >
+            <lucide-icon name="check-circle" :size="16" />
+            <div style="flex:1">
+              <div class="detail-banner-title">
+                {{ t('detail.bannerPartialReady', { n: segments.length }) }}
+              </div>
+              <div class="detail-banner-sub muted">
+                {{ t('detail.bannerPartialReadyHint') }}
+              </div>
             </div>
           </div>
 

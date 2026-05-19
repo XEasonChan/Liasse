@@ -546,6 +546,7 @@ input, select, textarea { font-family: inherit; }
 .chip-done      { background: var(--success-soft); color: var(--success); }
 .chip-failed    { background: var(--danger-soft); color: var(--danger); }
 .chip-stopped   { background: var(--bg-surface-soft); color: var(--text-tertiary); border: 1px solid var(--border-subtle); }
+.chip-partial-ready { display: inline-flex; align-items: center; gap: 3px; background: var(--success-soft); color: var(--success); border: 1px solid var(--success-border); font-size: 11px; padding: 1px 6px; border-radius: var(--radius-full); }
 
 .task-params { color: var(--text-secondary); font-size: var(--font-micro); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .task-time { color: var(--text-secondary); font-size: var(--font-small); white-space: nowrap; }
@@ -895,6 +896,13 @@ input, select, textarea { font-family: inherit; }
   border-color: var(--border-subtle);
   color: var(--text-secondary);
 }
+.banner-partial-ready {
+  background: var(--success-soft);
+  border-color: var(--success-border);
+  color: var(--success);
+  align-items: flex-start;
+}
+.banner-partial-ready .detail-banner-sub { color: var(--text-secondary); }
 .detail-banner-title { font-weight: 600; font-size: 14px; }
 .detail-banner-sub { font-size: 12px; margin-top: 2px; }
 
