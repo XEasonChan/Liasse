@@ -22,10 +22,17 @@ class AlignmentTests(unittest.TestCase):
 
         assigned = assign_speakers(segments, turns)
 
-        speakers = [s.speaker for s in assigned]
+        # 过滤到与原 segment [10,20] 有重叠的 sub-segment(gap-fill 会在
+        # segment 之外也补占位,smoothing 后还可能跨边界 merge,本测试只关心
+        # segment 内的 split 结果是否标了 SPK_01)
+        in_range = [s for s in assigned
+                    if s.start < 20 and s.end > 10]
+        speakers = [s.speaker for s in in_range]
         self.assertIn("SPEAKER_01", speakers)
-        # 主体段（最长 sub-segment）应是 SPK_01
-        longest = max(assigned, key=lambda s: s.end - s.start)
+        # 主体段(最长 sub-segment 与 segment 重叠)应是 SPK_01
+        def overlap_with_seg(s):
+            return max(0.0, min(s.end, 20) - max(s.start, 10))
+        longest = max(in_range, key=overlap_with_seg)
         self.assertEqual(longest.speaker, "SPEAKER_01")
 
 
@@ -81,17 +88,21 @@ class WeightedAlignmentTests(unittest.TestCase):
         assert assigned[0].speaker == "SPEAKER_00"
 
     def test_realistic_interview_pattern_two_speakers_present(self):
-        """模拟 2 分钟双人访谈：5 个 ASR segment 跨越 52 个 pyannote turns。
-        期望最终 segments 里两个 speaker 都出现（不是所有都被赋
-        SPEAKER_00，这就是 cleanup pass Phase E 发现的 bug）。"""
+        """模拟 2 分钟双人访谈,两个 speaker 都该出现。
+
+        SPEAKER_01 必须占 ≥ 15% 总时长且至少有一段长于 4s,否则会被新的
+        smart-smoothing(_smooth_minority_runs)collapse 掉 — 那是 production
+        在 pyannote 噪声场景下的正确行为(详见 alignment.py 注释)。
+        """
         # 用长 text 让拆分后每段都有内容
         segments = [
             TranscriptSegment(start=0,   end=8,   text="开场" * 10),
             TranscriptSegment(start=9,   end=47,  text="主答" * 50),
             TranscriptSegment(start=47,  end=80,  text="主答二" * 50),
-            TranscriptSegment(start=80,  end=95,  text="研究者提问" * 10),
-            TranscriptSegment(start=96,  end=120, text="再回答" * 30),
+            TranscriptSegment(start=80,  end=110, text="研究者长追问" * 20),
+            TranscriptSegment(start=111, end=120, text="再回答" * 10),
         ]
+        # SPEAKER_01 总占比 ≈ 25%, 最长 run 28s(>4s) — 智能 smoothing 不会抹掉它
         turns = [
             SpeakerTurn(start=0,   end=2.1, speaker="SPEAKER_00"),
             SpeakerTurn(start=2.8, end=4.1, speaker="SPEAKER_01"),
@@ -99,28 +110,33 @@ class WeightedAlignmentTests(unittest.TestCase):
             SpeakerTurn(start=9,   end=46,  speaker="SPEAKER_00"),
             SpeakerTurn(start=46,  end=47,  speaker="SPEAKER_01"),
             SpeakerTurn(start=47,  end=78,  speaker="SPEAKER_00"),
-            SpeakerTurn(start=78,  end=80,  speaker="SPEAKER_01"),
-            SpeakerTurn(start=80,  end=82,  speaker="SPEAKER_00"),
-            SpeakerTurn(start=82,  end=95,  speaker="SPEAKER_01"),
-            SpeakerTurn(start=96,  end=120, speaker="SPEAKER_00"),
+            SpeakerTurn(start=80,  end=110, speaker="SPEAKER_01"),  # 30s 长追问段
+            SpeakerTurn(start=111, end=120, speaker="SPEAKER_00"),
         ]
         assigned = assign_speakers(segments, turns)
         speakers_present = set(s.speaker for s in assigned)
         assert speakers_present == {"SPEAKER_00", "SPEAKER_01"}, (
             f"双人访谈应该看到两个 speaker，实际 {speakers_present}"
         )
-        # 验证 80-95s 时间区间内有 SPEAKER_01 的 sub-segment（提问被切出来）
+        # 验证 80-110s 长追问区间内有 SPEAKER_01 (长 run,smoothing 不抹)
         ask_segs = [s for s in assigned
-                    if s.start >= 80 and s.end <= 95 and s.speaker == "SPEAKER_01"]
-        assert ask_segs, "80-95s 区间内应有 SPEAKER_01 sub-segment"
+                    if s.start is not None and s.start >= 79
+                    and s.end is not None and s.end <= 111
+                    and s.speaker == "SPEAKER_01"]
+        assert ask_segs, "80-110s 长追问区间内应有 SPEAKER_01 sub-segment"
 
     def test_no_overlap_keeps_original_speaker(self):
-        """如果 turns 完全不与 segment 重叠，speaker 保持原值（不强行改）。"""
+        """如果 turns 完全不与 segment 重叠，segment 原 speaker 不改。
+
+        (gap-fill 会在 [0,50] 也插入占位 SPK_FAR segment,但原 100-110 段保持
+        ORIGINAL 不变。)
+        """
         segments = [TranscriptSegment(start=100, end=110, text="x",
                                        speaker="ORIGINAL")]
         turns = [SpeakerTurn(start=0, end=50, speaker="SPK_FAR")]
         assigned = assign_speakers(segments, turns)
-        assert assigned[0].speaker == "ORIGINAL"
+        original_seg = next(s for s in assigned if s.start == 100)
+        assert original_seg.speaker == "ORIGINAL"
 
     def test_segment_with_none_timestamps_skips_alignment(self):
         """没有 start/end 的 segment（极少见，比如 ASR 单段无时间戳）不应

@@ -1,0 +1,56 @@
+{
+  "sample": "ce-3",
+  "audio_dur_sec": 300.016327,
+  "asr_model": "Qwen/Qwen3-ASR-0.6B",
+  "speakers": [
+    "SPEAKER_00",
+    "SPEAKER_01"
+  ],
+  "wall_sec": 44.36,
+  "rt_factor": 6.76,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 30.11909375,
+      "speaker": "SPEAKER_01",
+      "text": "ChatbotbeforeChatGPTwaswaslaunchedandwewehadultimatelychosennottolaunchitforsafetyreasonsIthinktheteamdidn'twanttokickoffEffectivelyanAIglobalarmsraceandumyouknowChatGPTlaunchandlike theygotlikeinsanetractionrightAndandthatjustnaturallysortofpulledthemtowardsconsumerYouknowthere'sanotherworldwhereAnthropichadlaunchedClaudefirstlikemaybedotheotherwayaroundevenwith allthatfocusstuffSowhoknowsIt'sit'shardIt'salwayshardtosaylooki"
+    },
+    {
+      "start": 30.675968750000003,
+      "end": 61.91159375,
+      "speaker": "SPEAKER_00",
+      "text": "ngbackatsomeofthesethi ngsWowIdidn'tknowthatIthinkalsopeoplejustdon'trealizehowfarbehindAnthropicwaslikerightnowit'slike ofcoursethey'reamazingbutlikeIjustrememberwhenpeopleweretalkingaboutAnthropicwewereraisingmoneyIwaslikethere'snowaythey'regoingtocompetewithOpenAIatthispointit'slikesooverjustlikethey're sofaraheadanditshowsthepoweroffocusandjustIguessIdon'tknowallthethingsy'alldidlikeititisabsurdhowfary'allhavecomeandhowsuccessfulandhowthingshavechangedsoquick"
+    },
+    {
+      "start": 62.04659375000001,
+      "end": 88.748125,
+      "speaker": "SPEAKER_01",
+      "text": "lyYeahandIwouldsayIvery muchagreeIthinkalotofthatlikeweIthinkalotofthatcomesdowntoourleadershipteamWehaveanumberofpeoplewhoworkedatlikecallitlikethebestcompaniesyouknowintheworldveryseniorpeopleandIthinkalmost uniformlyeveryone'slikethisisthestrongestleadershipteamoutofanyofthosecompaniesandsoIthinkalotcomesfromthemandthenwe'rejustveryluckytohaveincrediblepeopleIthinkthatthathelpsalotaswell"
+    },
+    {
+      "start": 89.22812499999999,
+      "end": 109.87034375,
+      "speaker": "SPEAKER_00",
+      "text": "OnthecodingpiecejusttomakesurethatpartisisisclearIneverthoughtaboutthisthatthereasonthatthebetWassodeeponcodingisnotjustthat'sahugetambutit'sthatthiswillexcelThisisafeedbackloopthat willaccelerateusfurtherandfurtherSoifwegetthebestatcodingcodingwillhelpusdoresearchit'llhelpusbuildbettermodelsandit'llacceleratefasterandfaster"
+    },
+    {
+      "start": 109.87034375,
+      "end": 115.75971875,
+      "speaker": "SPEAKER_01",
+      "text": "Yeahthat'scorrectAndandthisissomething IcheckedDariohastalkedaboutthispubliclysoIamfinetooLikeo"
+    },
+    {
+      "start": 115.75971875,
+      "end": 144.56534375,
+      "speaker": "SPEAKER_00",
+      "text": "kayitmakessenseUmthesafetypieceisreallyinterestingSoIwanttospendalittletimehereSofamouslyAnthropicIthinktheofficialnameofAnthropic isAnthropicanAIsafetyresearchcompanyAsagrowthpersonthere'sthisbalanceIimagineyoustrikebetweengrowingandjustandnotandthemissionbeingdon'tgrowatallcostOurgoalisAIsafetyandalignmentHow doyoubalancethosetwothingsHowdoe"
+    },
+    {
+      "start": 144.76784375,
+      "end": 299.7720625,
+      "speaker": "SPEAKER_01",
+      "text": "sthatimpactyourjobLookIthinkit'ssomethingwetakeveryveryseriouslyanditisIt'sthewholereasonthecompanyexistsandandandifyouthinkaboutit'sit'sallthewayfrom it'swhytheytheytheylefttostartthecompanyIt'sdeepinourcorporatestructureitselfSoyouknowhistoricallyumEveryoneraisingmoneyislikegogocreateaDelawareCcorpandandthat'slikethestructureyou doAndwithawithacorporationumyouhaveafiduciarydutytomaximizereturnsforshareholdersmaximizeshareholdervalueAndfromthebeginningtheytheywentadifferentwayWewewenttowecreatedapublicbenefit corporationPBCwhichallowsyoutolegallysaythatmaximizingshareholdervalueisnotthethelikeOverarchingumbrellagoalofthisofthiscompanyandyouyoucanoptimizeforforpublicbenefitsoreallyIthink ititstartsfromthereandititladdersdownfromthereForusyouknowourourpurposeourmissionultimatelyistoistomakesurethatthattransitiontopowerfulAIgoeswellandisisnetbeneficialforforhumanityUm youknowweIthinkinternallylikewewelikeveryexcitedandIthinkHonestlyisalotoflikeveryveryoptimisticaboutwherethiscangobutwealsounderstandwhatwhattherisksareandsoforusthattoplineobjective ofthisjustlikethisneedstogowellforhumanityThisjustneedstogowellforhumanityThatissomethingthatWearehappytotakeasignificantcommercialhitforandandwe'vedonethattimeandtimeagainrightSolike wehaveityouknowlikebackthenokayyouhadClaudebutyoudon'twanttoreleaseitbecauseyou'relikethere'sasafetyriskandsothere'stimeandtimeagainthatI'veseenwe'vebeenhappytotakethathitandit'sit's actuallyworkedoutwellforusinotherwaysFromlikeagrowthlensyouknowIIlookatitaslikegrowthteamscanoftenpushtheboundariesofwhatislikeagooduserXUXetcbecausethey'retryingtoveryverymuchlike eoutmetricsattimesWhenIthinkaboutifacontroversialtestisisbroughttomeIsortoflookatitaslikethisthere'stwotypesofteststhatarecontroversialOneiswhenthattestissocontroversialthatyouyoujust shouldnotrunthethingbecausetheresultsdon'tmatterbecauseyouwouldnotshipitforacombinationofyouknowbrandandandsortofcustomerfriendlinessandandvaluesandthenthesecondiswhereit'slikeit's controversiallikeIdon'tlikeitIcertainlydon'tloveitbut"
+    }
+  ]
+}

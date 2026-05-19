@@ -1,0 +1,37 @@
+{
+  "sample": "cp-3",
+  "audio_dur_sec": 300.016327,
+  "asr_model": "Qwen/Qwen3-ASR-1.7B",
+  "speakers": [
+    "SPEAKER_01"
+  ],
+  "wall_sec": 94.63,
+  "rt_factor": 3.17,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 60.930125000000004,
+      "speaker": "SPEAKER_01",
+      "text": "BestPMscansensethatcansetadirectionandcansteadilyexecutetowardsitandchangethepathifthemodelcapabilitiesaremuchbetterthanorworsethanwhattheyhadoriginallyexpectedIthinkitisveryhardto betherightamountofAGIpilledbecauseIthinkeveryonecanseethislikeThisfuturewherethemodelsareextremelysmartandcandoalmosteverythinginwhichcaseyouactuallydon'tneedthatcomplicatedaproduct YoucanactuallyjusthaveatextboxagainwhereyoutellthemodelwhatyouwantAndit'ssosmartthatitcanaddanytooloraddanyintegrationthatitneedstolikegetthejobdoneItknowswhenit'suncertainitcanask clarifyingquestionsLikeit'sKindofveryeasytobuildtheproductforthesuperAGIstrongmodelIthinkthehardthingisfiguringoutforthecurrentmodelhowdoyouelicitthemaximumcapabilityHowdoyouhelpusers"
+    },
+    {
+      "start": 62.00025,
+      "end": 64.08024999999999,
+      "speaker": "SPEAKER_01",
+      "text": "Gogetontothe"
+    },
+    {
+      "start": 65.44025,
+      "end": 135.5908125,
+      "speaker": "SPEAKER_01",
+      "text": "thegoldenpathHowdoyoulikeguideuserstointeractwiththemodel'sstrengthsandlikepatchitsweaknessesThetheskillislikeprettyrareand howdoyoubuildthatskillIsitjustusingeachlikebasicallyunderstanding thelimitsofeachmodelHavinglikeyoutalkedabouttasteunderstandinghavingtasteintowhatthemodelmaybeiscapableofwhatit'sgreatatnotgreatatwhereit'sch angedIthinkit'sspendingatonoftimetalking andusingthemodelOneofthethingsIreallyliketodoistoaskthemodeltointrospectonitsownbehaviorsSosometimeswhenInoticethatthemodeldoessomethingunexpectedLikeforexamplethere'slikesituations wherethemodelwillmakeafrontendchangeandruntestsbutnotactuallyusetheUIIt'sactuallyprettyusefultoaskthemodeltoreflectonwhyitdidthisAndsometimesthey'llsaythatheytherewaslikesomethingconfusing inthesystempromptorIdidn'trealizethatthefrontendverificationwaslikepartofthetaskorheyIdelegatedtheverificationtothissubagentandthesubagentdidn'tdothetestandIdidn'tcheckitswork"
+    },
+    {
+      "start": 137.08093749999998,
+      "end": 299.9804375,
+      "speaker": "SPEAKER_01",
+      "text": "AlotoftimesjustlikebeingverycuriousaboutwhythemodelmadethedecisionthatitdidwillshowyouwhatmisleditsothatyoucanfixtheharnessinordertoclosethegapTheotherthingthathelpsistofigureoutwho thetasteswhoaretheuserswhoyoutrustthemosttogiveyouaccuratefeedbackaboutthemodelUsuallythere'slikeahandfulofpeoplewhoaremuchbetterthanothersatarticulatingwhatmakesaspecificmodelormodel harnesscombinationgoodandthere'salotofpeoplewhowillgiveyoufeedbackbutnoteveryone'sfeedbackisasqualifiedAndsofindingagroupofthoselikefivepeopleyoutrustisreallyimportantforgettingvery fastfeedbackIthinkthethirdthingthatisusefulbutnoteveryonelovesdoingisbuildingevalsYoudon'tneedtobuildhundredsofevalsforthemtobeusefulJustbuildingtengreatevalsIsimportantforhelpingthe teamquantifywhatthegoalisandwhattheirprogresstowardsitisandwhatthey'remissingAndsoIthinkevalsisthislikeunderappreciatedthingthatmoremorePMsmoreengineersshouldbeworkingonWe'vecovered evalsabunchThere'sthistrendofjustlikethatisthefutureofproductmanagementiswritingevalsbecauseandessentiallyit'swhatasuccesslookedlikeOkaycoolLetmeactuallyconcretelydefineitandthenwe'll knowhowmuchofyourtimeareyouspendingwritinge valswhichIthinktheimportanceofevalsvariesabitbasedonthefeaturethatyou'reworkingonandorlikewhattheproblemYou'retryingtosolveissotherearealot offolksonourteamwhodospendalotoftimeworkingonevalsWehaveasmallpodoffolkswhocollaborateverycloselywithresearchtomorepreciselyunderstandourcloudcodebehaviorsandwhattheLargestareasofimprovement areandtryingtomeasurethoseprettyconcretelyIpersonallyjumpintoevalswhenthere'safeaturethatIthinkneedsabitmoreproductdefinitionandoftenTheoutputofthisisokayHerearelikefiveevalsthatImade ThisishowyourunthemThesearetheonesthatsucceedandthesearetheonesthatdon'tAndthisislikethepromptthatI'veusedtoincreasethesuccessrateItvariesalotthoughbasedontheexactfeatureNoteveryfeature needsitbutIthinkfeaturessuchasmemorybenefitalotfromitT hispointyoumadeaboutpeoplebeingverygoodatevaluatingmodelssointerestingIt'salmostlikeahumanevalofjustlikeokaytheyunderstandwhere it'sspikingorit'smaybelackingIsthereanyonespecificthatyouwanttoshoutoutthat'sverygoodatthisTwopeoplewho"
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "sample": "ce-3",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 33.9,
+      "speaker": "A",
+      "text": "chatbot before ChatGPT was was launched. And we we had ultimately chosen not to launch it for safety reasons. I think the team didn't want to kick off effectively an AI global arms race. And um yeah, ChatGPT launched and like they got like insane traction, right? And and that just naturally sort of pulled them towards consumer. You know, there's another world where if Anthropic had launched Claude first, like maybe it'd be the other way around even with all that focus stuff. So so who knows? It's it's hard it's always hard to say looking back at some of these things."
+    },
+    {
+      "start": 34.0,
+      "end": 68.9,
+      "speaker": "B",
+      "text": "Wow. I didn't know that. I think also people just don't realize how far behind Anthropic was. Like right now it's like of course they're amazing, but like I just remember when people were talking about Anthropic, we were raising money. I was like, there's no way they're going to compete with OpenAI at this point. It's like so over, just like they're so far ahead. And it shows the power of focus and just uh I guess I don't know, all the things y'all did. Like it it is absurd how far y'all have come and how successful and how things have changed so quickly."
+    },
+    {
+      "start": 69.0,
+      "end": 115.9,
+      "speaker": "A",
+      "text": "Yeah. And I I would say I I very much agree. I think a lot of that like we I think a lot of that comes down to our leadership team. We have a number of people who've worked at like call it like the best companies you know in the world. Like very senior people and I think almost uniformly everyone's like this is the strongest leadership team out out of any of those companies. And so I think a lot comes from them and then we're just very lucky to have incredible people uh uh I think that that helps a lot as well."
+    },
+    {
+      "start": 116.0,
+      "end": 135.9,
+      "speaker": "B",
+      "text": "On the coding piece, just to make sure that part is is is clear. I I never thought about this. That the reason that the bet was so deep on coding is not just that's a huge TAM, but it's that this will excel this is a feedback loop that will accelerate us further and further. So if we get the best at coding, coding will help us do research, it'll help us build better models and it'll accelerate faster and faster."
+    },
+    {
+      "start": 136.0,
+      "end": 141.9,
+      "speaker": "A",
+      "text": "Yeah, that's correct. And and this is something I checked Dario has talked about this publicly, so I am fine to fine to talk about it."
+    },
+    {
+      "start": 142.0,
+      "end": 171.9,
+      "speaker": "B",
+      "text": "Like, okay, it makes sense. Um, the safety piece is really interesting. So I want to spend a little time here. So famously Anthropic, I think the official name of Anthropic is Anthropic an AI Safety Research Company. As a growth person, there's this balance I imagine you strike between growing and just and not and the mission being don't grow at all costs. Our goal is AI safety and alignment. How do you balance those two things? How does that impact your job?"
+    },
+    {
+      "start": 172.0,
+      "end": 299.9,
+      "speaker": "A",
+      "text": "Look, I think it's something we take very, very seriously. And um it is it is the whole reason the company exists. And and and if you think about it's it's all the way from it's why they they they left to start the company. It's deep in our corporate structure itself. So you know historically um everyone raising money is like go go create a Delaware C Corp and and that's like your the structure you do. And with a with a corporation um you have a fiduciary duty to maximize returns for share shareholders, maximize shareholder value. And uh from the beginning they they went a different way. We we went to we created a public benefit corporation, PBC, which allows you to legally say that maximizing shareholder value is not the the like overarching umbrella goal of this of this company and you you can optimize for for public benefits. So really I think it it starts from there and it it ladders down from there. For us, you know, our our our purpose, our our mission ultimately is to is to make sure that the transition to powerful AI goes well and is is net beneficial for for humanity. Um you know, we I think internally like we we are like very excited and I think honestly as a lot of like very, very optimistic about where this can go, but we also understand what what the risks are. And so for us, that top line objective of this just like this needs to go well for humanity. This just needs to go well for humanity. That is something that we are happy to take a significant commercial hit for. And and we've done that time and time again, right? So like we have it, you know, like back then, okay, you had Claude, but you don't want to release it because you're like there's these safety risks. And so there's time and time again that I I've seen we we've been happy to take that hit and it's it's actually worked out well for us in in other ways. From like a growth lens, you know, I I look at it as like growth teams can often push the boundaries of what is like, you know, good user UX, UX, etc. because they're trying to very very much like eke out metrics at times. When I think about if a controversial test is is brought to me, I I sort of look at it as like there's there's two types of tests that are controversial. One is when that test is so controversial that you you just should not run the thing because the results don't matter because you would not ship it for a combination of uh you know, brand and and sort of customer friendliness and and values. And then the second is where it's like it's controversial, like I don't like it. I certainly don't love it, but..."
+    }
+  ]
+}

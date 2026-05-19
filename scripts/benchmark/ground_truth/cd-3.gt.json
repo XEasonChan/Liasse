@@ -1,0 +1,79 @@
+{
+  "sample": "cd-3",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 121.2,
+      "speaker": "A",
+      "text": "...that I think is really important because yeah, so much is changing around us and you have to be really willing to adapt, to try out new methods, to try out new tools and learn stuff as opposed to just like be stuck in the old processes and the old ways. Um, but then I think about also there's probably three archetypes of folks that are really interesting to me right now. Um, and I think these folks were already interesting to me before, but I feel like is in this era feels especially important. Um, so the first one I would call is like strong generalists. Um, so not just like regular generalists where they're like kind of good at a lot of things, but like people that are like almost like block-shaped, you know, in that T-shape framework where it's like they're really good at like a few core skills, like 80th percentile good. I think this is like pretty rare and hard to hire for to be honest. But I like this because the design role we've already seen is kind of like stretching and spanning, right? Like we're all becoming more PM-shaped, we're all becoming engineering-shaped. Um, and so if you already have strong skills in a few different buckets, it's really easy for you to sort of like flex around and expand your and expand your role. So that's really exciting to me. It's just somebody who is really good at a bunch of things. Again, a huge ask. Um, and then the other person that's really exciting to me is in that T-shape framework, like a a deep specialist, like someone who's is T-shaped, but like the the the tip of the T probably is like goes down farther than most other people. So folks that are maybe like the top, you know, like 10% of the industry and whatnot. Again, super hard to find and I feel very lucky that like, you know, working at at at some of these places like folks like these you you can sort of afford to hire them and and and actually bring them up on board. Um, and then my last one is probably the one that I think we're all overlooking, which is what I call the cracked new grad. Um, it's just somebody who is like early career and uh feels kind of like wise and experienced beyond their years, but is also just like very humble and and and very eager to learn. And I think this person is really interesting right now because I think most companies are just hiring like senior talent, like folks that have done things before, are super experienced. But given how much the roles are changing and what we're expected to do is changing, I think having somebody who almost has like a blank slate and is just like a really quick learner and is really eager to learn um new tactics and stuff like that and doesn't have like all these baked in processes and rituals in their mind, that's super valuable. Um, so I think those are the folks that I think a lot of us are just like overlooking, but I'm like really excited about."
+    },
+    {
+      "start": 121.2,
+      "end": 129.5,
+      "speaker": "B",
+      "text": "This is awesome. Uh, on the deep T-shape, what's an example of someone in design that has a like what's what's a skill that they're really good at?"
+    },
+    {
+      "start": 129.5,
+      "end": 164.5,
+      "speaker": "A",
+      "text": "Sometimes there's designers who are just like really technical in a way where they could be like 50% a soft- they're basically a software engineer. Like that's really interesting, especially because right now like a lot of it is, at least for us, it's like you know you're working with directly with the model, so it can it helps when you have just like deep engineering expertise. Um, but another like deep kind of like specialist T is just you know maybe they're just really good at like visual design or or just like designing icons or something where things like that given that everybody can anybody can make anything, you know having that deep specialist slant feels like, oh yeah, they can really help differentiate the things that we're building."
+    },
+    {
+      "start": 164.5,
+      "end": 178.0,
+      "speaker": "B",
+      "text": "Awesome. Okay. And then this block shape, I had Mark Andreessen on the podcast, we kind of called it the F F-shape or E-shape where there's like multiple T things, sideways F, sideways E I guess. Is that what you're describing where there's like many things you're really, really good at?"
+    },
+    {
+      "start": 178.0,
+      "end": 183.5,
+      "speaker": "A",
+      "text": "Yeah, yeah. And like basically like I don't know if you almost mapped their skills out it would it would look like a block. You know, like instead of a T."
+    },
+    {
+      "start": 183.5,
+      "end": 185.5,
+      "speaker": "B",
+      "text": "Because there's so many skills that like the T is spread out."
+    },
+    {
+      "start": 185.5,
+      "end": 186.0,
+      "speaker": "A",
+      "text": "Yeah."
+    },
+    {
+      "start": 186.0,
+      "end": 196.0,
+      "speaker": "B",
+      "text": "Okay. And the cracked new grad. So this is just like someone that is uh eager, like uh open-minded, gritty, very smart, I imagine is a big part of it."
+    },
+    {
+      "start": 196.0,
+      "end": 197.5,
+      "speaker": "A",
+      "text": "Yeah. Yeah. Yeah."
+    },
+    {
+      "start": 197.5,
+      "end": 209.5,
+      "speaker": "B",
+      "text": "If someone's like a new design- like a young designer trying to break in, trying to be successful, what would your advice be to them to help them have a shot at at ends up joining Anthropic for example?"
+    },
+    {
+      "start": 209.5,
+      "end": 248.0,
+      "speaker": "A",
+      "text": "I would just say just like build a bunch of stuff. Like try a bunch of stuff out, build build actual things. I I think that is that can feel I don't really know what the state of like design education or education is these days, but at least from like back when I was in school like everything was very like theoretical and like here we're going to teach you some approaches and whatnot. But like the best the best kind of like cracked new grad folks I know are just like people who just like use the technology, build actual things, don't feel like limited by you know how little experience they might have. I think that they're sometimes they're actually unburdened by that because they're like..."
+    }
+  ]
+}

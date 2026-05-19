@@ -1,0 +1,55 @@
+{
+  "sample": "cp-3",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 28.5,
+      "speaker": "A",
+      "text": "best PMs can sense that, can set a direction and can steadily execute towards it and change the path if the model capabilities are much better than or worse than what they'd originally expected. I think it is very hard to be the right amount of AGI pilled. Because I think everyone can see this like this future where the models are extremely smart and can do almost everything, in which case you actually don't need that complicated a product. You can actually just have a text box again where you tell the model what you want and it's so smart that it can add any tool or add any integration that it needs to like get the job done. It knows when it's uncertain, it can ask clarifying questions. Like it's kind of very easy to build a product for this super AGI strong model. I think the hard thing is figuring out for the current model, how do you elicit the maximum capability? How do you help users go get onto the the golden path? How do you like guide users to interact with the model's strengths and like patch its weaknesses? This skill is like pretty rare."
+    },
+    {
+      "start": 28.5,
+      "end": 33.5,
+      "speaker": "B",
+      "text": "Mm. And how do you build that skill? Is it just using each like basically understanding the limits of each model and having like you talked about taste, understanding having taste into what the model maybe is capable of, what it's great at, not great at, where it's changed?"
+    },
+    {
+      "start": 33.5,
+      "end": 89.0,
+      "speaker": "A",
+      "text": "I think it's spending a ton of time talking and using the model. One of the things I really like to do is to ask the model to introspect on its own behaviors. So sometimes when I notice that the model does something unexpected, like for example, there's like situations where the model will make a front-end change and run tests but not actually use the UI. It's actually pretty useful to ask the model to reflect on why it did this. And sometimes it'll say that, hey, there's like something confusing in the system prompt or I didn't realize that the front-end verification was like part of this task or hey, I delegated the verification to this sub-agent and the sub-agent didn't do the test and I didn't check its work. A lot of times just like being very curious about why the model made the decisions that it did will show you what misled it so that you can fix the harness in order to close this gap. The other thing that helps is to figure out who the taste who are the users who you trust the most to give you accurate feedback about the model. Usually there's like a handful of people who are much better than others at articulating what makes a specific model or model harness combination good. And there's a lot of people who will give you feedback but not everyone's feedback is as qualified. And so finding a group of those like five people you trust is really important for getting very fast feedback. I think the third thing that is useful but not everyone loves doing is building evals. You don't need to build hundreds of evals for them to be useful. Just building 10 great evals is important for helping the team quantify what the goal is and what their progress towards it is and what they're missing. And so I think evals is this like underappreciated thing that more more PMs, more engineers should be working on."
+    },
+    {
+      "start": 89.0,
+      "end": 99.5,
+      "speaker": "B",
+      "text": "We've covered evals a bunch. There's this trend of just like that is the future of product management is writing evals because it essentially it's what does success look like? Okay, cool, let me actually concretely define it and then we'll know. How much of your time are you spending writing evals, would you say?"
+    },
+    {
+      "start": 99.5,
+      "end": 142.5,
+      "speaker": "A",
+      "text": "I think the importance of evals varies a bit based on the feature that you're working on and or like what the problem you're trying to solve is. So there are a lot of folks on our team who do spend a lot of time working on evals. We have a small pod of folks who collaborate very closely with research to more precisely understand our Claude code behaviors and what the largest areas of improvement are and trying to measure those pretty concretely. I personally jump into evals when there's a feature that I think needs a bit more product definition. And often the output of this is, okay, here are like five evals that I made. Um, this is how you run them. These are the ones that succeed and these are the ones that don't. And this is like the prompt that I've used to increase the success rate. It varies a lot though based on the exact feature. Uh, not every feature needs it, but I think features such as memory benefit a lot from it."
+    },
+    {
+      "start": 142.5,
+      "end": 152.0,
+      "speaker": "B",
+      "text": "This uh point you made about people being very good at evaluating models is so interesting. It's almost like a human eval of just like, okay, they understand where it's spiking or it's maybe lacking. Uh, is there anyone specific that you want to shout out that's very good at this?"
+    },
+    {
+      "start": 152.0,
+      "end": 153.0,
+      "speaker": "A",
+      "text": "Uh, two people who..."
+    }
+  ]
+}

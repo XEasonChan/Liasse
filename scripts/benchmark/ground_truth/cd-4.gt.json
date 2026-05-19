@@ -1,0 +1,187 @@
+{
+  "sample": "cd-4",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 2.3,
+      "speaker": "A",
+      "text": "Jenny, what a crazy time we're living through."
+    },
+    {
+      "start": 2.3,
+      "end": 3.3,
+      "speaker": "B",
+      "text": "What a crazy time."
+    },
+    {
+      "start": 3.3,
+      "end": 4.1,
+      "speaker": "A",
+      "text": "What a world. How much change."
+    },
+    {
+      "start": 4.1,
+      "end": 10.0,
+      "speaker": "A",
+      "text": "Okay, before we get to our very exciting lightning round, is there anything else that I should have asked you, that you want to leave listeners with, that you want to double down on?"
+    },
+    {
+      "start": 10.0,
+      "end": 32.8,
+      "speaker": "B",
+      "text": "Um, I think I just want to call out, uh, the Anthropic design team, um, and shout them out, uh, just because it's a team of folks that are just really humble and they're not always the loudest on social, but they're doing a lot of really great work. And especially through this time where jobs are changing so much, uh, the team is so resilient and they're, they sort of span this whole spectrum of people who are really technical and prototype-y to all the, all the way to folks that are really high craft and, and, and delivering stuff that's, that's going out the door and is fabulous. Um, and we are hiring throughout the year. So I just wanted to call that out. If I didn't scare you with the way that we work internally at Anthropic, if it sounds more exciting than terrifying, um, would love to connect."
+    },
+    {
+      "start": 32.8,
+      "end": 35.5,
+      "speaker": "A",
+      "text": "Sounds exciting is getting access to these Slacks where all the features are being built and..."
+    },
+    {
+      "start": 35.5,
+      "end": 37.0,
+      "speaker": "B",
+      "text": "Yeah, yeah, that's the core benefit."
+    },
+    {
+      "start": 37.0,
+      "end": 40.5,
+      "speaker": "A",
+      "text": "Let's talk to super intelligence right now and tell me where I should invest. I'm just joking."
+    },
+    {
+      "start": 40.5,
+      "end": 43.0,
+      "speaker": "A",
+      "text": "And then in terms of hiring, is there anything specific that people should think about to, if they want to apply?"
+    },
+    {
+      "start": 43.0,
+      "end": 48.0,
+      "speaker": "B",
+      "text": "Think a little bit about the, the archetypes that I mentioned, especially the strong generalist and the deep specialist. Those folks we're really excited about."
+    },
+    {
+      "start": 48.0,
+      "end": 48.8,
+      "speaker": "A",
+      "text": "The block, the block and the deep T."
+    },
+    {
+      "start": 48.8,
+      "end": 50.5,
+      "speaker": "B",
+      "text": "The block, the block and the deep T."
+    },
+    {
+      "start": 50.5,
+      "end": 51.5,
+      "speaker": "A",
+      "text": "I don't know what we're even talking about."
+    },
+    {
+      "start": 51.5,
+      "end": 58.5,
+      "speaker": "B",
+      "text": "Yeah, folks who feel like they, you know, they, those archetypes resonate with them, but also folks that are just really excited about the technology, have been building a lot, um, and, and sort of want to be on the frontier."
+    },
+    {
+      "start": 58.5,
+      "end": 64.5,
+      "speaker": "A",
+      "text": "Amazing. Well, with that, we've reached our very exciting lightning round. I've got five questions for you, Jenny. Are you ready?"
+    },
+    {
+      "start": 64.5,
+      "end": 65.5,
+      "speaker": "B",
+      "text": "All right. I'm ready."
+    },
+    {
+      "start": 65.5,
+      "end": 69.0,
+      "speaker": "A",
+      "text": "Here we go. What are two or three books that you find yourself recommending most to other people?"
+    },
+    {
+      "start": 69.0,
+      "end": 95.0,
+      "speaker": "B",
+      "text": "The first one is The Power Broker by Robert Caro, which is an incredibly aggressive recommendation given that it's 1100 pages. Uh, but I think in this era when our, our, when our attention spans are so short, I think this is actually worth reading end to end. Um, because there, I think there are very few like collections or memoirs where it spans through someone's entire life and you sort of see how somebody changes throughout those decades. Um, and it's also somebody who's really controversial too, and it's, it's nice to sort of like read a really nuanced view of somebody, Robert Moses. And I think we just lose out on some of this like long arc thinking because we're so much, we're thinking so much about right now. So, uh, it's just an important reminder that careers are long and is also really good for kind of understanding how somebody just gets things done really well. So, Power Broker."
+    },
+    {
+      "start": 95.0,
+      "end": 116.0,
+      "speaker": "B",
+      "text": "Um, the second one that I recommend to a lot of people is, um, a book called Insomniac City, which is written by Bill Hayes, who is, was the partner of the scientist Oliver Sacks around the time that Oliver Sacks died. And it's just this like really beautiful, kind of like ethereal memoir of Oliver Sacks' last days and their sort of love story. Um, I think this has like very little to do with the stuff on your podcast, Lenny, but it's just like, it's just a book that I really love, um, and just like makes you think about mortality, but also like love and life and stuff like that. So, that's one of my favorite books."
+    },
+    {
+      "start": 116.0,
+      "end": 120.0,
+      "speaker": "A",
+      "text": "My goal here isn't, you know, I'm trying to create, we're trying to create Renaissance humans. So all of this other stuff is excellent."
+    },
+    {
+      "start": 120.0,
+      "end": 120.5,
+      "speaker": "B",
+      "text": "Cool."
+    },
+    {
+      "start": 120.5,
+      "end": 125.5,
+      "speaker": "A",
+      "text": "Interestingly, I saw Julie Zhuo, uh, famed design leader, was reading The Power Broker recently. I don't know what's going on over here."
+    },
+    {
+      "start": 125.5,
+      "end": 126.5,
+      "speaker": "B",
+      "text": "Yeah, yeah, it's spreading in design land."
+    },
+    {
+      "start": 126.5,
+      "end": 130.5,
+      "speaker": "A",
+      "text": "Okay. Do you have a favorite recent movie or TV show that you really enjoyed?"
+    },
+    {
+      "start": 130.5,
+      "end": 148.5,
+      "speaker": "B",
+      "text": "Um, I watched A Sentimental Value recently. I watched it on a plane, which is, you know, how, how directors want you to watch their films. Um, but it's a, it's a Norwegian film by the same director who did The Worst Person in the World. I think just the, the pacing, the writing, the relationship between the characters is just really subtle and beautiful. Um, it's basically about this family, sort of a family drama, but also about this house that they lived in their entire lives. It's beautiful because like the house is sort of a character. So, I don't know what else to say about that, but that was a really good movie."
+    },
+    {
+      "start": 148.5,
+      "end": 153.5,
+      "speaker": "B",
+      "text": "Um, and then I would also recommend obviously The Bear season two. I know we're on that, we're on that. I think everybody just likes to watch people who are really competent at their jobs do something. Um, so, yeah. The Bear season two."
+    },
+    {
+      "start": 153.5,
+      "end": 158.0,
+      "speaker": "A",
+      "text": "Imagine being an actor on that show, just like how much you have to learn and memorize all these terms."
+    },
+    {
+      "start": 158.0,
+      "end": 163.5,
+      "speaker": "B",
+      "text": "Yeah, yeah. It just also seems really fast-paced too. Like they do so much stuff in like one shot and there's just so much like movement and stuff like that. It seems really, really hard to be an actor on."
+    },
+    {
+      "start": 163.5,
+      "end": 171.0,
+      "speaker": "A",
+      "text": "And I only recently realized Noah Wyle was in ER as like a younger person and now he's like the head of this thing. Yeah, yeah. Oh man. Okay. Favorite product you've recently discovered that you really love?"
+    }
+  ]
+}

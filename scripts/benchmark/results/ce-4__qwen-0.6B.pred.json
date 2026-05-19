@@ -1,0 +1,44 @@
+{
+  "sample": "ce-4",
+  "audio_dur_sec": 300.042449,
+  "asr_model": "Qwen/Qwen3-ASR-0.6B",
+  "speakers": [
+    "SPEAKER_00",
+    "SPEAKER_01"
+  ],
+  "wall_sec": 48.45,
+  "rt_factor": 6.19,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.16,
+      "end": 120.88971875000001,
+      "speaker": "SPEAKER_00",
+      "text": "TomeandandIthinkthatkeepingthatmindsethelpsThere'sapointwhenyoucanliketakethattoofarwhenyouthatviewisisdetachedfromrealityButIthinkit'sjustmademesomuchbetterandeffectivemoreeffective asapersonAlotofthesamehabitslikeIIdon'tdrinkalcoholIdon'tdrinkcaffeineIhavetodoabunchofthesethingsformyphysicalhealthIjusthavetodothemsoIkeepdoingthemItakebreaksThisislikeareallybig oneYoumightthinkeveninaplacelikeanthropiclikehowdoyousurviveinthiswayIt'slikeEvenonthecraziestdaysLennybetweenthestartofthedayandlunchandbetweenlunchandtheendofthedayItakeashortbreak EvenonthecraziestdayswithlikemodellaunchesetceteraluckywehavelikeameditationareaintheofficethatI'llgotoandandthenthewholeThewholesideofthingsaroundmeditationthatItalkedaboutinininum thatthatpostIthinkbothyouandIhavedonearetreatatSpiritRockanddoingayouknowmeditationretreatchangedmylifeandit'ssomethingthatIdoatleastonceayearnowIhaveonecominguprelativelysoonaswell andandjustIthinkallofthathashelpedwithBettermanagingthephysicalsideofitbecausethisjobisverytaxingandthenemotionallyhavingalittlebitofspacetowhathappensLikeyouhaveyouhavesortofawareness ononesideyouhavetherealityontheothersideandrealityiscrazyheremanLikerealityisinsaneLikethere'ssomuchhappeningeverydayThere'ssomuchnoiseIt'sit'sit'smindblowingandsothatrelationshipbetween awarenessandrealityThat'swhereyouhavechoiceThatyouyousortoflearnfromfromdeepmeditationononhowtoToshiftthatandapplyyourchoicethereIthinkthatthatisthethingthathashelpedmesignificantly withjustkeepingamorelevelheadIthinkalotofstayinginthisgameatthisatinthislevelofintensityisjustyoujustkeepyourheadjustdon'tloseyourheadinlikethecrazytimesAndIthinkallofthatthatI'vegone throughhaslikehelpedmedothiswithoutresortingtolikeunhealthycopingmechanismsWowI'mlikeyou'resucha"
+    },
+    {
+      "start": 120.88971875000001,
+      "end": 167.83596875,
+      "speaker": "SPEAKER_01",
+      "text": "ninspirationinsomanywaysJustlikethere'ssomanyreasonsthatyouwouldnothavebeensuccessful andthingswouldnothaveworkedoutandThere'ssomanylessonstolearnfromjustthestoriesyou'vesharedinthejourneyyou'vebeenontohelppeopleovercomechallengesthey'rehavingLikeifyoucanlikecomeback fromaninsanewasitlikeakicktotheheadIsthatwhatwhathappenedIsthatItwasaitwasakicktotheheadThat'scorrectYesjustlikefeelinglikeyoumaynotbeabletolikenotwantbeabletolistentomusicTojustlike leadinggrowthatthefastestgrowingcompanyinhistoryThere'salsojustlikealessonhereofconstraintsagainYoumentionedthisideaofjustlikethepowerofconstraintslikeyou'reforcedtotakebreaksyou're forcedtogomeditatelikeInawaythat'sreallyhelpfulandit'slikealessonforusallThisisactuallyreallygoodforusallYeahI"
+    },
+    {
+      "start": 167.83596875,
+      "end": 241.57971875,
+      "speaker": "SPEAKER_00",
+      "text": "thinkthatfreedomthroughconstraintsisislikeoneofthebigtakeawaysI'vehadduring thattimeAndbecausewhenyouhavetheseconstraintsyou'reforcedtoadaptandititcreatesyougivesyouinabusinesssettingyouhavetofocusmoreinapersonalsettingAndlikeiftheconstraintisIcan'tdoanything andI'minjuredIdon'tknowwhat'sgoingtohappenIdon'tknowI'mgoingtogetbetterYouhavetwochoicesYou'relikeoneareyougoingtoletthatareyoujustgoingtoresistandlikefightwithrealityandandletandreally sufferfromthatorareyougoingtoAcceptthesituationandandlikenotletthataffectyouemotionallyIt'snottosaylikeIdideverythingmanIwaslikeeverysinglethingIcoulddodietexileIwaslikeI'monitevery actionIcantakeI'monitButthenyouhaveachoiceofareyougonnalettheimpactofthatdefineyourhappinessornotAndandIthinkthatthat'sthethingwhenyouwhenyouwhentheimpactsmaybearenotcomingyouhaveto thenadapttookaywhatIwantmyhappinesstobeAndoneofthemeditationsyoujustsaidliketheTruefreedomininlifeislearninghowtobecontentwhenyoudon'tgetwhatyouwantandit'snottosayyoushouldn'tdosomething whenyoudon'tgetwhatyouwantButIthinkthatthatthattakeawayofjustcanyoubecontentandlikenothaveyourhappinessrelyonongettingsomethingIthinkisit'sachallengeandnotperfectatitButIthinkit'sit's probablyoneofthebiggesttakeawaysfromtha"
+    },
+    {
+      "start": 241.88346875000002,
+      "end": 261.94481249999995,
+      "speaker": "SPEAKER_01",
+      "text": "twholethingIncredibleandwe'lllinktothepostiffolkswanttoreadthisBeforewegettoourveryexcitinglightningroundisthereanythingelseyouwantedtoshareor shouldwejustjumprightinIthinkwecanjumpinWecoveredalotofgroundOkayherewegoI'vegotfivequestionsforyouFirstquestionWhataretwoorthreebooksyourecommendmosttootherpeopleItprobablytiestoa"
+    },
+    {
+      "start": 261.94481249999995,
+      "end": 299.6839375,
+      "speaker": "SPEAKER_00",
+      "text": "lotofwhatIjusttalkedaboutLikeIIthinkalotaboutmeditationandmyemotionalstateThat'swhatIspendmostofmytimethinkingandlikereadingandresearchingandworkingonoutsideofofworkSomyrecommendation isveryrelatedtothatThefirstisabookcalledJoyofLivingbyaBuddhistmonknamedYogiMingaRinpocheIt'sit'sjustreallyaboutHowyoucanstarttothinkaboutyourlifeexperienceinadifferentwayandandandyou andhavetacticsofwhattodotokindofchangejusthowyouthinkaboutthingsThisisonewherelikeI'verecommendedtopeopleum"
+    }
+  ]
+}

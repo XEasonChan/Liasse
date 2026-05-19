@@ -1,0 +1,139 @@
+{
+  "sample": "cp-2",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 8.7,
+      "speaker": "A",
+      "text": "And so we put that together. Yeah, it's such a bizarre world. So Anthropic has been really successful with B2B and enterprises where traditionally you don't launch a bunch of stuff, you just kind of have a quarterly release maybe and it's like the opposite of every day we got some new."
+    },
+    {
+      "start": 8.7,
+      "end": 20.0,
+      "speaker": "A",
+      "text": "So just maybe following that thread, the run Anthropic has been on is just otherworldly. Anthropic was way behind when it started. It was, I'll share this, just like one of the least funded companies, didn't have distribution, wasn't the first to go, OpenAI was way ahead and it was just like no way Anthropic has any chance to compete significantly long-term."
+    },
+    {
+      "start": 20.0,
+      "end": 28.5,
+      "speaker": "A",
+      "text": "Now it's just killing it, just beating the biggest companies, teams, so much just like the growth is just like 11 billion dollars in ARR in one month in terms of growth."
+    },
+    {
+      "start": 28.5,
+      "end": 35.5,
+      "speaker": "A",
+      "text": "By the time this comes out, it'll probably be even higher. Just being on the inside, what, what are some ingredients that have allowed Anthropic to be this successful and kind of come from behind and do this well?"
+    },
+    {
+      "start": 35.5,
+      "end": 46.0,
+      "speaker": "B",
+      "text": "The two most important things are one, this unifying mission. It's hard to state how important this is. We hire people who care most about bringing safe AGI to all of humanity."
+    },
+    {
+      "start": 46.0,
+      "end": 58.0,
+      "speaker": "B",
+      "text": "And this is actually something that we reference frequently in our decisions about what our entire product org should focus on shipping. And because we put this like mission above any individual product line, we're able to make very fast decisions that cut across the entire org and like execute on them in a unified way."
+    },
+    {
+      "start": 58.0,
+      "end": 61.0,
+      "speaker": "B",
+      "text": "So I think this is, this is like something that I've never seen at a company of our scale."
+    },
+    {
+      "start": 61.0,
+      "end": 68.5,
+      "speaker": "A",
+      "text": "And so just to make sure that's clear, so essentially having the, the number one mission is safety, alignment, making sure AI is good for the world, and you're saying just having that as a clear mission makes decisions a lot easier to make."
+    },
+    {
+      "start": 68.5,
+      "end": 82.0,
+      "speaker": "B",
+      "text": "If there's two competing priorities, we'll talk about which one is more important for Anthropic's mission. And it makes it a lot easier to decide which of the two we prioritize. And then everyone will stand behind the one that we decide."
+    },
+    {
+      "start": 82.0,
+      "end": 88.0,
+      "speaker": "B",
+      "text": "And so sometimes that means that like, hey, we want to ship something on Claude Code, but this other thing is more important and so we deprioritize shipping this and we just wait until later."
+    },
+    {
+      "start": 88.0,
+      "end": 101.0,
+      "speaker": "A",
+      "text": "What's really interesting about that is that explains I think versus another company maybe rhymes with Open AI, uh, did a lot of different things. And what I'm hearing here essentially is like, okay, we're not going to launch a social network, we're not going to launch a feed of interesting information because it's not aligned to this mission and that has kept Anthropic focused, which seems to be a core ingredient to the success."
+    },
+    {
+      "start": 101.0,
+      "end": 113.0,
+      "speaker": "B",
+      "text": "Well, when I think about mission, I think about putting Anthropic's goals ahead of any individual org or any individual product. And so for me, it's, I think the second thing that we're very good at is focus."
+    },
+    {
+      "start": 113.0,
+      "end": 128.0,
+      "speaker": "B",
+      "text": "I think mission to me is slightly different. Mission means that teams are willing to make sacrifices that hurt their own goals and their own OKRs in service of Anthropic's goals and Anthropic's OKRs. And people are very happy to make those trade-offs."
+    },
+    {
+      "start": 128.0,
+      "end": 136.0,
+      "speaker": "B",
+      "text": "So like an extreme example is if Claude Code failed but Anthropic succeeded, I would be extremely happy. And like we're, like the whole team is very willing to make decisions that follow that chain of thought."
+    },
+    {
+      "start": 136.0,
+      "end": 144.0,
+      "speaker": "A",
+      "text": "I don't know if you can talk about this in depth, but do you feel like the open Claude decision is a part of this? Just like, okay, this is not furthering the mission of Anthropic, we need to stop this because it's not working in the way we wanted it to work."
+    },
+    {
+      "start": 144.0,
+      "end": 158.0,
+      "speaker": "B",
+      "text": "I think one of the most important things for Anthropic is to grow the number of users that we're able to reach. One of the ways that we're able to do this is with the Claude subscriptions with our first-party products. And so we just very much want to double down on that, but that does come at the expense of third-party products sometimes."
+    },
+    {
+      "start": 158.0,
+      "end": 170.0,
+      "speaker": "A",
+      "text": "So we've been talking about Claude, Co-work, all these things. Something that I want to make sure people get, and I'm curious just how you use these tools. So there's Claude Code, there's Claude Desktop/Web, there's Co-work."
+    },
+    {
+      "start": 170.0,
+      "end": 174.0,
+      "speaker": "A",
+      "text": "What's the best way to understand when to use which? When do you use each of these three?"
+    },
+    {
+      "start": 174.0,
+      "end": 188.0,
+      "speaker": "B",
+      "text": "So I tend to use Claude Code in the terminal when I'm just kicking off like a one-off coding task and I want all the latest features. The CLI is our initial product surface and it's also the one where our features often land first."
+    },
+    {
+      "start": 188.0,
+      "end": 195.0,
+      "speaker": "B",
+      "text": "And so it's the, it's the most powerful of all the tools. So that's, that's what I tend to use when I'm just like trying to kick off one or like maybe like a handful of tasks at a time."
+    },
+    {
+      "start": 195.0,
+      "end": 210.0,
+      "speaker": "B",
+      "text": "I think Desktop really shines when you're doing something that requires front-end work. And so one thing that I love to do is to use our preview feature. So if I'm building a web app, I'll often use Claude Code in Desktop. I'll have the preview pane open on the right-hand side so that I can actually see the web app that I'm making."
+    }
+  ]
+}

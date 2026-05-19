@@ -1,0 +1,67 @@
+{
+  "sample": "ce-4",
+  "audio_dur_sec": 300.042449,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 70.1,
+      "speaker": "A",
+      "text": "to me. I and I think that keeping that mindset helps. And there's a point when you can like take that too far when you're that view is devoid is detached from reality, but I think it's just made me so much better and effective, more effective as a person. A lot of the same habits like I I don't drink alcohol, I don't drink caffeine, I have to do a bunch of these things for my physical health, I just have to do them. So I keep doing them. I take breaks. This is like a really big one. You might think even at a place like Anthropic, like how do you survive in this way? It's like, even on the craziest days, Lenny, between the start of the day and lunch and between lunch and the end of the day, I take a short break. Um, even on the craziest days with like model launches, etc. I'm lucky we have like a meditation area in the office that I'll go to. And uh, and then the whole, the whole side of things around meditation that I I talked about in in in um that that post. I think both you and I have done a retreat at Spirit Rock and doing a, you know, meditation retreat changed my life and it's something that I do uh at least once a year now. I have one coming up uh relatively soon as well. And and just I think all of that has helped with better managing the physical side of it because this job is very taxing. And then emotionally having a little bit of space to what happens. Like you you have you have sort of awareness on one side, you have the reality on the other side and reality is crazy here, man. Like reality is insane. Like there's so much happening every day. Uh there's so much noise. It's it's it's mind-blowing. And so that relationship between awareness and reality, that's where you have choice that you you sort of learn from from deep meditation on on how to to shift that and apply your choice there. I think that that is the thing that has helped me significantly with just keeping a more level head. Um I think a lot of staying in this game at this at in this level of intensity is just you just keep your head. Just don't lose your head in like the crazy times. And I think all of that that I've gone through has like helped me do this um without resorting to like unhealthy coping mechanisms."
+    },
+    {
+      "start": 70.1,
+      "end": 88.9,
+      "speaker": "B",
+      "text": "Wow. Uh, I mean, you're such an inspiration in so many ways. Just like, there are so many reasons this you would not have been successful and things have would not have worked out. And there's so many lessons to learn from just the stories you've shared and the journey you've been on to help people overcome challenges they're having. Like if you can like come back from an insane, what was it, like a kick to the head? Is that what would happen? Is that..."
+    },
+    {
+      "start": 88.9,
+      "end": 91.5,
+      "speaker": "A",
+      "text": "It was a, it was a kick to the head, that's correct. Yes."
+    },
+    {
+      "start": 91.5,
+      "end": 108.0,
+      "speaker": "B",
+      "text": "Just like feeling like you may not be able to walk, like not being able to listen to music, uh, to just like leading growth at the fastest growing company in history. There's also just like a lesson here of constraints again. You mentioned this idea of just like the power of constraints. Like you're forced to take breaks, you're forced to go meditate like in a way that's really helpful. And it's like a lesson for us all. This is actually really good for us all."
+    },
+    {
+      "start": 108.0,
+      "end": 169.5,
+      "speaker": "A",
+      "text": "Yeah, I think that freedom through constraints is is is like one of the big takeaways I've had during that time. And it because when you have these constraints, you're forced to adapt. And it it creates you it gives you in a business setting you have to focus more in a personal setting. You're like, if the constraint is I can't do anything and I'm injured and I don't know what's going to happen, I don't know how I'm going to get better, you have two choices. You're like, one, are you going to let that, are you just going to resist and like fight with reality and and let and really suffer from that? Or are you going to accept the situation and and like not let that affect you emotionally? That's not to say like, I did everything, man. I was like, every single thing I could do, diet, exercise, I was like, I'm on it. Every action I can take, I'm on it. But then you have a choice of are you going to let the impact of that define your happiness or not? And and I think that when you when the impacts maybe are not coming, you have to then adapt to, okay, what do I want my happiness to be? And one of my meditation teachers said like the true freedom in in life is learning how to be content when you don't get what you want. And it's not to say you shouldn't do something when you don't get what you want, but I I think that that that takeaway of just can you be content and like not have your happiness rely on on getting something, I think is it's a challenge, I'm not perfect at it, but I think it's it's probably one of the biggest takeaways from that whole thing."
+    },
+    {
+      "start": 169.5,
+      "end": 177.0,
+      "speaker": "B",
+      "text": "Incredible. And we'll link to the post if folks want to read this. Before we get to our very exciting lightning round, is there anything else you wanted to share or should we just jump right in?"
+    },
+    {
+      "start": 177.0,
+      "end": 179.5,
+      "speaker": "A",
+      "text": "I think we can jump in. We we covered a lot of ground."
+    },
+    {
+      "start": 179.5,
+      "end": 188.0,
+      "speaker": "B",
+      "text": "Okay, here we go. Uh, I've got five questions for you. First question, what are two or three books you recommend most to other people?"
+    },
+    {
+      "start": 188.0,
+      "end": 215.0,
+      "speaker": "A",
+      "text": "Probably ties to a lot of what I just talked about. Like I I think a lot about meditation and my emotional state. It's what I spend most of my time thinking and like reading and researching and working on outside of of work. So my recommendations are probably related to that. The first is a book called Joy of Living uh by a Buddhist monk, his name is Yongey Mingyur Rinpoche. Um it's it's just really about how you can start to think about your life experience in a different way and uh and and you and have tactics of what to do to kind of change just how you think about things. This is one where like I've recommended it to people..."
+    }
+  ]
+}

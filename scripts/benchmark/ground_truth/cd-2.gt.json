@@ -1,0 +1,79 @@
+{
+  "sample": "cd-2",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 70.5,
+      "speaker": "A",
+      "text": "the cons. I think that is like okay to do, especially when there is something like really valuable with the product already and it's worth putting it out there. But I think the promise you sort of have to make your users is is like, hey, we're we're going to put it out there, but we're going to we're going to iterate. We're going to take your feedback and we're going to iterate and we're going to make it better. And you have to sort of commit that, you have to show that to the world, you have to respond to people's feedback, and you have to show that you are continuously shipping and improving it. Because I think the way that you really lose trust around quality and releasing something early is if you release it early and then nothing ever happens. That that is what something that degrades a brand. But whenever you put something out early, like it's it's possible to do that and like maintain the brand of of your company. And I think I think that's something that we've been doing pretty well and and I think if there's anything anyone's listening to that can if anyone's listening can take away from it is like, yeah, we're we're continuing to do that. And and I think that is actually really fun for me as a designer because you put something out there and you actually learn and you get feedback about it immediately and you know what to do next."
+    },
+    {
+      "start": 70.6,
+      "end": 73.5,
+      "speaker": "B",
+      "text": "The way I've heard you describe this is building trust through speed."
+    },
+    {
+      "start": 73.6,
+      "end": 86.5,
+      "speaker": "A",
+      "text": "Yeah, for sure. It's yeah, it's building trust through speed, but also just like making people feel like they've been heard and that we're fixing things based on what they're trying to use it for and their feedback is actually appreciated and used."
+    },
+    {
+      "start": 86.6,
+      "end": 113.5,
+      "speaker": "B",
+      "text": "Yeah, it's clear when when the labs launch stuff and y'all are very good at this, everyone on the team is tweeting and just like responding to tweets and comments and and then shipping, hey, we fixed this yesterday, this is happening. So there's a clear sense of this is just today and we know this is broken and we will fix it. And and then because Claude code can code very quickly, uh the fixes come very fast."
+    },
+    {
+      "start": 113.6,
+      "end": 161.5,
+      "speaker": "B",
+      "text": "Okay, so another big question that people are asking that I ask a lot on this podcast is around just like what skills become valuable. And like another way I've been thinking about it, Lex put it this way recently is where will human brains continue to be valuable as AI gets smarter? So we've gone through this progression of uh tab completing elements segments of code to 100% of code is written by AI now, like it's crazy. To now AI is reviewing its own code. Boris on the podcast recently was saying Claude code is now helping him come up with ideas and decide what to build, which is like, okay, wow, look at that. Look at it go. The whole product workflow is the product development process is slowly getting eaten up by AI."
+    },
+    {
+      "start": 161.6,
+      "end": 175.5,
+      "speaker": "B",
+      "text": "So the question is just like, where will human brains still be useful at least until we have super intelligence? Do you think like, do you think AI is going to get very, very good at taste, judgment, design?"
+    },
+    {
+      "start": 175.6,
+      "end": 240.5,
+      "speaker": "A",
+      "text": "I think it will get better at taste and judgment and design. Yeah. Like I I think we we might be holding on to that a little bit too much and saying like, oh yeah, like, you know, a a designer or somebody will always know the the best thing to ship or the best version of this. And I but I I do think AI will like AI's sense of taste will get better. At the end of the day, someone has to decide like what is actually going to get built and and what actually matters. And and when I think about people saying like, oh, you know, like AI is just going to build this software for us, a lot of the hard parts of building software are actually like not building it, you know? If you think about the hardest times that you've had at work, Lenny, it's probably things like, oh, you and some other person like disagreeing about like what should go into this feature or what shouldn't go into this feature. And those things still feel like, yes, AI can weigh in, but it can't necessarily solve this dispute between you and somebody else. And so there is something about like deciding what actually goes into the things we build, which I guess is taste in some way, but maybe not taste in like the way we think about like aesthetic taste or or whatnot. There's some sort of like, it's like judgment around what to do next."
+    },
+    {
+      "start": 240.6,
+      "end": 287.5,
+      "speaker": "B",
+      "text": "Just watching how quickly AI had took over coding, which I think a year ago, definitely two years ago, most people are like, I don't think so. I don't think AI will get this good and that the best engineers in the world trust it so much they're not even looking at the code anymore. Like that's where we've gotten. It just made me reevaluate all these assumptions I've had about, okay, AI will never be as good as really good PMs, designers at judging what is great and deciding what to build. But I'm just like starting to think I think it will get there. Like even an example you shared, like it could give these two people trying to make a decision, here's all of the data you need to make a decision and here's why this is the right answer and just press yes, press one and I'll go ahead and build it."
+    },
+    {
+      "start": 287.6,
+      "end": 288.5,
+      "speaker": "A",
+      "text": "Just say yeah."
+    },
+    {
+      "start": 288.6,
+      "end": 302.5,
+      "speaker": "B",
+      "text": "So I think we're just, yeah, to your point, I think we undervalue just how good it'll get at this stuff. Okay, so your sense is it'll get better, but your sense is we'll still need awesome designers to be involved, awesome PMs to help make these decisions, engineers, of course."
+    },
+    {
+      "start": 302.6,
+      "end": 304.0,
+      "speaker": "A",
+      "text": "Yeah. Yeah, I think someone..."
+    }
+  ]
+}

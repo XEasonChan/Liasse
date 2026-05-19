@@ -1,0 +1,870 @@
+{
+  "results": [
+    {
+      "sample": "cd-2",
+      "model": "qwen-0.6B",
+      "der": 0.09314283008513964,
+      "accuracy": 0.9030748663101382,
+      "mapping": {
+        "SPEAKER_00": "A",
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 11,
+      "pred_turn_count": 6,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cd-2",
+      "model": "qwen-1.7B",
+      "der": 0.09060284430823443,
+      "accuracy": 0.9057486631015828,
+      "mapping": {
+        "SPEAKER_00": "A",
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 11,
+      "pred_turn_count": 7,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cd-3",
+      "model": "qwen-0.6B",
+      "der": 0.48501809378185534,
+      "accuracy": 0.7247077791213268,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 11,
+      "pred_turn_count": 8,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cd-3",
+      "model": "qwen-1.7B",
+      "der": 0.4923321865443426,
+      "accuracy": 0.71704957678356,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 11,
+      "pred_turn_count": 8,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cd-4",
+      "model": "qwen-0.6B",
+      "der": 1.130980813740458,
+      "accuracy": 0.6458211572180099,
+      "mapping": {
+        "SPEAKER_01": "B",
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 29,
+      "pred_turn_count": 12,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cd-4",
+      "model": "qwen-1.7B",
+      "der": 1.1263199358778624,
+      "accuracy": 0.6499123319696171,
+      "mapping": {
+        "SPEAKER_01": "B",
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 29,
+      "pred_turn_count": 13,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-1",
+      "model": "qwen-0.6B",
+      "der": 0.4431680385700846,
+      "accuracy": 0.6754942185751551,
+      "mapping": {
+        "SPEAKER_00": "A",
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 9,
+      "pred_turn_count": 6,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-1",
+      "model": "qwen-1.7B",
+      "der": 0.42268838193791153,
+      "accuracy": 0.6960089518836216,
+      "mapping": {
+        "SPEAKER_00": "A",
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 9,
+      "pred_turn_count": 7,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-2",
+      "model": "qwen-0.6B",
+      "der": 0.7388295206971678,
+      "accuracy": 0.5459205467748908,
+      "mapping": {
+        "SPEAKER_00": "A",
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 18,
+      "pred_turn_count": 7,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-2",
+      "model": "qwen-1.7B",
+      "der": 0.7416181917211329,
+      "accuracy": 0.5433575395130369,
+      "mapping": {
+        "SPEAKER_00": "A",
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 18,
+      "pred_turn_count": 8,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-3",
+      "model": "qwen-0.6B",
+      "der": 0.21683551083851443,
+      "accuracy": 0.781563126252476,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 7,
+      "pred_turn_count": 7,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-3",
+      "model": "qwen-1.7B",
+      "der": 0.2206050453705259,
+      "accuracy": 0.7775551102204121,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 7,
+      "pred_turn_count": 7,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-4",
+      "model": "qwen-0.6B",
+      "der": 0.8532852526439483,
+      "accuracy": 0.5416085541608645,
+      "mapping": {
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 9,
+      "pred_turn_count": 5,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "ce-4",
+      "model": "qwen-1.7B",
+      "der": 0.8549703830787307,
+      "accuracy": 0.5416085541608645,
+      "mapping": {
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 9,
+      "pred_turn_count": 5,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-1",
+      "model": "qwen-0.6B",
+      "der": 0.3509035423037717,
+      "accuracy": 0.8615944961554051,
+      "mapping": {
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 7,
+      "pred_turn_count": 1,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-1",
+      "model": "qwen-1.7B",
+      "der": 0.3509035423037717,
+      "accuracy": 0.8615944961554051,
+      "mapping": {
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 7,
+      "pred_turn_count": 1,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-2",
+      "model": "qwen-0.6B",
+      "der": 0.8636267496947495,
+      "accuracy": 0.5711565920990092,
+      "mapping": {
+        "SPEAKER_01": "B",
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 21,
+      "pred_turn_count": 11,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-2",
+      "model": "qwen-1.7B",
+      "der": 0.8722225982905981,
+      "accuracy": 0.5630652070442735,
+      "mapping": {
+        "SPEAKER_01": "B",
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 21,
+      "pred_turn_count": 11,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-3",
+      "model": "qwen-0.6B",
+      "der": 1.1571946280991734,
+      "accuracy": 0.8105813193990907,
+      "mapping": {
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 7,
+      "pred_turn_count": 4,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-3",
+      "model": "qwen-1.7B",
+      "der": 1.1571946280991734,
+      "accuracy": 0.8105813193990907,
+      "mapping": {
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 7,
+      "pred_turn_count": 4,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-4",
+      "model": "qwen-0.6B",
+      "der": 0.2879992016423359,
+      "accuracy": 0.7673354452657335,
+      "mapping": {
+        "SPEAKER_01": "B",
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 40,
+      "pred_turn_count": 14,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "cp-4",
+      "model": "qwen-1.7B",
+      "der": 0.22719879105839408,
+      "accuracy": 0.8264695529742843,
+      "mapping": {
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 40,
+      "pred_turn_count": 5,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "kd-1",
+      "model": "qwen-0.6B",
+      "der": 0.33346160827553384,
+      "accuracy": 0.6731089636787504,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 85,
+      "pred_turn_count": 15,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "kd-1",
+      "model": "qwen-1.7B",
+      "der": 0.31413522713281633,
+      "accuracy": 0.6911029656780829,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 85,
+      "pred_turn_count": 15,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "kd-2",
+      "model": "qwen-0.6B",
+      "der": 0.5238310113519092,
+      "accuracy": 0.6648373186985552,
+      "mapping": {
+        "SPEAKER_00": "B",
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 51,
+      "pred_turn_count": 12,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "kd-2",
+      "model": "qwen-1.7B",
+      "der": 0.5203636480908155,
+      "accuracy": 0.6648373186985552,
+      "mapping": {
+        "SPEAKER_00": "B",
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 51,
+      "pred_turn_count": 13,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "kd-4",
+      "model": "qwen-0.6B",
+      "der": 0.797656007751938,
+      "accuracy": 0.6811311555338926,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 46,
+      "pred_turn_count": 11,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "kd-4",
+      "model": "qwen-1.7B",
+      "der": 0.7363236434108529,
+      "accuracy": 0.739639200390059,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 46,
+      "pred_turn_count": 9,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "luyu-1",
+      "model": "qwen-0.6B",
+      "der": 0.5990726279317694,
+      "accuracy": 0.6510851419031782,
+      "mapping": {
+        "SPEAKER_00": "B",
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 20,
+      "pred_turn_count": 13,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "luyu-1",
+      "model": "qwen-1.7B",
+      "der": 0.5983903251599144,
+      "accuracy": 0.6519198664440797,
+      "mapping": {
+        "SPEAKER_00": "B",
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 20,
+      "pred_turn_count": 13,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "luyu-2",
+      "model": "qwen-0.6B",
+      "der": 0.4939230324074077,
+      "accuracy": 0.596510359869133,
+      "mapping": {
+        "SPEAKER_00": "B",
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 20,
+      "pred_turn_count": 10,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "luyu-2",
+      "model": "qwen-1.7B",
+      "der": 0.4939230324074077,
+      "accuracy": 0.596510359869133,
+      "mapping": {
+        "SPEAKER_00": "B",
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 20,
+      "pred_turn_count": 10,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "luyu-4",
+      "model": "qwen-0.6B",
+      "der": 0.34723269742679685,
+      "accuracy": 0.6754536117767699,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 41,
+      "pred_turn_count": 15,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "luyu-4",
+      "model": "qwen-1.7B",
+      "der": 0.34961823425022204,
+      "accuracy": 0.6727148236904982,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 41,
+      "pred_turn_count": 15,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s1-opening",
+      "model": "qwen-0.6B",
+      "der": 0.31634431853281864,
+      "accuracy": 0.8121463598641974,
+      "mapping": {
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 24,
+      "pred_turn_count": 8,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s1-opening",
+      "model": "qwen-1.7B",
+      "der": 0.31634431853281864,
+      "accuracy": 0.8121463598641974,
+      "mapping": {
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 24,
+      "pred_turn_count": 8,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s2-deep-answer",
+      "model": "qwen-0.6B",
+      "der": 0.371343962962963,
+      "accuracy": 0.8334018922254246,
+      "mapping": {
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 54,
+      "pred_turn_count": 15,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s2-deep-answer",
+      "model": "qwen-1.7B",
+      "der": 0.371343962962963,
+      "accuracy": 0.8334018922254246,
+      "mapping": {
+        "SPEAKER_01": "A"
+      },
+      "gt_turn_count": 54,
+      "pred_turn_count": 15,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s3-back-forth",
+      "model": "qwen-0.6B",
+      "der": 0.35357223092998924,
+      "accuracy": 0.8366927190456631,
+      "mapping": {
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 15,
+      "pred_turn_count": 18,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00"
+      ]
+    },
+    {
+      "sample": "s3-back-forth",
+      "model": "qwen-1.7B",
+      "der": 0.34655368338557946,
+      "accuracy": 0.8366927190456631,
+      "mapping": {
+        "SPEAKER_00": "A"
+      },
+      "gt_turn_count": 15,
+      "pred_turn_count": 19,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00"
+      ]
+    },
+    {
+      "sample": "s4-mid",
+      "model": "qwen-0.6B",
+      "der": 0.35646276713615044,
+      "accuracy": 0.7021121631463859,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 33,
+      "pred_turn_count": 22,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s4-mid",
+      "model": "qwen-1.7B",
+      "der": 0.36404551361502374,
+      "accuracy": 0.6937363437727518,
+      "mapping": {
+        "SPEAKER_01": "A",
+        "SPEAKER_00": "B"
+      },
+      "gt_turn_count": 33,
+      "pred_turn_count": 23,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_00",
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s5-late",
+      "model": "qwen-0.6B",
+      "der": 0.177443162096494,
+      "accuracy": 0.8328785811732331,
+      "mapping": {
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 20,
+      "pred_turn_count": 10,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    },
+    {
+      "sample": "s5-late",
+      "model": "qwen-1.7B",
+      "der": 0.17741398385977064,
+      "accuracy": 0.8328785811732331,
+      "mapping": {
+        "SPEAKER_01": "B"
+      },
+      "gt_turn_count": 20,
+      "pred_turn_count": 10,
+      "gt_speakers": [
+        "A",
+        "B"
+      ],
+      "pred_speakers": [
+        "SPEAKER_01"
+      ]
+    }
+  ],
+  "summary": {
+    "qwen-0.6B": {
+      "avg_der": 0.5132421640409531,
+      "avg_accuracy": 0.7176461985566948,
+      "target_met": false,
+      "sample_count": 22
+    },
+    "qwen-1.7B": {
+      "avg_der": 0.5065960046090392,
+      "avg_accuracy": 0.7235696242753376,
+      "target_met": false,
+      "sample_count": 22
+    }
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "sample": "ce-1",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 17.8,
+      "speaker": "A",
+      "text": "And uh, I didn't expect he would respond. And uh, you know, he responds and says, hey, yeah, I'm interested. Let's let's talk. And it's funny, I didn't know, I mean, I wouldn't have known they were not hiring for a growth team. There were no growth PM roles listed, but they were just at that time starting to think about hiring a growth team. So it was very good timing. But yeah, one one spoke to spoke to Mike and and one thing led to another. He said, I'm the only PM that he's hired from from cold email. And I I feel very lucky that he decided to respond to my email."
+    },
+    {
+      "start": 17.8,
+      "end": 22.8,
+      "speaker": "B",
+      "text": "I did not know this story. That is, that is another uh absurd fact. Uh clearly you're good at cold email. What what did you do in this cold email to get his attention?"
+    },
+    {
+      "start": 22.8,
+      "end": 58.0,
+      "speaker": "A",
+      "text": "I would say like I've basically perfected cold email over the years. So I was a when I was a founder, I I had to get really, really good at this. So I I sent a lot of cold emails out and just honed the the the subject line, the message and and the tone. And and so basically I have in the subject line, the first thing is like from a conversion standpoint, someone sees the email, they need to click on it. And so I have a copy that I've tested that is like very, very high uh open rate. And so"
+    },
+    {
+      "start": 58.0,
+      "end": 59.5,
+      "speaker": "B",
+      "text": "Wait, what is this copy? Or is this a secret?"
+    },
+    {
+      "start": 59.5,
+      "end": 61.5,
+      "speaker": "A",
+      "text": "It's a secret. I think it's"
+    },
+    {
+      "start": 61.5,
+      "end": 62.5,
+      "speaker": "B",
+      "text": "Okay, we'll keep it, we'll kind of keep some secrets a secret."
+    },
+    {
+      "start": 62.5,
+      "end": 94.0,
+      "speaker": "A",
+      "text": "It's a secret. Um, so that's one, getting them to open. I think the second is then the tactics of you need to understand like where are people getting outreach. And if you if everyone's getting outreach in one area and then uh you reach out to them there, then then you you're not going to get as high of a response rate. So if you think about like LinkedIn, if you think about like work email, these are things that everyone is emailing. So there's there's ways to get people's personal emails out there. And so okay, I've got his personal email. I know the copy that works. And then it's just keeping it very short on here's who I am, here's why I'd be a good fit, and and we should chat. And and you know, these things typically don't work. And then you you should always follow up a few times. I think my rule of thumb is like if I really care about it, I should just keep keep reaching out to them until until they tell me like please stop. And so I would have I would have kept doing that, but he responded the first time."
+    },
+    {
+      "start": 94.0,
+      "end": 177.0,
+      "speaker": "B",
+      "text": "It makes sense that a talented growth person would be very good at cold email and getting people's attention. So that's almost like an interview step is just did I want to read this email? This episode is brought to you by our season's presenting sponsor, WorkOS. What do OpenAI, Anthropic, Cursor, Vercel, Replit, Sierra, Clay, and hundreds of other winning companies all have in common? They are all powered by WorkOS. If you're building a product for the enterprise, you've felt the pain of integrating single sign-on, SCIM, RBAC, audit logs, and other features required by large companies. WorkOS turns those deal blockers into drop-in APIs with a modern developer platform built specifically for B2B SaaS. Literally every startup that I'm an investor in that starts to expand up market ends up working with WorkOS. And that's because they are the best. Whether you are a seed stage startup trying to land your first enterprise customer or a unicorn expanding globally, WorkOS is the fastest path to becoming enterprise ready and unblocking growth. It's essentially Stripe for enterprise features. Visit workos.com to get started or just hit up their Slack where they have actual engineers waiting to answer your questions. WorkOS allows you to build faster with delightful APIs, comprehensive docs, and a smooth developer experience. Go to workos.com to make your app enterprise ready today. Okay, so give us just like a glimpse of what it's like to be leading growth inside of Anthropic right now, the most by far fastest growing company in history. Just what is it like?"
+    },
+    {
+      "start": 177.0,
+      "end": 268.0,
+      "speaker": "A",
+      "text": "Yeah, I'd say it's I'd say it's very much a company-wide effort, right? So like, yes, we are the growth team. We have done great. I think we've driven a lot of impact. But honestly, man, we can't claim too much credit for the success of the company. Like we we as Anthropic are really a model company and an intelligence company first and and foremost. And so the the lion's share of of like what has driven our success is our research team. We have I think the best research team in the world. We have great teams on inference and compute. And then there's many other teams like Claude, code, go-to-market, etc. who I think deserve much more credit than than us. I think just zooming out, going going to some of what you said earlier, that the growth trajectory has just been insane. That that 10x year-on-year revenue growth trend has been there since the beginning. I think 2023 was zero to 100 mil. 2024 was 100 to one. Uh last year was one to to roughly 10. And like I I look back to when I joined in 2024, revenue was in the the hundreds of millions. And just that trajectory through the end of 2024 and 2025, like week two of when I joined, we're going into 2025 revenue planning. And we have these like base case and aggressive case scenarios. And Dario is pushing the aggressive case scenario. And people are freaking out being like, how the hell are we going to hit that? And Dario is like, I think we can actually go much higher than that. And I'm I'm coming in like, this this this place is crazy. Like there's there's absolutely no way."
+    }
+  ]
+}

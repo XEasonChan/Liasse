@@ -1,0 +1,253 @@
+{
+  "sample": "cp-4",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 4.0,
+      "speaker": "A",
+      "text": "First question, what are two or three books that you find yourself recommending most to other people?"
+    },
+    {
+      "start": 4.0,
+      "end": 16.0,
+      "speaker": "B",
+      "text": "I really like How Asia Works. Um, it's a story about economic development and what are the like the policies and uh governments that make um long-lasting successful economies."
+    },
+    {
+      "start": 16.0,
+      "end": 26.0,
+      "speaker": "B",
+      "text": "The other books that I'm really into are The Technology Trap. So this is actually about the past few technology revolutions, so the Industrial Revolution and the Computer Revolution,"
+    },
+    {
+      "start": 26.0,
+      "end": 36.0,
+      "speaker": "B",
+      "text": "and how this has affected uh workers. The the reason that I really like this is because I think we there's a lot we can learn from history to make sure that this transition goes well."
+    },
+    {
+      "start": 36.0,
+      "end": 48.0,
+      "speaker": "B",
+      "text": "And um maybe on like a fun note, I really like Paper Menagerie. Um, it's just like a book of short stories about like coming of age and AI and um just like self-discovery."
+    },
+    {
+      "start": 48.0,
+      "end": 51.0,
+      "speaker": "A",
+      "text": "Favorite recent movie or TV show you have really enjoyed?"
+    },
+    {
+      "start": 51.0,
+      "end": 54.0,
+      "speaker": "B",
+      "text": "I really like Drive to Survive."
+    },
+    {
+      "start": 54.0,
+      "end": 63.0,
+      "speaker": "B",
+      "text": "There's no like deep meaning to it. I just there's just something very satisfying about people being so obsessed with like a singular engineering goal and"
+    },
+    {
+      "start": 63.0,
+      "end": 72.0,
+      "speaker": "B",
+      "text": "just like the purity of the pursuit. Um, and I also really love Free Solo, which is about Alex Honnold um climbing El Capitan without a harness."
+    },
+    {
+      "start": 72.0,
+      "end": 83.0,
+      "speaker": "B",
+      "text": "And I think similarly, it's just such a pure achievement to be able to climb this extremely challenging, dangerous route and to be able to have the mental focus to"
+    },
+    {
+      "start": 83.0,
+      "end": 88.0,
+      "speaker": "B",
+      "text": "do it knowing that if you make a single mistake, you die."
+    },
+    {
+      "start": 88.0,
+      "end": 93.0,
+      "speaker": "A",
+      "text": "It's insane, yeah. That movie is out of control. And it's interesting how these relate in some way to the work you do."
+    },
+    {
+      "start": 93.0,
+      "end": 103.0,
+      "speaker": "B",
+      "text": "I actually am a rock climber. Um, but I first watched Free Solo before I climbed rocks. And so I I thought it was impressive. I didn't understand how impressive it was."
+    },
+    {
+      "start": 103.0,
+      "end": 113.0,
+      "speaker": "B",
+      "text": "It's one of the rare movies where like the more you know about it, the more you're you're blown away by how insane this is. Like the kinds the kinds of moves he's doing on the wall are things that like"
+    },
+    {
+      "start": 113.0,
+      "end": 121.0,
+      "speaker": "B",
+      "text": "I don't think I will ever be able to do in my lifetime if it were set in a gym like one feet off the ground."
+    },
+    {
+      "start": 121.0,
+      "end": 122.0,
+      "speaker": "A",
+      "text": "With a rope."
+    },
+    {
+      "start": 122.0,
+      "end": 124.0,
+      "speaker": "B",
+      "text": "With a rope."
+    },
+    {
+      "start": 124.0,
+      "end": 129.0,
+      "speaker": "A",
+      "text": "Did you see the documentary on that other guy, the younger one that went on like ice? Alpinist?"
+    },
+    {
+      "start": 129.0,
+      "end": 131.0,
+      "speaker": "B",
+      "text": "I did. That one was very sad."
+    },
+    {
+      "start": 131.0,
+      "end": 136.0,
+      "speaker": "A",
+      "text": "That was that was wild. Okay, uh favorite product you've recently discovered that you really love?"
+    },
+    {
+      "start": 136.0,
+      "end": 145.0,
+      "speaker": "B",
+      "text": "The product that has like most changed my life outside of Claude products is probably Waymo. Like I'm a die-hard Waymo user."
+    },
+    {
+      "start": 145.0,
+      "end": 155.0,
+      "speaker": "B",
+      "text": "Um use it twice a day, get to and from work. So the two things that I really like about it are one, I don't feel bad if a Waymo is waiting for me. And so I feel like"
+    },
+    {
+      "start": 155.0,
+      "end": 162.0,
+      "speaker": "B",
+      "text": "I feel less pressure to be right at the curb side the moment it arrives. And the second thing is I feel like it lets me be a bit more productive."
+    },
+    {
+      "start": 162.0,
+      "end": 172.0,
+      "speaker": "B",
+      "text": "Um when when I'm in the car with another human, I I typically try not to like do any work calls. I I feel a little rude if I'm like on my laptop the whole time."
+    },
+    {
+      "start": 172.0,
+      "end": 182.0,
+      "speaker": "B",
+      "text": "But one thing I really appreciate about the Waymo is I can call into a work call. I'm not worried about someone overhearing me. I'm not worried about, hey, is this like rude? Am I talking too loud? Do I need to tell someone to like change the music?"
+    },
+    {
+      "start": 182.0,
+      "end": 187.0,
+      "speaker": "B",
+      "text": "And so this has been like I feel like this has given me back like 30 minutes every day."
+    },
+    {
+      "start": 187.0,
+      "end": 190.0,
+      "speaker": "A",
+      "text": "All these second-order effects of of technology, it's so interesting."
+    },
+    {
+      "start": 190.0,
+      "end": 198.0,
+      "speaker": "B",
+      "text": "Yeah, I always thought Waymo needed to be priced lower than Uber and Lyft to succeed, but actually I'm like very happy to pay a 2x premium for it."
+    },
+    {
+      "start": 198.0,
+      "end": 208.0,
+      "speaker": "A",
+      "text": "I love Waymo. It's just like like you once you see it, you're just like, this is insane. And and then you get used to it. Like you get in there and you're like, this is crazy. And then you forget about it."
+    },
+    {
+      "start": 208.0,
+      "end": 218.0,
+      "speaker": "B",
+      "text": "Totally. And I think it's also changed the vernacular. Like a lot of people at Anthropic love Waymo. And I think in the past you would be like, hey, let's call like blah blah rideshare app. And now like everyone's just like, okay, is the Waymo here?"
+    },
+    {
+      "start": 218.0,
+      "end": 222.0,
+      "speaker": "A",
+      "text": "Okay, two more questions. Do you have a favorite life motto that you often come back to in work or in life?"
+    },
+    {
+      "start": 222.0,
+      "end": 225.0,
+      "speaker": "B",
+      "text": "Just do things."
+    },
+    {
+      "start": 225.0,
+      "end": 226.0,
+      "speaker": "A",
+      "text": "That tracks, that tracks."
+    },
+    {
+      "start": 226.0,
+      "end": 236.0,
+      "speaker": "B",
+      "text": "I think there's a lot of value in like first principles thinking. And if if you like if you know what you're optimizing for and you have like strong first principles, then you can normally deduce what the right like"
+    },
+    {
+      "start": 236.0,
+      "end": 246.0,
+      "speaker": "B",
+      "text": "course of action is and be able to clearly articulate that to all the stakeholders. And then you should just like do it. Like I think jobs are fake."
+    },
+    {
+      "start": 246.0,
+      "end": 256.0,
+      "speaker": "B",
+      "text": "If you understand the constraints, you can figure out what you can do and then just like try to do it quickly, learn from the mistakes, and apologize or fix them if you did something wrong."
+    },
+    {
+      "start": 256.0,
+      "end": 260.0,
+      "speaker": "A",
+      "text": "You you could just do things, whoever said that."
+    },
+    {
+      "start": 260.0,
+      "end": 270.0,
+      "speaker": "B",
+      "text": "I think it's liberating actually to like tell people this. I think in a lot of companies, like roles are very strictly defined. Like, okay, this is what the PM does, this is what the designer does, this is what an engineer does."
+    },
+    {
+      "start": 270.0,
+      "end": 280.0,
+      "speaker": "B",
+      "text": "And then even team scopes are very rigidly defined. So, hey, like this corner of the codebase we touch, and this corner like we're not allowed to touch. And I think what just do things lets people do is they feel like"
+    },
+    {
+      "start": 280.0,
+      "end": 284.0,
+      "speaker": "B",
+      "text": "empowered to make these decisions."
+    }
+  ]
+}

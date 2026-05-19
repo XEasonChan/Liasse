@@ -1,0 +1,55 @@
+{
+  "sample": "cp-1",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 4.2,
+      "speaker": "A",
+      "text": "...need to understand about what it is, what it takes to be successful these days."
+    },
+    {
+      "start": 4.2,
+      "end": 83.0,
+      "speaker": "B",
+      "text": "I think before AI, technology shifts were a lot slower, so you could plan on these six to 12 month time horizons. And because you were shipping features at a bit of a slower rate, there was a lot more emphasis on coordinating with all the other partner teams to make sure that they're shipping features that unblock your features because code at that time was very expensive to make. Um, I think now with AI and with how much that has accelerated engineering and with how quickly the model capabilities are improving, the timelines for a lot of our product features have gone down from six months to one month and sometimes to one week or even one day. And with that, we actually need to make sure that products ship quite quickly. And what that means is as a PM, there should be less emphasis on making sure that you're aligning your like multi-quarter road maps with your partner teams and more emphasis on, okay, how can we figure out the fastest way to get something out the door? How can we figure out how to make like a concept corner of our product suite where we can just an engineer has an idea or a PM has an idea and like by the end of the week, we are able to get it into our users' hands. I think the PMs who do the best on AI native products are the ones who can figure out how can I like shorten the time from having this idea to actually getting the product in the hands of users and help define what are the most important tasks that need to work out of the box for my product."
+    },
+    {
+      "start": 83.0,
+      "end": 96.0,
+      "speaker": "A",
+      "text": "So what I love about this is what you're saying is just like people haven't grasped how fast they need to move and what how much of the job now is just moving is helping the team move fast. What what helps you do that? What do you what does your PM team do to help them move this fast other than have access to the the most advanced models?"
+    },
+    {
+      "start": 96.0,
+      "end": 195.0,
+      "speaker": "B",
+      "text": "I think the first thing is to set clear goals. Because LLMs are so general, that actually creates a lot of ambiguity in who we're building for, what problems we're trying to solve, what the top use cases are. And so I think a great PM is able to say, okay, our our key user is professional developers. Uh, the main problem that we want to solve for this feature is maybe there's like too many permission prompts and people are feeling fatigue. And like the the use case is we we want professional developers at enterprises to safely get to zero permission prompts. And that actually sets a pretty clear goal because it it rules out a lot of potential approaches for reducing permission prompts so that people can uh get a lot more done with one prompt. And then I think the second thing that's very important is figuring out some repeatable process for getting these features shipped. So uh for Claude Code, what we do is we actually ship almost all of our features in research preview. We clearly brand this um when we ship something so that users know that this is an early product, this is just an idea, this is just something that we're trying to get feedback on and iterating on and that this might not be supported forever. And what this does is it reduces it reduces our commitment for shipping something. We can just get something out in a week or two. And then the third thing that a PM should do is help create the framework for the team so that they know when to pull in cross-functional partners and what those cross-functional partners' expectations are. So for example, we have a really tight process between engineering, marketing, and docs. So when engineers have a feature that they feel is ready and that we've dogfooded internally, they post it in our evergreen launch room. And then Sarah who leads our docs and Alex who leads PMM and Tariq and Lydia on DevRel just like jump in and can turn around the the marketing announcement for it the very next day. And because we have this really tight process, it lowers the friction for any engineer to ship something. And PM is the role that should be setting this up."
+    },
+    {
+      "start": 195.0,
+      "end": 206.0,
+      "speaker": "A",
+      "text": "How do PRDs fit into this? So the fact that you said that goals are a really important part is just like being aligned on what does success look like, who is this for, who is this not for. Are you writing PRDs? Is it just like a couple bullet points? How does how has that evolved in the the world of a PM?"
+    },
+    {
+      "start": 206.0,
+      "end": 241.0,
+      "speaker": "B",
+      "text": "So there's two two things that we do. One is we have very rigorous metrics and we do metrics readouts with the entire team every week. The goal of this is to make sure that everyone deeply understands all the facets of our business, what our key goals are, how they're trending, and what drives them. The second thing that we do is we have this list of team principles and this includes who our key users are, why those are our key users. And the reason that we articulate all of this is so that everybody on the team feels like they understand how our business works, they understand what's important to us and what we're willing to trade off. And it lets people make decisions by themselves without feeling like they're blocked on PM or any other stakeholder."
+    },
+    {
+      "start": 241.0,
+      "end": 247.0,
+      "speaker": "A",
+      "text": "I love how so much of this is like, okay, we still need PMs in the future. There's so much talk of like, why do we need PMs?"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "sample": "ce-1",
+  "audio_dur_sec": 300.016327,
+  "asr_model": "Qwen/Qwen3-ASR-0.6B",
+  "speakers": [
+    "SPEAKER_00",
+    "SPEAKER_01"
+  ],
+  "wall_sec": 47.85,
+  "rt_factor": 6.27,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 30.28784375,
+      "speaker": "SPEAKER_00",
+      "text": "AndIdidn'texpecthewouldrespondAndyouknowherespondsandsaysHeyyeahI'minterestedLet'slet'stalkAndit'sfunnyIdidn'tknowImeanIwouldn'thaveknowntheywerenothiringforagrowthteamTherewerenogrowth GMroleslistedbuttheywerejustatthattimestartingtothinkabouthiringagrowthteamSoitwasverygoodtimingbutYeahoneonespoketospoketoMikeandandonethingledtoanotherHesaidI'mtheonlyPMthathe'shired fromfromcoldemailandIIfeelveryluckythathedecidedtorespondto"
+    },
+    {
+      "start": 30.81096875,
+      "end": 40.260125,
+      "speaker": "SPEAKER_01",
+      "text": "myemailIdidnotknowthestoryThatisthatisanotherabsurdfactClearlyyou'regoodatcoldemailWhatdidyoudointhiscoldemailtogethisattention"
+    },
+    {
+      "start": 40.420125,
+      "end": 124.58534375,
+      "speaker": "SPEAKER_00",
+      "text": "IwouldsaylikeI'vebasicallyperfectedcoldemailovertheyearsSoIwasawhenIwasafounderIIhadtogetreallyreallygoodatthisSoIsentalotofcoldemailsoutandjusthonedthethetheSubjectlinethemessageand andthetoneandandsobasicallyIhaveinthesubjectlineThefirstthingislikefromaconversionstandpointSomeoneseestheemailtheyneedtoclickonitandsoIhaveacopythatI'vetestedthatislikeveryveryhigh openrateandsowaitwhatisthiscopyOristhisasecretIt' sasecretIthinkOkaywe'llkee pitWe'llkindofkeepsomesecret Umsothat'sonegettingthemtoopenIthinkthesecondisthenthetacticsofyouneedtounderstandlikewherearepeoplegettingoutreachandifyouifeveryone'sgettingoutreachinoneareaandthenuhyoureachoutto themtherethenthenyou'renotgoingtogetashigharesponserateSoyoucanthinkaboutlikeLinkedInyoucanthinkaboutlikeworkemailThesearethingsthateveryoneisemailingSothere'sthere'swaystogetpeople's personalemailsoutthereandsolikethat'sonethingthatIdidandsookayI'vegothispersonalemailIknowthecopythatworksandthenit'sjustkeepingitveryshortandhere'swhoIamHere'swhyI'dbeagoodfitandand weshouldchatandandthesethingstypicallydon'tworkandthenyeahyoushouldalwaysfollowupafewtimesIthinkmyruleofthumbislikeifIreallycareaboutitIshouldjustkeepKeepreachingouttothemanduntilthey tellmelikepleasestopandsoIwouldhaveIwouldhavekeptdoingthatButherespondedthefirsttimeItmakessensethatata"
+    },
+    {
+      "start": 124.58534375,
+      "end": 202.32846875,
+      "speaker": "SPEAKER_01",
+      "text": "lentedgrowthpersonwouldbeverygoodatcoldemailandgettingpeople'sattentionSothat's almostlikeaninterviewstepasjustdidIwanttoreadthisemailThisepisodeisbroughttoyoubyourseason'spresentingsponsorWorkOSWhatdoOpenAIAnthropicCursorVerseCellReplitSierraClayandhundredsof otherwinningcompaniesallhaveincommonTheyareallpoweredbyWorkOSIfyou'rebuildingaproductfortheenterpriseyoufeltthepainofintegratingsinglesignonSkimRbacAuditLogsandotherfeaturesrequired bylargecompaniesWorkOSturnsthosedealblockersintodropinAPIswithamoderndeveloperplatformbuiltspecificallyforBtwoBSaaSLiterallyeverystartupthatI'maninvestorinthatstartstoexpandupmarket endsupworkingwithWorkOSAndthat'sbecausetheyarethebestWhetheryouareaseedstagestartuptryingtolandyourfirstenterprisecustomeroraunicornexpandinggloballyWorkOSSisthefastestpathtobecoming enterprisereadyandunblockinggrowthIt'sessentiallyStripeforenterprisefeaturesVisitWorkOSSdotcomtogetstartedorjusthituptheirSlackwheretheyhaveactualengineerswaitingtoansweryourquestions WorkOSallowsyoutobuildfasterwithdelightfulAPIscomprehensivedocsandasmoothdeveloperexperienceGotoworkoscomtomakeyourappenterp"
+    },
+    {
+      "start": 202.86846875,
+      "end": 215.25471875000002,
+      "speaker": "SPEAKER_01",
+      "text": "risereadytodayOkaysogiveusjustlikeaglimpseofwhatit'slike tobeleadinggrowthinsideofAnthropicrightnowthemostbyfarfastestgrowingcompanyinhistoryJustwhatisi"
+    },
+    {
+      "start": 215.99721875,
+      "end": 299.6820625,
+      "speaker": "SPEAKER_00",
+      "text": "tlikeYeahItakeItakeverymuchacompanywideeffortrightSolikeyeswewearethegrowthteamwehave donegreatIthinkwe'vedrivenalotofimpactbuthonestlymanwekindClaimingtoomuchcreditforthesuccessofthecompanyweweasanthropicarereallyamodelcompanyandanintelligencecompanyfirstandforemost AndsothethelionshareofoflikewhathasdrivenoursuccessisourresearchteamWehaveIthinkthebestresearchteamintheworldWehavegreatteamsoninferenceandcomputeandthenthere'sManyotherteamslikeClaude CodeGotoMarketetcWhoIthinkdeservemuchmorecreditthanusIthinkjustzoomingoutgoingtosomeofwhatyousaidearlierthatthegrowthtrajectoryhasjustbeeninsaneThatthattenxyearonyearrevenuegrowthtrend hasbeentheresincethebeginningIthinkTwentytwentythreewaszerotoonehundredmiltwentytwentyfourwasonehundredtoonelastyearwasonetoroughlytenandlikeIlookedbacktowhenIjoinedintwentytwentyfour revenuewasinthethehundredsofmillionsandjustthattrajectorytotheendoftwentytwentyfourandtwentytwentyfivelikeWeektwoofwhenIjoinedwe'regoingintotwentytwentyfiverevenueplanningandwehave theselikebasecaseandaggressivecasescenariosAndDariaispushingtheaggressivecasescenarioandpeoplearefreakingoutbeinglikeHowthehellarewegoingtohitthatAndDaria'slikeIthinkwecanactuallygo muchhigherthanthatAndI'mcominginlikeThisthisthisplaceiscrazyLikethere'sthere'sabsolutelynoway"
+    }
+  ]
+}

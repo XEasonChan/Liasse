@@ -1,0 +1,50 @@
+{
+  "sample": "cd-2",
+  "audio_dur_sec": 300.016327,
+  "asr_model": "Qwen/Qwen3-ASR-0.6B",
+  "speakers": [
+    "SPEAKER_00",
+    "SPEAKER_01"
+  ],
+  "wall_sec": 45.49,
+  "rt_factor": 6.6,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.24,
+      "end": 83.41034375000001,
+      "speaker": "SPEAKER_00",
+      "text": "TheconsIthinkthatislikeokaytodoespeciallywhenthereissomethingreallyvaluablewiththeproductalreadyandit'sworthputtingitoutthereButIthinkthepromiseyousortofhavetomakeyourusersisIslike heywe'rewe'regonnaputitouttherebutwe'regonnawe'regonnaiteratewe'regonnatakeyourfeedbackandwe'regonnaiterateandwe'regonnamakeitbetterandyouhavetosortofcommitthatyouhavetoshowthattothe worldyouhavetorespondtopeople'sfeedbackandyouhavetoshowthatyouarecontinuouslyshippingandimprovingitbecauseIthinkthewaythatyoureallylosetrustaroundqualityandreleasingsomethingearlyis ifyoureleaseitearlyandthennothingeverhappensthatthatiswhatsomethingthatdegradesabrandButwheneveryouputsomethingoutearlylikeit'sit'spossibletodothatandlikemaintainthebrandofofyourcompany andIthinkIthinkthat'ssomethingthatwe'vebeendoingprettywellandIthinkifthere'sanythinganyone'slisteningthatanyone'slisteningcantakeawayfromitislikeyeahwellwe'recontinuingtodothatandI thinkthatisactuallyreallyfunformeasadesignerbecauseyouputsomethingoutthereandyouactuallylearnAndyougetfeedbackaboutitimmediatelyandyouknowwhattodonextThewayI'veheardyoudescribethis isbuildingtrustthroughspeed YeahforsureIt'syeahit'sbuildingtrustthroughspeedbutalsojustlikemakingpeoplefeellikethey'vebeenheardandthatwe'refixingthingsbasedonwhatthey'retryingtouseit forandtheirfeedbackisactuallyappreciatedanduse"
+    },
+    {
+      "start": 83.59596875000001,
+      "end": 106.9008125,
+      "speaker": "SPEAKER_01",
+      "text": "dYeahit'sclearwhenWhenthelabslaunchstuffandy'allareverygoodatthiseveryoneonteamistweetingandjustlikerespondingtotweetsandcommentsandand thenshippingHeywefixedthisyesterdayandthisishappeningSothere'saclearsenseofthisisjusttodayandweknowthisisbrokenandwewillfixitAndandthenbecauseClaudecodecancodeveryquicklythefixescome veryfast"
+    },
+    {
+      "start": 108.3109375,
+      "end": 160.7115625,
+      "speaker": "SPEAKER_01",
+      "text": "OkaysoanotherbigquestionthatpeopleareaskingthatIaskalotonthispodcastisaroundjustlikewhatskillsbecomevaluableAndlikeanotherwayI'vebeenthinkingaboutitLexputitthiswayrecentlyiswherewill humanbrainscontinuetobevaluableasAIgetssmarterSowe'vegonethroughthisprogressionofAhtabcompletingelementsofcodetoonehundredpercentofcodeiswrittenbyAInowLikeit'scrazytonowAIisreviewing itsowncodeBorisonthepodcastrecentlywassayingClaudeCodeisnowhelpinghimcomeupwithideasanddecidewhattobuildwhichislikeokaywowlookatthatlookatitgoThewholeproductworkflowstheproductdevelopment processslowlygettingeatenupbyAISothequestionisjustlikewherewillhumanbrainsstillbeusefulatleastuntilwehavesuperintelligenceDoyouthinklikedoyouthinkAIisgoingtogetveryverygoodatTastejudgment"
+    },
+    {
+      "start": 160.7115625,
+      "end": 236.90534375000001,
+      "speaker": "SPEAKER_00",
+      "text": "designIthinkitwillgetbetterattasteandjudgmentanddesignYeahlikeIIthinkweWemightbeholdingontothatalittlebittoomuchandsayinglikeohyeahlikeyouknowaadesignerorsomebodywillalwaysknowthethe bestthingtoshiporthebestversionofthisAndIbutIdothinkAIwilllikeAIsenseoftastewillgetbetterAttheendofthedaysomeonehastodecidelikewhatisactuallygoingtogetbuiltandandwhatactuallymatters AndandwhenIthinkaboutpeoplesayinglikeohyouknowlikeAIisjustgoingtobuildthissoftwareforusAlotofthehardpartsofbuildingsoftwareareactuallylikenotbuildingityouknowIfyouthinkaboutthehardest timesthatyou'vehadatworkplentyisprobablythingslikeohyouandsomeotherpersonlikedisagreeingaboutlikewhatshouldgointothisfeatureorwhatshouldn'tgointothisfeatureAndthosethingsstillfeellike yesAIcanweighinbutitcan'tnecessarilysolvethisdisputebetweenyouandsomebodyelseAndsothereissomethingaboutlikedecidingwhatactuallygoesintothethingswebuildwhichIguessistasteinsomewaybut maybenottasteinlikethewaywethinkaboutlikeaesthetictasteororwhatnotThere'ssomesortoflikeit'slikejudgmentarou"
+    },
+    {
+      "start": 237.42846875,
+      "end": 281.67881250000005,
+      "speaker": "SPEAKER_01",
+      "text": "ndwhattodonextJustwatchinghowquicklyAIhadtookovercodingwhichIthinkayearago definitelytwoyearsagomostpeoplearelikeIdon'tthinksoIdon'tthinkAIwillgetthisgoodandthatthebestengineersintheworldtrustitsomuchThey'renotevenlookingatthecodeanymoreLikethat'swherewegot ItjustmademereevaluatealltheseassumptionsI'vehadaboutokayAIwillneverbeasgoodasReallygoodPMsdesignersatjudgingwhatisgreatanddecidingwhattobuildButI'mjustlikestartingtothinkIthinkitwill getthereLikeevenanexampleyousharedlikeitcouldgivethesetwopeopletryingtomakeadecisionHere'sallofthedatayouneedtomakeadecisionandhere'swhythisistherightanswerAndjustpressyespressoneand I'llgoaheadandbuildthisSoI"
+    },
+    {
+      "start": 283.5988125,
+      "end": 299.86987500000004,
+      "speaker": "SPEAKER_01",
+      "text": "thinkwe'rejustyeahToyourpointIthinkweundervaluejusthowgoodit'llgetatthisstuffOkaysoyoursenseisit'llgetbetterbutyoursenseswillstillneedawesomedesignerstobeinvolvedawesomePMstohelpmake thesedecisionsEngineersofcourseYeahyeahIthinksome"
+    }
+  ]
+}

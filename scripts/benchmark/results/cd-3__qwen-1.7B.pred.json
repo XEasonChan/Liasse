@@ -1,0 +1,62 @@
+{
+  "sample": "cd-3",
+  "audio_dur_sec": 300.016327,
+  "asr_model": "Qwen/Qwen3-ASR-1.7B",
+  "speakers": [
+    "SPEAKER_00",
+    "SPEAKER_01"
+  ],
+  "wall_sec": 106.39,
+  "rt_factor": 2.82,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.64,
+      "end": 135.97,
+      "speaker": "SPEAKER_01",
+      "text": "UmthatIthinkisreallyimportantbecauseyeahsomuchischangingaroundusandyouhavetobereallywillingtoadapttotryoutnewmethodstotryoutnewtoolsandlearnstuffasopposedtojustlikebestuckintheoldprocesses andtheoldwaysUmbutthenIthinkaboutalsothere'sprobablythreearchetypesoffolksthatarereallyinterestingtomerightnowUmandIthinkthesefolkswerealreadyinterestingtomebeforebutIfeellikeisInthis erafeelsespeciallyimportantSothefirstoneIwouldcallislikestronggeneralistsSonotjustlikeregulargeneralistswherethey'relikeKindofgoodatalotofthingsbutlikepeoplethatarelikealmostlikeblock shapedyouknowinthatTshapedframeworkwhereit'slikethey'rereallygoodatlikeafewcoreskillslike80thpercentilegoodIthinkthisislikeprettyrareandhardtohirefortobehonestButIlikethisbecausethe designrolewe'vealreadyseeniskindoflikeStretchingandspanningrightLikewe'reallbecomingmorePMshapedWe'reallbecomingengineeringshapedAndsoifyoualreadyhavestrongskillsinafewdifferentbuckets it'sreallyeasyforyoutosortoflikeflexaroundandexpandyourandexpandyourroleSothat'sreallyexcitingtomeIt'sjustsomebodywhoisreallygoodatabunchofthingsAgainahugeaskAndthentheotherpersonthat's reallyexcitingtomeisinthatTshapedframeworklikeadeepspecialistlikesomeonewho'sisTshapedbutlikethethethetipoftheTprobablyislikegoesdownfartherthanmostotherpeopleSofolksthataremaybelike thetopyouknowliketenpercentintheindustryandwhatnotAgainsuperhardtofindandIfeelveryluckythatlikeYouknowworkingatsomeoftheseplaceslikefolksliketheseyouyoucansortofaffordtohirethemand andandactuallybringthemuponboardAndthenmylastoneisprobablyTheonethatIthinkwe'realloverlookingwhichiswhatIcallthecraftnewgradIt'sjustsomebodywhoislikeearlycareerandfeelskindoflikewise andexperiencedbeyondtheiryearsbutisalsojustlikeveryhumbleandandandveryeagertolearnIthinkthispersonisreallyinterestingrightnowbecause"
+    },
+    {
+      "start": 137.610125,
+      "end": 168.83159375000002,
+      "speaker": "SPEAKER_01",
+      "text": "IthinkmostcompaniesarejusthiringlikeseniortalentlikefolksthathavedonethingsbeforearesuperexperiencedButgivenhowmuchtherolesarechangingandwhatwe'reexpectedtodoischangingIthinkhaving somebodywhoalmosthaslikeablankslateandisjustlikeareallyquicklearnerandisreallyeagertolearnnewtacticsandstufflikethatanddoesn'thavelikeallthesebakedinProcessesandritualsintheirmindthat's supervaluableSoIthinkthosearethefolksthatIthinkalotofusarejustlikeoverlookingButI'mlikereallyexcited"
+    },
+    {
+      "start": 169.42221875,
+      "end": 175.57025,
+      "speaker": "SPEAKER_00",
+      "text": "aboutThisisawesomeOnthedeepTshapewhat'sanexampleofsomeoneindesignthathasalikeWhat's"
+    },
+    {
+      "start": 175.57025,
+      "end": 214.64721875,
+      "speaker": "SPEAKER_01",
+      "text": "what'saskillthatthey'rereallygoodatSometimesthere'sdesignerswhoarejustlikeReallytechnicalinawaywheretheycouldbelikefiftypercentofsoftThey'rethey'rebasicallyasoftwareengineerLikethat's reallyinterestingespeciallybecauserightnowlikealotofitisatleastforusit'slikeyouknowyou'reworkingwithdirectlywiththemodelSoitcanithelpswhenyouhavejustlikedeepengineeringexpertiseBut anotherlikedeepkindoflikespecialistheisjustYouknowmaybethey'rejustreallygoodatlikevisualdesignororjustlikedesigningiconsorsomethingWherethingslikethatgiventhateverybodycananybodycan makeanythingyouknowhavingthatdeepspecialistslantfeelslikeohyeahtheycanreallyhelpdifferentiatethethingsthatwe'rebuildin"
+    },
+    {
+      "start": 214.93409375000002,
+      "end": 229.291,
+      "speaker": "SPEAKER_00",
+      "text": "gAwesomeOkayandthenthisblockshapeWehadMarkAndreessenonthepodcast WekindofcalledittheFFshapeorEshapewherethere'slikemultipleTthingssidewaysFsidewaysEIguessIsthatwhatyou'redescribingWherethere'slikemanythingsyou'rereallyreallygoodatYeahyeahandlike"
+    },
+    {
+      "start": 229.291,
+      "end": 234.55971875,
+      "speaker": "SPEAKER_01",
+      "text": "basicallylikeIdon'tknowifyoualmosthadtheirskillsetitwoulditwouldlooklikeablockyouknowlikeitwouldBecau"
+    },
+    {
+      "start": 233.95221875000001,
+      "end": 260.02409375,
+      "speaker": "SPEAKER_00",
+      "text": "sethere'ssomanyskillsthatliketheteaisspreadoutYeahOkayandthecrackingyougritSothis isjustlikesomeonethatiseagerlikeopenmindedgrittyverysmartIimagineisabigpartofitYeahAwesomeYeahYeahIfsomeone'sl ikeanewdesignlikeayoungdesignertryingtobreakintryingtoBesuccessfulWhat wouldyouradvicebetothemtohelpthemhaveashotatatyouknowjoiningAnthropicf"
+    },
+    {
+      "start": 260.26034375,
+      "end": 299.9820625,
+      "speaker": "SPEAKER_01",
+      "text": "orexampleIwouldjustsayjustlikebuildabunchofstuffliketryabunchofstuffoutbuildbuildactualthingsIIthinkthatisThat canfeelIdon'treallyknowwhatthestateoflikedesigneducationoreducationisthesedaysbutatleastfromlikebackwhenIwasinschoollikeeverythingwasveryLiketheoreticalandlikeherewe'regonnateachyou someapproachesandwhatnotButlikethebestthebestkindoflikecrackednewgradfolksIknowarejustlikepeoplewhojustlikeusethetechnologybuildactualthingsDon'tfeellikelimitedbyyouknowhowlittleexperience theymighthaveIthinkthatsometimesthey'reactuallyunburdenedbythatbecauselike"
+    }
+  ]
+}

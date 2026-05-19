@@ -128,68 +128,119 @@ def compute_metrics(
     }
 
 
+def _discover_pred_files(pred_dir: Path, sample: str) -> List[Path]:
+    """找 <sample>.pred.json 或 <sample>__<modeltag>.pred.json 模式的预测文件。"""
+    files = []
+    single = pred_dir / f"{sample}.pred.json"
+    if single.exists():
+        files.append(single)
+    for f in pred_dir.glob(f"{sample}__*.pred.json"):
+        files.append(f)
+    return sorted(files)
+
+
+def _model_tag(pred_path: Path, sample: str) -> str:
+    """从文件名抽 model tag。<sample>__<tag>.pred.json → tag。"""
+    stem = pred_path.stem.replace(".pred", "")
+    if stem == sample:
+        return "default"
+    prefix = f"{sample}__"
+    if stem.startswith(prefix):
+        return stem[len(prefix):]
+    return stem
+
+
 def main() -> int:
     PRED_DIR.mkdir(parents=True, exist_ok=True)
     if not GT_DIR.exists() or not list(GT_DIR.glob("*.gt.json")):
         print(f"ERROR: no ground truth in {GT_DIR}.\n"
-              f"  run build_ground_truth.py first (needs ANTHROPIC_API_KEY).",
+              f"  run build_ground_truth.py first (needs OPENROUTER_API_KEY).",
               file=sys.stderr)
         return 1
 
     results = []
+    by_model: Dict[str, List[Dict]] = {}
     for gt_file in sorted(GT_DIR.glob("*.gt.json")):
         sample = gt_file.stem.replace(".gt", "")
-        pred_file = PRED_DIR / f"{sample}.pred.json"
-        if not pred_file.exists():
-            print(f"  ✗ skip {sample}: prediction not found ({pred_file.name})")
-            continue
         gt = json.loads(gt_file.read_text())
-        pred = json.loads(pred_file.read_text())
-        try:
-            m = compute_metrics(gt["turns"], pred["turns"],
-                                total_dur=gt["audio_dur_sec"])
-        except Exception as exc:
-            print(f"  ✗ {sample}: scoring error: {exc}", file=sys.stderr)
+        preds = _discover_pred_files(PRED_DIR, sample)
+        if not preds:
+            print(f"  ✗ skip {sample}: no prediction found")
             continue
-        results.append({"sample": sample, **m})
+        for pred_file in preds:
+            tag = _model_tag(pred_file, sample)
+            pred = json.loads(pred_file.read_text())
+            try:
+                m = compute_metrics(gt["turns"], pred["turns"],
+                                    total_dur=gt["audio_dur_sec"])
+            except Exception as exc:
+                print(f"  ✗ {sample} ({tag}): scoring error: {exc}",
+                      file=sys.stderr)
+                continue
+            row = {"sample": sample, "model": tag, **m}
+            results.append(row)
+            by_model.setdefault(tag, []).append(row)
 
     if not results:
         print("ERROR: no scoreable samples (need GT + pred for at least one).",
               file=sys.stderr)
         return 1
 
-    # stdout 表
+    # stdout 表 — 每个 model 一段
     print()
-    print("=" * 88)
-    print(f"{'sample':<24} {'DER':>8} {'accuracy':>10} {'gtTurns':>8} {'predTurns':>10} {'mapping':>12}")
-    print("-" * 88)
-    for r in results:
-        mapping_str = " ".join(f"{k}→{v}" for k, v in r["mapping"].items())
-        print(f"{r['sample']:<24} {r['der']*100:>7.2f}% {r['accuracy']*100:>9.2f}% "
-              f"{r['gt_turn_count']:>8} {r['pred_turn_count']:>10} {mapping_str:>12}")
-    avg_der = sum(r["der"] for r in results) / len(results)
-    avg_acc = sum(r["accuracy"] for r in results) / len(results)
-    print("-" * 88)
-    print(f"{'AVG':<24} {avg_der*100:>7.2f}% {avg_acc*100:>9.2f}%")
-    print()
-    if avg_acc >= 0.90:
-        print(f"✓ TARGET MET: average accuracy {avg_acc*100:.2f}% ≥ 90%")
-    else:
-        print(f"✗ Below target: avg accuracy {avg_acc*100:.2f}% < 90%")
+    for tag, rows in sorted(by_model.items()):
+        print("=" * 96)
+        print(f"MODEL: {tag}")
+        print(
+            f"{'sample':<24} {'DER':>8} {'accuracy':>10} "
+            f"{'gtTurns':>8} {'predTurns':>10} {'mapping':>20}"
+        )
+        print("-" * 96)
+        for r in rows:
+            mapping_str = " ".join(f"{k}→{v}" for k, v in r["mapping"].items())
+            print(
+                f"{r['sample']:<24} {r['der']*100:>7.2f}% "
+                f"{r['accuracy']*100:>9.2f}% "
+                f"{r['gt_turn_count']:>8} {r['pred_turn_count']:>10} "
+                f"{mapping_str:>20}"
+            )
+        avg_der = sum(r["der"] for r in rows) / len(rows)
+        avg_acc = sum(r["accuracy"] for r in rows) / len(rows)
+        print("-" * 96)
+        print(f"{'AVG':<24} {avg_der*100:>7.2f}% {avg_acc*100:>9.2f}%")
+        if avg_acc >= 0.90:
+            print(f"✓ TARGET MET ({tag}): avg accuracy {avg_acc*100:.2f}% ≥ 90%")
+        else:
+            print(f"✗ Below target ({tag}): avg accuracy {avg_acc*100:.2f}% < 90%")
+        print()
+
+    # 跨模型最佳
+    if len(by_model) > 1:
+        print("=" * 96)
+        print("CROSS-MODEL SUMMARY")
+        print(f"{'model':<24} {'avg_der':>10} {'avg_accuracy':>14} {'target_met':>12}")
+        print("-" * 96)
+        for tag, rows in sorted(by_model.items()):
+            avg_der = sum(r["der"] for r in rows) / len(rows)
+            avg_acc = sum(r["accuracy"] for r in rows) / len(rows)
+            ok = "✓" if avg_acc >= 0.90 else "✗"
+            print(f"{tag:<24} {avg_der*100:>9.2f}% {avg_acc*100:>13.2f}% {ok:>12}")
+        print()
 
     # JSON 报告
-    report = {
-        "results": results,
-        "summary": {
-            "avg_der": avg_der,
-            "avg_accuracy": avg_acc,
-            "target_met": avg_acc >= 0.90,
-            "sample_count": len(results),
-        },
+    summary = {
+        tag: {
+            "avg_der": sum(r["der"] for r in rows) / len(rows),
+            "avg_accuracy": sum(r["accuracy"] for r in rows) / len(rows),
+            "target_met": (sum(r["accuracy"] for r in rows) / len(rows)) >= 0.90,
+            "sample_count": len(rows),
+        }
+        for tag, rows in by_model.items()
     }
+    report = {"results": results, "summary": summary}
     out = PRED_DIR / "scores.json"
     out.write_text(json.dumps(report, indent=2, ensure_ascii=False))
-    print(f"\nFull report: {out}")
+    print(f"Full report: {out}")
     return 0
 
 

@@ -1,0 +1,319 @@
+{
+  "sample": "kd-2",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "Chinese",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 3.8,
+      "speaker": "A",
+      "text": "就是被很多人用，你没有 decision power，你没有 impact。"
+    },
+    {
+      "start": 3.8,
+      "end": 4.5,
+      "speaker": "B",
+      "text": "没错了。"
+    },
+    {
+      "start": 4.5,
+      "end": 9.8,
+      "speaker": "A",
+      "text": "对，就是有没有你这个东西都是这么做的，只能是接一个活，然后就是打螺丝。"
+    },
+    {
+      "start": 9.8,
+      "end": 12.8,
+      "speaker": "B",
+      "text": "对，你打了一个万吨巨轮的一个螺丝，但其实你还是打了个螺丝。"
+    },
+    {
+      "start": 12.8,
+      "end": 15.0,
+      "speaker": "A",
+      "text": "对，就是还是在打螺丝，对，就感觉。"
+    },
+    {
+      "start": 15.0,
+      "end": 20.8,
+      "speaker": "B",
+      "text": "现在我也跟我孩子说哈，你大厂的经验是很重要，因为你需要那个自信。"
+    },
+    {
+      "start": 20.8,
+      "end": 21.8,
+      "speaker": "A",
+      "text": "吃过见过。"
+    },
+    {
+      "start": 21.8,
+      "end": 26.0,
+      "speaker": "B",
+      "text": "对啊，吃过见过，然后我的能力也可以在那里，但是呢，你还是得 follow your heart。"
+    },
+    {
+      "start": 26.0,
+      "end": 44.0,
+      "speaker": "A",
+      "text": "这就是不同的人了，我觉得有两种啊，就是我自己出来做了以后就发现，第一呢，你喜欢确定性还是喜欢不确定性？然后第二呢，就是你喜欢做任务还是喜欢去做一个结果？因为做结果你其实就要去面对不确定性，就要去找各种各样的东西，然后你要去自己负责任。很多人不喜欢自己负责，很多人就希望别人给我一道题，我把它做出来，然后拿钱，然后受到奖励，对吧，做得好，然后打个高分。"
+    },
+    {
+      "start": 44.0,
+      "end": 46.0,
+      "speaker": "B",
+      "text": "嗯，这个有意思，对，确实是，说得对。"
+    },
+    {
+      "start": 46.0,
+      "end": 50.0,
+      "speaker": "A",
+      "text": "所以大家就特别喜欢大厂的这个地方，就是哎，我只需要我确定的知道这个东西是什么，确定的知道我把它做出来了。"
+    },
+    {
+      "start": 50.0,
+      "end": 52.8,
+      "speaker": "A",
+      "text": "但是这个工作我觉得未来会消失的。"
+    },
+    {
+      "start": 52.8,
+      "end": 54.8,
+      "speaker": "B",
+      "text": "绝对是消失，正在消失。"
+    },
+    {
+      "start": 54.8,
+      "end": 57.8,
+      "speaker": "A",
+      "text": "对，AI 可以做任务做得很好。"
+    },
+    {
+      "start": 57.8,
+      "end": 58.8,
+      "speaker": "B",
+      "text": "对。"
+    },
+    {
+      "start": 58.8,
+      "end": 60.8,
+      "speaker": "A",
+      "text": "然后 Nordstrom，Visa，Lululemon。"
+    },
+    {
+      "start": 60.8,
+      "end": 61.8,
+      "speaker": "B",
+      "text": "Lululemon，对。"
+    },
+    {
+      "start": 61.8,
+      "end": 65.8,
+      "speaker": "A",
+      "text": "什么时候开始去做管理或者说是开始在梯子上往上爬了呢？"
+    },
+    {
+      "start": 65.8,
+      "end": 71.8,
+      "speaker": "B",
+      "text": "基本上就是从 Nordstrom 开始，Nordstrom 的时候是 principal architect，所以下面带一些 solution architects。"
+    },
+    {
+      "start": 71.8,
+      "end": 73.8,
+      "speaker": "A",
+      "text": "怎么就一下子就 principal 了？"
+    },
+    {
+      "start": 73.8,
+      "end": 83.8,
+      "speaker": "B",
+      "text": "你想我已经工作那么久了呀，对吧？进那个 Nordstrom 的时候已经工作十几年了呀，所以你从 engineer 到 senior engineer，你就开始往 architects，right，solution architects，senior architects。"
+    },
+    {
+      "start": 83.8,
+      "end": 93.8,
+      "speaker": "A",
+      "text": "而且刚才还有一个信息我忽略了，就是你说你是相当于躺平了十几年，其实不是，你说你的工作很累，只是不用 travel，所以说那个工作强度是很大的，在强工作强度之下你的技术其实也是一直在往前走。"
+    },
+    {
+      "start": 93.8,
+      "end": 95.8,
+      "speaker": "B",
+      "text": "是的，是的。"
+    },
+    {
+      "start": 95.8,
+      "end": 116.8,
+      "speaker": "B",
+      "text": "我呢就是有个习惯，这个也是我有的时候跟我孩子说，我说我不知道你们为什么也有点像我。我的习惯是什么呢？就是我心里是比较好胜的一个人，虽然我是生活状态或者人生哲理是比我得更水一样哈，但是我有一点就是我不想被别人认为是你是 optional。"
+    },
+    {
+      "start": 116.8,
+      "end": 119.8,
+      "speaker": "B",
+      "text": "你可有可无，这个我不能接受，我从来不愿接受这点。"
+    },
+    {
+      "start": 119.8,
+      "end": 130.8,
+      "speaker": "B",
+      "text": "就算在工作场合哈，我可以不是你的领导，你也不用把我当做你最好的员工，这个我不去追求，但是必须有一个东西所有的人都得来找我，别人搞不定，必须是我能搞定的。"
+    },
+    {
+      "start": 130.8,
+      "end": 139.8,
+      "speaker": "B",
+      "text": "所以我每到一个公司我都是找这个点，必须变成一个，you know，go-to person。这样的话你就自然地会被推到下个位置，推到下个位置，我是说从技术的角度。"
+    },
+    {
+      "start": 139.8,
+      "end": 140.8,
+      "speaker": "A",
+      "text": "这个很重要，这个很重要。"
+    },
+    {
+      "start": 140.8,
+      "end": 142.8,
+      "speaker": "B",
+      "text": "对，这个非常重要。"
+    },
+    {
+      "start": 142.8,
+      "end": 144.8,
+      "speaker": "A",
+      "text": "你可不可以讲几个故事？"
+    },
+    {
+      "start": 144.8,
+      "end": 163.8,
+      "speaker": "B",
+      "text": "讲几个故事哈，有些东西非常简单，我年轻的时候比如说用数据库很多嘛，取数据，尤其是那种 investment company。那你写 query 的话，其实有很多可以写得很 efficient，run 起来非常快，对吧？就算你说 join，left join，right join，大家都知道，但 join 也很有诀窍的，然后哪边放 index，哪边不放，也很有诀窍，对吧？"
+    },
+    {
+      "start": 163.8,
+      "end": 165.8,
+      "speaker": "A",
+      "text": "对。"
+    },
+    {
+      "start": 165.8,
+      "end": 178.8,
+      "speaker": "B",
+      "text": "所以这个东西其实你看些书，练练其实可以知道的。所以就弄到最后就是我写的那个 query statement 是最 efficient，速度最快，大家都觉得，哦，如果我这个东西不行，run 得太慢，我去找 Wei。"
+    },
+    {
+      "start": 178.8,
+      "end": 180.8,
+      "speaker": "A",
+      "text": "然后它的好处是什么？"
+    },
+    {
+      "start": 180.8,
+      "end": 185.8,
+      "speaker": "B",
+      "text": "好处就是这个名字虽然我没去到处宣传，但大家都知道有这个人存在。"
+    },
+    {
+      "start": 185.8,
+      "end": 190.8,
+      "speaker": "A",
+      "text": "就可能场景就是一群人在那吃饭，然后这个人说哎我的 query 好好慢呀，他说你去找 Wei。"
+    },
+    {
+      "start": 190.8,
+      "end": 192.8,
+      "speaker": "B",
+      "text": "对对对，你去早她，找了她，对。"
+    },
+    {
+      "start": 192.8,
+      "end": 194.8,
+      "speaker": "A",
+      "text": "然后你过来找，找了以后就说哇。"
+    },
+    {
+      "start": 194.8,
+      "end": 209.8,
+      "speaker": "B",
+      "text": "对，然后你说公司出现问题，比如说 trading floor，一旦那个 system like running not return back 经常会有的嘛，long running query，你又不能把它 kill 掉，那怎么办呢？半夜打 Wei 的电话。"
+    },
+    {
+      "start": 209.8,
+      "end": 216.8,
+      "speaker": "B",
+      "text": "这就变成你的 visibility 就变得很高，因为通常这个是上层的领导在 troubleshooting，这个是最焦虑的问题嘛，你就变成救火的那个人了。"
+    },
+    {
+      "start": 216.8,
+      "end": 223.8,
+      "speaker": "B",
+      "text": "所以这个很重要，就是你就变成必须的一个螺丝钉，虽然你还是个螺丝钉，但是是必须的。"
+    },
+    {
+      "start": 223.8,
+      "end": 226.8,
+      "speaker": "A",
+      "text": "完全同意，这个我觉得比较重要，虽然你不去爬那个楼梯哈，那个阶梯，但是你必须得常位。"
+    },
+    {
+      "start": 226.8,
+      "end": 228.8,
+      "speaker": "B",
+      "text": "定位要定好，exactly。"
+    },
+    {
+      "start": 228.8,
+      "end": 237.8,
+      "speaker": "A",
+      "text": "其实很多企业竞争也是这样的，就是我看很多商业书嘛，就蓝海战略什么这些东西，他们说不是要去作最好的，做最好的一定是没有利润的，你一定要做唯一的。"
+    },
+    {
+      "start": 237.8,
+      "end": 239.8,
+      "speaker": "B",
+      "text": "没错，不可或缺很重要。"
+    },
+    {
+      "start": 239.8,
+      "end": 241.8,
+      "speaker": "A",
+      "text": "然后在这个地方是不可或缺的。"
+    },
+    {
+      "start": 241.8,
+      "end": 244.8,
+      "speaker": "A",
+      "text": "就是你越不可或缺，你的议价权就越高。"
+    },
+    {
+      "start": 244.8,
+      "end": 245.8,
+      "speaker": "B",
+      "text": "是的。"
+    },
+    {
+      "start": 245.8,
+      "end": 249.8,
+      "speaker": "A",
+      "text": "很重要，我觉得这个东西大家真的是要去多去注意一下这件事情。"
+    },
+    {
+      "start": 249.8,
+      "end": 252.8,
+      "speaker": "B",
+      "text": "其实应该能看到，就是大家工作的时候能想到身边谁是。"
+    },
+    {
+      "start": 252.8,
+      "end": 255.0,
+      "speaker": "A",
+      "text": "能想到的，就算我现在的公司场合。"
+    }
+  ]
+}

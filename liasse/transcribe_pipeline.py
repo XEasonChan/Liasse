@@ -65,7 +65,11 @@ class TranscribePipeline:
 
             if job.diarization_enabled and not is_mlx:
                 self._progress("正在识别发言人", ASR_PROGRESS_DONE)
-                speaker_turns = PyannoteDiarizer(job.pyannote_model, job.hf_token).diarize(job.audio_path)
+                speaker_turns = PyannoteDiarizer(
+                    job.pyannote_model,
+                    job.hf_token,
+                    num_speakers=job.diarization_num_speakers,
+                ).diarize(job.audio_path)
                 segments = assign_speakers(segments, speaker_turns)
             else:
                 speaker_turns = speaker_turns_from_segments(segments)
@@ -133,7 +137,11 @@ class TranscribePipeline:
                 # setup 完了，主线程可以开始 ASR。
                 worker_ready.set()
                 # 真正的工作：load pipeline + run diarization
-                diarizer = PyannoteDiarizer(job.pyannote_model, job.hf_token)
+                diarizer = PyannoteDiarizer(
+                    job.pyannote_model,
+                    job.hf_token,
+                    num_speakers=job.diarization_num_speakers,
+                )
                 turns = diarizer.diarize(job.audio_path)
                 diar_state["turns"] = turns
             except Exception as exc:

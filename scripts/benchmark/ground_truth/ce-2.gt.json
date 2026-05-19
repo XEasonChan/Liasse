@@ -1,0 +1,121 @@
+{
+  "sample": "ce-2",
+  "audio_dur_sec": 300.016327,
+  "method": "openrouter-multimodal",
+  "judge_model": "google/gemini-3.1-pro-preview",
+  "language": "English",
+  "speakers": [
+    "A",
+    "B"
+  ],
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 8.7,
+      "speaker": "A",
+      "text": "Yeah, I think the work of PMs is like not going away actually anytime soon. And um that that piece especially for larger projects. Usually you don't need to do as much of it for smaller stuff, right? You can you can you can skip it. But for larger stuff, uh that that piece is is not not not going away."
+    },
+    {
+      "start": 8.7,
+      "end": 11.5,
+      "speaker": "B",
+      "text": "Until the other stakeholders have their own little agents running around."
+    },
+    {
+      "start": 11.5,
+      "end": 23.5,
+      "speaker": "A",
+      "text": "I think that's right. I think that would be the point where it changes. It's funny, we had a we had like a difficult meeting a couple of weeks ago and me and my uh our head of design, Joel, we were debriefing afterwards and he pings me and he's just like, 'we will have AGI and it will still be impossible to get six people in a room to to get to align.' And uh I'm like, 'Yeah, I think that's I can see that.'"
+    },
+    {
+      "start": 23.5,
+      "end": 26.5,
+      "speaker": "B",
+      "text": "That's a... like what's the harder alignment problem?"
+    },
+    {
+      "start": 26.5,
+      "end": 28.0,
+      "speaker": "A",
+      "text": "Oh."
+    },
+    {
+      "start": 28.0,
+      "end": 50.0,
+      "speaker": "B",
+      "text": "Okay, this is so interesting and this is exactly where I feel like things are going. So just to be clear what you shared here, there's basically this tool that comes up with experiments to run to help grow Claude and all the tools. So it comes up with the idea, somebody looks at it, approves, 'Cool, let's do these things,' builds it, ships it, tests the results, see how it's doing, and then it comes back with like, 'Here's things that are working.' Is that roughly right?"
+    },
+    {
+      "start": 50.0,
+      "end": 81.0,
+      "speaker": "A",
+      "text": "It's roughly right. And like we right now we have human in the loop approving, but like the amount of time I kind of think about scale in this way of just like week on week are things getting better in each of the areas? Are people spending less time on each of the areas? Are the results getting better in each of the areas? And as long as like week on week that's getting better, then you're like, 'Okay, this whole initiative is like scaling.' Um and and so that that's roughly right. But you can think about it as I I think a lot of this can be automated where human review is not needed."
+    },
+    {
+      "start": 81.0,
+      "end": 94.0,
+      "speaker": "A",
+      "text": "So like we care a lot about brand, right? So that is something that we we do look at right now. We don't want to be shipping something that goes against the brand. Um but then, you know, you can have a skill that a skill that that contains your your your brand guidelines and and very clear dos and don'ts on on brand."
+    },
+    {
+      "start": 94.0,
+      "end": 106.0,
+      "speaker": "A",
+      "text": "And and and so all of these types of like accompaniments I think are going to get better. The model is going to get better at understanding how to use them. And so over time I I think that the need to like human review this really really decreases significantly."
+    },
+    {
+      "start": 106.0,
+      "end": 116.0,
+      "speaker": "B",
+      "text": "Yeah, and you could always unship it if it's like, 'Oh yeah, that was actually not a great idea.' And that's such a good point that we like we think we need people to do these things forever. And it turns out, 'Okay, a skill could do this really well. Here's our brand guidelines, here's our vision, here's our mission, here's our goals, here's what matters to us. Okay, let's not ship that thing.'"
+    },
+    {
+      "start": 116.0,
+      "end": 140.0,
+      "speaker": "B",
+      "text": "So the reason I think this is so interesting, this is like I've just been watching the expansion of AI doing more of the product development process, in this case the growth process, of just, 'Okay, it went from helping you write code to like writing all your code to reviewing your code.' Now it feels like what are the other ends of this? The two ends around this. It's kind of going from the middle out. The top of that is coming up with what to do. And then there's like the alignment stuff, still very hard. And then on the other end it's uh reviewing the code and then shipping it uh and then get distribution is that's like a whole other thing I want to talk to you about."
+    },
+    {
+      "start": 140.0,
+      "end": 154.0,
+      "speaker": "B",
+      "text": "So what I'm hearing here, and this is exactly what I thought was going to start happening, is AI is now getting really good at telling us what to do, not just taking our orders and building it. And it feels like the growth version of this is where it starts because it's so much simpler. Just like, not that growth is easy, but just like it's data-driven, there's this loop that you talk about. So I think this is such an interesting sign of things to come across just generally product."
+    },
+    {
+      "start": 154.0,
+      "end": 156.0,
+      "speaker": "A",
+      "text": "Yeah, I think that's right."
+    },
+    {
+      "start": 156.0,
+      "end": 158.0,
+      "speaker": "B",
+      "text": "Just putting that out there."
+    },
+    {
+      "start": 158.0,
+      "end": 171.0,
+      "speaker": "B",
+      "text": "Okay, so something that I'm constantly thinking about along these lines is just the future of product, PM, engineering, how those roles shift over time based on the stuff we're talking about. How how are you working together as a as a triad? And where do you see these roles going? What's most going to change do you think across these three roles?"
+    },
+    {
+      "start": 171.0,
+      "end": 202.0,
+      "speaker": "A",
+      "text": "This is like something that we talk about and think about frequently and the the the picture changes rapidly. So sometimes when when things break and you know execution like the bottlenecks break, historically in the past it's like, 'Okay, now you need to hire more engineers, you need to hire more designers, etc.' And it's more just like a a life cycle thing of like where is the life cycle of your team and that specific pod to identify where the bottleneck is. But now when when when things break, you need to still look at it of like, 'Okay, is it like the actual ratio or is there also underlying technological shifts that are that are also causing this to break?'"
+    },
+    {
+      "start": 202.0,
+      "end": 221.0,
+      "speaker": "A",
+      "text": "And so that's like an interesting thing. I think that smaller companies, like if I'm at like a 15 or 20 person company, I'm like the only PM there working with some designers and engineers, I I I think um I think in the smaller companies you'll see probably like the biggest blend where like the PM will be doing all sorts of, they'll be, you know, designing, shipping, etc. And I think you just have extreme bifurcation."
+    },
+    {
+      "start": 221.0,
+      "end": 234.0,
+      "speaker": "A",
+      "text": "You know, larger organizations, more scaled organizations, I think the jury is still very much out. Like you you speak to people even internally here and different people on different teams will have different views."
+    }
+  ]
+}

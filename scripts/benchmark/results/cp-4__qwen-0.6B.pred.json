@@ -1,0 +1,98 @@
+{
+  "sample": "cp-4",
+  "audio_dur_sec": 300.016327,
+  "asr_model": "Qwen/Qwen3-ASR-0.6B",
+  "speakers": [
+    "SPEAKER_00",
+    "SPEAKER_01"
+  ],
+  "wall_sec": 45.57,
+  "rt_factor": 6.58,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.03096875,
+      "end": 4.3678437500000005,
+      "speaker": "SPEAKER_00",
+      "text": "FirstquestionWhataretwoorthreebooksthatyoufindyourse"
+    },
+    {
+      "start": 4.570343750000001,
+      "end": 61.538125,
+      "speaker": "SPEAKER_01",
+      "text": "lfrecommendingmosttootherpeopleIreallylikeHowAsiaWorksumit'sastoryabouteconomicdevelopmentandwhatarelikethepoliciesandgovernments thatmakeLonglastingsuccessfuleconomiesTheotherbooksthatI'mreallyintoaretheTechnologyTrapSothisisactuallyaboutthepastfewtechnologyrevolutionssotheindustrialrevolutionandthecomputerrevolution andhowthishasaffectedworkersThethereasonthatIreallylikethisisbecauseIthinkwethere'salotwecanlearnfromhistorytomakesurethatthistransitiongoeswellAndmaybeonlikeafunnoteIreallylikePaper MinjeryIt'sjustlikeabookofshortstoriesaboutlikeComingofageandAIandumjustlikeselfdiscoveryFavoriterecentmovieorT VshowyouhavereallyenjoyedIre allylikeDrivetoSurvive"
+    },
+    {
+      "start": 63.458125,
+      "end": 103.18784375000001,
+      "speaker": "SPEAKER_01",
+      "text": "There'snolikedeepmeaningtoitIjustthere'sjustsomethingverysatisfyingaboutpeoplebeingsoobsessedwithlikeasingularengineeringgoalandJustlikethepurityofthepursuitandIalsoreallyloveFreeSolo whichisaboutAlexHonnoldclimbingElCapitanwithoutaharnessandIthinksimilarlyit'sjustsuchapureachievementtobeabletoclimbthisextremelychallengingdangerousrouteAndtobeabletohavethemental focustodoitknowingthatifyoumakeasinglemistakeyoudieIt'sinsaneYeahthatm"
+    },
+    {
+      "start": 103.40721875000001,
+      "end": 108.26721875000001,
+      "speaker": "SPEAKER_00",
+      "text": "ovieisoutofcontrolAndit'sinterestinghowtheserelateinsomewaytotheworky"
+    },
+    {
+      "start": 108.31784375000001,
+      "end": 136.9009375,
+      "speaker": "SPEAKER_01",
+      "text": "oudoIactuallyamarockclimberUmbutIfirstwatched FreeSolobeforeIclimbedrocksandsoIthoughtitwasimpressiveIdidn'tunderstandhowimpressiveitwasIt'soneoftheraremovieswherelikethemoreyouknowaboutitthemoreyou'reyou'reblownawaybyhowinsane thisisLikethekindsThekindsofmoveshe'sdoingonthewallarethingsthatlikeIdon'tthinkIwilleverbeabletodoinmylifetimeifitweresetinagymlikeonefeetoffthegroundWitharopeWitharopeDidyouseethe"
+    },
+    {
+      "start": 136.9009375,
+      "end": 146.62409375000001,
+      "speaker": "SPEAKER_00",
+      "text": "documentaryonthatotherguytheyoungeronethatwentonlikeiceIdidThaton ewasverysadButthatwastha twaswildOkayfavoriteproductyourecentlydiscoveredthatyoureallyloveThepro"
+    },
+    {
+      "start": 146.96159375000002,
+      "end": 152.42093749999998,
+      "speaker": "SPEAKER_01",
+      "text": "ductthathaslikemostchanged mylifeoutsideofclawproductsisprobablyWaymo"
+    },
+    {
+      "start": 153.663,
+      "end": 201.50159375,
+      "speaker": "SPEAKER_01",
+      "text": "LikeI'madiehardWaymouseruseittwiceadaygettoandfromworkSothetwothingsthatIreallylikeaboutitareoneIdon'tfeelbadifaWaymoiswaitingformeandsoIfeellikeIfeellesspressuretoberightatthecurb sidethemomentitarrivesandthesecondthingisIfeellikeitletsmebeabitmoreproductiveUmwhenwhenI'minthecarwithanotherhumanIItypicallytrynottolikedoanyworkcallsIIfeelalittlerudeifI'mlikeon mylaptopthewholetimeButonethingIreallyappreciateabouttheWemoisIcancallintoaworkcallI'mnotworriedaboutsomeoneoverhearingmeI'mnotworriedaboutHeyisthislikerudeAmItalkingtooloudDoIneed totellasksomeonetolikechangethemusicAndsothishasbeenlikeIfeellikethishasgivenmebacklikethirtyminuteseverydayA"
+    },
+    {
+      "start": 201.68721875,
+      "end": 205.945875,
+      "speaker": "SPEAKER_00",
+      "text": "llthesesecondordereffectsofoftechnologyit'ssointerestingYeahIalwaysthought"
+    },
+    {
+      "start": 205.945875,
+      "end": 212.74034375000002,
+      "speaker": "SPEAKER_01",
+      "text": "WaymoneededtobepricedlowerthanUberandLyfttosucceedbutactuallyI'mlikeveryhappytopayatwoxpremi"
+    },
+    {
+      "start": 212.89221875,
+      "end": 223.59096875,
+      "speaker": "SPEAKER_00",
+      "text": "umforitIloveWaymoIt'sjustlikelikeonceyouseeit you'rejustlikeThisisinsaneandandthenyougetused toitLikeyougetinthereyou'relikeThisiscrazyandthenyouforgetabo"
+    },
+    {
+      "start": 223.59096875,
+      "end": 236.11221875,
+      "speaker": "SPEAKER_01",
+      "text": "utitTotallyandIthinkit'salsochangedthevernacularLikealotofpeopleatAnthropicloveWaymoandIthinkinthepastyouwouldbelikeHey likelet'scalllikeBajaRideShareappandnowlikeeveryone'sjustlikeOkayisWay"
+    },
+    {
+      "start": 236.33159375000002,
+      "end": 242.35125,
+      "speaker": "SPEAKER_00",
+      "text": "mohereOkaytwomorequestionsDoyouhaveafavoritelifemottothatyouoftencomebacktoinworkorinlifeJustdothings"
+    },
+    {
+      "start": 243.79125,
+      "end": 299.9805,
+      "speaker": "SPEAKER_01",
+      "text": "Ithinkthere'salotofvalueinlikefirstprinciplesthinkingandififyoulikeifyouknowwhatyou'reoptimizingforandyouhavelikestrongfirstprinciplesthenyoucannormallydeducewhattherightlikecourse ofactionisandbeabletoclearlyarticulatethattoallthestakeholdersandthenyoushouldjustlikedoitLikeIthinkjobsarefakeIfyouunderstandtheconstraintsyoucanfigureoutwhatyoucandoandthenjustlike trytodoitquicklylearnfromthemistakesandApologizeorfixthemifyoudidsomethingwrong YouyoucouldjustdothingsWhoeversaidthat Ithinkit'sliberatingactuallytoliketellpeoplethisIthinkinalotofcompanies likerolesareverystrictlydefinedLikeokaythisiswhatthePMdoesiswhatthedesignerdoesiswhattheengineerdoesandtheneventeamscopesareveryrigidlydefinedSoheylikethiscornerofthecodebasewetouch andthiscornerlikewe'renotallowedtotouchAndIthinkwhatjustdothingsletspeopledoistheyfeellikeempoweredtomakethesedecisions"
+    }
+  ]
+}

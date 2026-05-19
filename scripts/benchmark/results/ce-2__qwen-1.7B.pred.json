@@ -1,0 +1,62 @@
+{
+  "sample": "ce-2",
+  "audio_dur_sec": 300.016327,
+  "asr_model": "Qwen/Qwen3-ASR-1.7B",
+  "speakers": [
+    "SPEAKER_00",
+    "SPEAKER_01"
+  ],
+  "wall_sec": 114.62,
+  "rt_factor": 2.62,
+  "pipeline_version": "3d78cb0",
+  "turns": [
+    {
+      "start": 0.0,
+      "end": 38.42159375,
+      "speaker": "SPEAKER_01",
+      "text": "AstheworkofTMsislikenotgoingawayactuallyandanytimesoonandthatthatpieceespeciallyforlargerprojectsyoudon'tneedtodoasmuchofitforsmallerstuffrightYoucanyoucanyoucanskipitbutforlargerstuff Thatthatpieceisisnotnotnotgoingawayuntilthetheotherstakeho ldersaretheirownlittleagentsrunningaroundIthinkthat'srig htIthinkthatwouldbethepointwhereitchangesIt'sfunnyWehadawehadlikea difficultmeetingacoupleofweeksagoandmeandmyourheadofdesignJoelweweredebriefingafterwardsandhethinkshe'sjustlikeI'mallWewillhaveAGIanditwillstillbeimpossibletogetsixpeopleinaroomtoto gettoalignAndI'mlikeYeahIthinkthat'sIcanseethatThat'"
+    },
+    {
+      "start": 38.74221875,
+      "end": 41.2575625,
+      "speaker": "SPEAKER_00",
+      "text": "salikewhat'stheharderalignmentproblem"
+    },
+    {
+      "start": 43.378,
+      "end": 71.72999999999999,
+      "speaker": "SPEAKER_00",
+      "text": "OhokayThisissointerestingandthisisexactlywhereIfeellikethingsaregoingSojusttobeclearwhatyousharedherethere'sbasicallythistoolthatcomesupwithExperimentstoruntohelpgrowClaudeandallthe toolsSoitcomesupwithideaSomebodylooksatthemapprovesCoollet'sdothesethingsBuildsitshipsitteststheresultsSeehowit'sdoingandthencomesbacklikehere'sthingsthatareworkingIsthatroughlyright"
+    },
+    {
+      "start": 71.97,
+      "end": 133.49375,
+      "speaker": "SPEAKER_01",
+      "text": "It'sroughlyrightAndlikewerightnowwehavehumanintheloopapprovingbutLiketheamountoftimeIkindofthinkaboutscalingthiswayofjustlikeweekonweekarethingsgettingbetterineachoftheareasArepeople spendinglesstimeoneachoftheareasAretheresultsgettingbetterineachoftheareasAndaslongaslikeweekonweekthat'sgettingbetterthenyou'relikeokaythiswholeinitiativeislikescalingAndandsothat that'sroughlyrightButyoucanthinkaboutitasIthinkalotofthiscanbeautomatedwherehumanreviewisnotneededSowecarealotaboutbrandrightSoThatissomethingthatwewedolookatrightnowWedon'twanttobe shippingsomethingthatgoesagainstthebrandButthenyouknowyoucanhaveaskillthataskillthatthatcontainsyouryourbrandguidelinesandandveryclearyetdo'sanddon'tsononbrandandandandsoallofthese typesoflikeAccompanimentsIthinkaregoingtogetbetterThemodelisgoingtogetbetteratunderstandinghowtousethemandsoovertimeIthinkthattheneedtolikehumanreviewthisreallyreallydecreasessignificantly"
+    },
+    {
+      "start": 133.81375,
+      "end": 177.2418125,
+      "speaker": "SPEAKER_00",
+      "text": "Yeahandyoucouldalwaysunshipitifit'slikeohyeahthatwasactuallynotagreatideaAndthat'ssuchagoodpointthatwelikewethinkweneedpeopletodothesethingsforeveranditturnsoutokayaskillcandothisreally wellHere'sourbrandguidelinesHere'sourvisionHere'sourmissionHere'sourgoalsHere'swhatmatterstousOkaylet'snotshipthatthingSothereasonIthinkthisissointerestingthisislikeI'vejustbeenwatching theexpansionofAIdoingmoreoftheproductdevelopmentprocessInthiscasethegrowthprocessofjustokayitwentfromhelpingyouwritecodetolikewritingallyourcodetoreviewingyourcodeNowititfeelslikewhat aretheotherendsofthisThetwoendsaroundthisit'skindofgoingfromthemiddleoutThethetopofthatiscomingupwithwhattodoandthenthere'slikethealignmentstuffstillveryhardAndthenontheotherendit's"
+    },
+    {
+      "start": 177.88181250000002,
+      "end": 210.39471875,
+      "speaker": "SPEAKER_00",
+      "text": "reviewingthecodeandthenshippingitandthengetdistributionisthat'slikeawholeotherthingIwanttotalktoyouaboutSowhatI'mhearinghereandthisisexactlywhatIthoughtwasgoingtostarthappeningisAI isnowgettingreallygoodattellinguswhattodonotjusttakingourordersandbuildingitAnditfeelslikethegrowthVersionofthisiswhereitstartsbecauseit'ssomuchsimplerJustnotthatgrowthiseasybutjust likeit'sdatadrivenThere'sthisloopthatyoutalkaboutSoIthinkthisissuchaninterestingsignofthingstocomeacrossjustgenerallyproductYea hjustputtingthatoutthereOkays"
+    },
+    {
+      "start": 211.06971875000002,
+      "end": 232.04534375,
+      "speaker": "SPEAKER_00",
+      "text": "osomethingthatI'mconstantly thinkingaboutalongtheselinesisjustthefutureofproductPMengineeringhowthoserolesshiftovertimebasedonthestuffwe'retalkingaboutHowhowareyouworkingtogetherIsitasatriadandwheredoyouseethese rolesgoingWhat'smostgoingtochangedoyouthinkacrossthese"
+    },
+    {
+      "start": 232.04534375,
+      "end": 300.00206249999997,
+      "speaker": "SPEAKER_01",
+      "text": "threerolesThisislikesomethingthatwetalkaboutandthinkaboutfrequentlyandthethepicturechangesrapidlySosometimeswhenwhenthingsbreak andyouknowexecutionlikethebottlenecksbreakhistoricallyinthepastit'slikeokaynowyouneedtohiremoreengineersyouneedtohiremoredesignersetcAndit'smorejustlikeaAlifecyclethingoflikewhereis thelifecycleofyourteamandthatspecificpodtoidentifywherethebottleneckisButnowwhenwhenwhenthingsbreakyouneedtostilllookatitOflikeokayisitliketheactualratioorisitalsounderlyingtechnological shiftsthatarethatarealsocausingthistobreakAndsothat'slikeaaninterestingthingIthinkthatSmallercompaniesSoifI'mlikeafifteenortwentypersoncompanyI'mliketheonlyPMthereworkingwithsomedesigners andengineersIthinkIthinkinthesmallercompaniesyou'llseeprobablylikethebiggestblendwherelikethePMwillbedoingallsortsofthey'llbeyouknowdesigningshippingetcAndIthinkyoujusthaveExtremebifurcation youknowlargerorganizationsmorescaledorganizationsIthinkthejuryisstillverymuchoutLikeyouyouspeaktopeopleeveninternallyhereanddifferentpeopleindifferentteamshavedifferentviews"
+    }
+  ]
+}
