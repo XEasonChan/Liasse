@@ -65,13 +65,19 @@ def chunk_interview(
     target_chars: int = 5000,
     max_chars: int = 6500,
     silence_split_seconds: float = 3.0,
+    overlap_chars: int = 0,
 ) -> List[Chunk]:
-    """1对1 访谈分块：尊重发言人轮次 + 长静默 + 字符上限。
+    """1对1 访谈分块：尊重发言人轮次 + 长静默 + 字符上限 + 可选重叠窗口。
 
     默认值理由：
     - target_chars=5000：qwen3:4b/8b 在 ~2500 token 输入下 L1 抽取质量稳定
     - max_chars=6500：硬上限，超过这个值 8K context 会被 prompt 模板挤爆
     - silence_split_seconds=3.0：访谈里典型话题切换前的停顿；< 3s 多是正常呼吸/思考
+    - overlap_chars=0：默认关闭（保持向后兼容）。设为 300-600 可让 L1 抽取看到
+      上一块的尾段上下文，避免发言人轮次切换处的语义割裂。借鉴自 VibeVoice-ASR
+      用 64K 整段上下文的思路：实在做不到不分块，就在边界处加一点重叠。
+      只影响发给 LLM 的 chunk.text，不改 segment_ids / start_time / end_time，
+      所以 L1 解析回来仍能精确对应到原始 segments。
     """
     segments = normalize_to_two_speakers(segments)
     if not segments:
@@ -85,19 +91,29 @@ def chunk_interview(
     cur_end: float = segments[0].end or 0.0
     cur_speakers: Set[str] = set()
     last_end: float = segments[0].start or 0.0
+    last_flushed_lines: List[str] = []
 
     def flush():
         nonlocal cur_lines, cur_ids, cur_chars, cur_start, cur_end, cur_speakers
+        nonlocal last_flushed_lines
         if not cur_lines:
             return
+        text = "\n".join(cur_lines)
+        # 如果开了 overlap 且不是第一块，把前一块尾部追加到 text 前面作为 LLM
+        # 上下文。注意只改 text，不改 segment_ids / start_time。
+        if overlap_chars > 0 and chunks and last_flushed_lines:
+            overlap_text = _take_tail_chars(last_flushed_lines, overlap_chars)
+            if overlap_text:
+                text = f"[上文回顾]\n{overlap_text}\n[本块开始]\n{text}"
         chunks.append(Chunk(
             index=len(chunks),
-            text="\n".join(cur_lines),
+            text=text,
             segment_ids=list(cur_ids),
             start_time=cur_start,
             end_time=cur_end,
             speaker_set=set(cur_speakers),
         ))
+        last_flushed_lines = list(cur_lines)
         cur_lines = []
         cur_ids = []
         cur_chars = 0
@@ -129,3 +145,17 @@ def chunk_interview(
 
     flush()
     return chunks
+
+
+def _take_tail_chars(lines: List[str], max_chars: int) -> str:
+    """从 lines 末尾取一段不超过 max_chars 的尾部文本，按行边界对齐。"""
+    if max_chars <= 0 or not lines:
+        return ""
+    selected: List[str] = []
+    total = 0
+    for line in reversed(lines):
+        if total + len(line) > max_chars and selected:
+            break
+        selected.append(line)
+        total += len(line)
+    return "\n".join(reversed(selected))

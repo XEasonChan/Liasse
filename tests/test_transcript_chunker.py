@@ -69,3 +69,49 @@ def test_chunker_emits_chunk_metadata():
     assert chunks[0].end_time == 60
     assert chunks[0].speaker_set == {"A", "B"}
     assert chunks[0].index == 0
+
+
+def test_chunk_interview_overlap_disabled_by_default():
+    """默认 overlap_chars=0 — 不能因为加了 overlap 改变现有行为。"""
+    segs = [_seg(i * 1.0, (i + 1) * 1.0, "x" * 200, "A" if i % 2 == 0 else "B")
+            for i in range(60)]
+    chunks = chunk_interview(segs, target_chars=2000, max_chars=2500)
+    assert len(chunks) >= 2
+    # 第二块文本不应包含「上文回顾」标记
+    assert "[上文回顾]" not in chunks[1].text
+
+
+def test_chunk_interview_overlap_prepends_previous_tail():
+    """overlap_chars > 0 时第二块应包含「[上文回顾]」头部，含上一块尾部。"""
+    segs = [_seg(i * 1.0, (i + 1) * 1.0, f"段{i:03d}内容" + "x" * 80,
+                 "A" if i % 2 == 0 else "B") for i in range(60)]
+    chunks = chunk_interview(segs, target_chars=2000, max_chars=2500,
+                              overlap_chars=300)
+    assert len(chunks) >= 2
+    assert chunks[1].text.startswith("[上文回顾]")
+    assert "[本块开始]" in chunks[1].text
+    # 上文回顾段不应让 chunks[1].text 超过 max_chars + overlap 太多
+    assert len(chunks[1].text) <= 2500 + 400
+
+
+def test_chunk_interview_overlap_does_not_change_segment_ids():
+    """关键不变量：overlap 仅影响 text，segment_ids / start_time / end_time
+    必须和不开 overlap 时一致（保证 L1 抽取结果能 1:1 对应原 segments）。"""
+    segs = [_seg(i * 1.0, (i + 1) * 1.0, f"段{i:03d}" + "x" * 100, "A")
+            for i in range(30)]
+    a = chunk_interview(segs, target_chars=1500, max_chars=2000)
+    b = chunk_interview(segs, target_chars=1500, max_chars=2000,
+                         overlap_chars=200)
+    assert len(a) == len(b)
+    for ca, cb in zip(a, b):
+        assert ca.segment_ids == cb.segment_ids
+        assert ca.start_time == cb.start_time
+        assert ca.end_time == cb.end_time
+
+
+def test_chunk_interview_first_chunk_never_has_overlap():
+    """第一块没有「前一块」，不应有上文回顾标记。"""
+    segs = [_seg(i, i + 1, "x" * 100, "A") for i in range(40)]
+    chunks = chunk_interview(segs, target_chars=1500, max_chars=2000,
+                              overlap_chars=300)
+    assert "[上文回顾]" not in chunks[0].text
