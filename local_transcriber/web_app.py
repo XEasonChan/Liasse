@@ -743,7 +743,11 @@ def _check_ollama_model(name: str) -> bool:
         opener = urllib.request.build_opener(proxy_handler)
         with opener.open("http://127.0.0.1:11434/api/tags", timeout=1.0) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-        return any(m.get("name", "").startswith(name) for m in data.get("models", []))
+        for m in data.get("models", []):
+            mname = m.get("name", "")
+            if mname == name or mname.startswith(f"{name}@"):
+                return True
+        return False
     except Exception:
         return False
 
