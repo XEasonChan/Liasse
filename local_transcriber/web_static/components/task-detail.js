@@ -31,6 +31,9 @@ export const TaskDetail = {
     segmentOverrides() {
       return (this.task && this.task.edits && this.task.edits.segmentOverrides) || {};
     },
+    transcriptWarnings() {
+      return ((this.task && this.task.transcript && this.task.transcript.warnings) || []);
+    },
     isRunning() { return this.task && this.task.status === "running"; },
     isQueued() { return this.task && this.task.status === "queued"; },
     isFailed() { return this.task && this.task.status === "failed"; },
@@ -296,6 +299,10 @@ export const TaskDetail = {
             <div v-else-if="!segments.length" class="muted">{{ t('detail.waitingTranscript') }}</div>
             <div v-if="isRunning && segments.length" class="muted" style="font-size:12px;margin-bottom:8px">
               {{ t('detail.transcribingNote', { n: segments.length }) }}
+            </div>
+            <div v-if="transcriptWarnings.length" class="upload-feedback warn" style="margin-bottom:8px">
+              <lucide-icon name="alert-triangle" :size="14" />
+              <span>{{ transcriptWarnings.join('；') }}</span>
             </div>
             <div v-for="seg in segments" :key="seg.id" class="segment-block">
               <div class="segment-head">

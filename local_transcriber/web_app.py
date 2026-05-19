@@ -600,7 +600,7 @@ def create_app() -> FastAPI:
     def put_settings(payload: Dict[str, Any] = Body(...)) -> dict:
         merged = {**default_settings(), **load_settings(), **payload}
         save_settings(merged)
-        return merged
+        return load_settings()
 
     @app.post("/api/open-path")
     def open_path(payload: OpenPathRequest, db: Session = Depends(get_db)) -> dict:

@@ -29,6 +29,9 @@ export const SettingsPage = {
         const resp = await fetch("/api/settings");
         if (!resp.ok) throw new Error(await resp.text());
         this.settings = await resp.json();
+        if (!this.settings.defaultSpeakerMode) {
+          this.settings.defaultSpeakerMode = this.settings.defaultDiarize ? "llm" : "fast";
+        }
       } catch (err) {
         this.message = { type: "error", text: t("settings.loadFail", { msg: err.message || err }) };
       } finally {
@@ -142,12 +145,14 @@ export const SettingsPage = {
 
           <div class="settings-row">
             <div>
-              <div class="settings-row-label">{{ t('settings.diarize') }}</div>
-              <div class="settings-row-hint">{{ t('settings.diarizeHint') }}</div>
+              <div class="settings-row-label">{{ t('settings.speakerMode') }}</div>
+              <div class="settings-row-hint">{{ t('settings.speakerModeHint') }}</div>
             </div>
-            <button class="toggle" :class="{ on: settings.defaultDiarize }" @click="settings.defaultDiarize = !settings.defaultDiarize">
-              {{ settings.defaultDiarize ? t('settings.on') : t('settings.off') }}
-            </button>
+            <select v-model="settings.defaultSpeakerMode">
+              <option value="fast">{{ t('upload.speakerModeFast') }}</option>
+              <option value="llm">{{ t('upload.speakerModeLLM') }}</option>
+              <option value="pyannote">{{ t('upload.speakerModePyannote') }}</option>
+            </select>
           </div>
 
           <div class="settings-row">

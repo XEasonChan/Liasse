@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from .web_models import TaskRow, init_db, session_scope, utc_now
+from .web_models import TaskRow, init_db, normalize_task_config, session_scope, utc_now
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -80,6 +80,20 @@ _PYANNOTE_HOOK_LABEL_MAP = {
     "speaker_counting": "估计发言人数",
     "reconstruction": "重建分段",
 }
+
+
+def _resolve_speaker_execution(config: Dict[str, Any]) -> tuple[Dict[str, Any], str, bool, bool]:
+    normalized = normalize_task_config(config)
+    auto_segment = normalized.get("autoSegment")
+    auto_segment = True if auto_segment is None else bool(auto_segment)
+    speaker_mode = str(normalized.get("speakerMode") or "llm")
+    effective_mode = speaker_mode if auto_segment else "fast"
+    return (
+        normalized,
+        effective_mode,
+        effective_mode == "pyannote",
+        effective_mode == "llm",
+    )
 
 
 def _make_pyannote_progress_hook(progress_queue):
@@ -166,13 +180,18 @@ def _worker_entry(
         for _stale_model in ("qwen3:4b", "qwen3:8b"):
             unload_model(_stale_model)
 
-        # 启用 diarization 时，把 pyannote 迁到 Metal/MPS（3-5x 加速）+
+        config, speaker_mode_effective, pyannote_enabled, llm_speaker_enabled = (
+            _resolve_speaker_execution(job_payload.get("config") or {})
+        )
+        auto_segment = config.get("autoSegment")
+        auto_segment = True if auto_segment is None else bool(auto_segment)
+
+        # 启用 pyannote 精确声纹时，把 pyannote 迁到 Metal/MPS（3-5x 加速）+
         # 注入 progress hook（让前端看到 diarization 内部阶段进度）。
-        if bool(job_payload.get("config", {}).get("diarize")):
+        if pyannote_enabled:
             _accelerate_pyannote_on_mps()
             _install_pyannote_progress_hook(progress_queue)
 
-        config = job_payload["config"]
         task_id = job_payload["id"]
         audio_path = Path(job_payload["audioPath"])
         output_dir = Path(job_payload["outputDir"])
@@ -188,10 +207,29 @@ def _worker_entry(
                 raise InterruptedError("用户停止了任务")
             progress_queue.put({"type": "progress", "stage": message, "value": value})
 
-        auto_segment = config.get("autoSegment")
-        auto_segment = True if auto_segment is None else bool(auto_segment)
-        # 关闭自动分段时强制不做发言人识别，否则 diarization 没法对齐时间戳
-        diarize = bool(config.get("diarize")) and auto_segment
+        def on_partial_transcript(payload: Dict[str, Any]) -> None:
+            if stop_event.is_set():
+                raise InterruptedError("用户停止了任务")
+            segments = [
+                {
+                    "id": f"raw-{i}",
+                    "speaker": seg.speaker,
+                    "start": seg.start,
+                    "end": seg.end,
+                    "text": seg.text,
+                }
+                for i, seg in enumerate(payload.get("segments") or [])
+            ]
+            progress_queue.put(
+                {
+                    "type": "partial_transcript",
+                    "segments": segments,
+                    "rawText": payload.get("rawText") or "",
+                    "rawTextPath": payload.get("rawTextPath"),
+                    "outputDir": payload.get("outputDir"),
+                }
+            )
+
         summarize_requested = bool(config.get("summarize"))
         # 新路径：让 task_runner 在 pipeline 之外调用 analyze_transcript，
         # pipeline.run 内部不再做摘要，避免重复跑一次 Ollama。
@@ -203,7 +241,7 @@ def _worker_entry(
             language=config.get("language") or "Chinese",
             qwen_model=config.get("asrModel") or "Qwen/Qwen3-ASR-0.6B",
             qwen_return_timestamps=auto_segment,
-            diarization_enabled=diarize,
+            diarization_enabled=pyannote_enabled,
             diarization_num_speakers=config.get("numSpeakers"),
             hf_token=os.environ.get("HF_TOKEN") or os.environ.get("PYANNOTE_AUTH_TOKEN"),
             summary_enabled=pipeline_summary_enabled,
@@ -212,7 +250,48 @@ def _worker_entry(
         )
 
         progress_queue.put({"type": "progress", "stage": "加载模型", "value": 0.02})
-        result = LocalTranscriptionPipeline(on_progress=on_progress).run(job)
+        result = LocalTranscriptionPipeline(
+            on_progress=on_progress,
+            on_partial_transcript=on_partial_transcript,
+        ).run(job)
+
+        warnings: list[str] = []
+        suggested_speaker_labels: Dict[str, str] = {}
+        needs_export_refresh = False
+
+        if llm_speaker_enabled:
+            try:
+                from .diarization import speaker_turns_from_segments
+                from .speaker_labeler import label_segments
+
+                progress_queue.put(
+                    {
+                        "type": "progress",
+                        "stage": "正在智能区分发言人",
+                        "value": 0.885,
+                    }
+                )
+                labeling = label_segments(
+                    result.segments,
+                    model=config.get("summaryModel") or "qwen3:4b",
+                    num_speakers=config.get("numSpeakers"),
+                )
+                result.segments = labeling.segments
+                result.speaker_turns = speaker_turns_from_segments(result.segments)
+                suggested_speaker_labels = labeling.speaker_labels
+                needs_export_refresh = True
+            except InterruptedError:
+                raise
+            except Exception as exc:
+                warning = "智能分离失败，已保留未分离逐字稿"
+                warnings.append(warning)
+                progress_queue.put(
+                    {
+                        "type": "progress",
+                        "stage": f"{warning}（{exc}）",
+                        "value": 0.89,
+                    }
+                )
 
         # 新路径：在 pipeline 之后调用分层分析（L1/L2/索引），更丰富。
         # 旧路径走 LOCAL_TRANSCRIBER_LEGACY_SUMMARY=1，由 pipeline 内部生成摘要。
@@ -250,6 +329,7 @@ def _worker_entry(
                 )
                 result.summary = summary
                 analysis_payload = analysis.to_dict()
+                needs_export_refresh = True
             except InterruptedError:
                 raise
             except Exception as exc:
@@ -261,6 +341,26 @@ def _worker_entry(
                         "value": 0.99,
                     }
                 )
+
+        if needs_export_refresh:
+            from .exporters import export_json, export_markdown, export_srt
+
+            export_markdown(
+                result.markdown_path,
+                result.audio_path,
+                result.segments,
+                result.speaker_turns,
+                result.summary,
+            )
+            export_json(
+                result.json_path,
+                result.audio_path,
+                result.segments,
+                result.speaker_turns,
+                result.summary,
+            )
+            if result.srt_path is not None:
+                export_srt(result.srt_path, result.segments)
 
         segments = [
             {
@@ -284,6 +384,9 @@ def _worker_entry(
             },
             "segments": segments,
             "summaryText": summary_text,
+            "speakerModeEffective": speaker_mode_effective,
+            "warnings": warnings,
+            "suggestedSpeakerLabels": suggested_speaker_labels,
         }
         if analysis_payload is not None:
             done_msg["analysis"] = analysis_payload
@@ -398,7 +501,7 @@ class TaskRunner:
             return {
                 "id": row.id,
                 "audioPath": row.audio_path,
-                "config": dict(row.config or {}),
+                "config": normalize_task_config(row.config or {}),
             }
 
     def _dispatcher_loop(self) -> None:
@@ -455,6 +558,8 @@ class TaskRunner:
 
                 if msg["type"] == "progress":
                     self._apply_progress(job["id"], msg)
+                elif msg["type"] == "partial_transcript":
+                    self._apply_partial_transcript(job["id"], msg)
                 elif msg["type"] in {"done", "failed", "stopped"}:
                     final_msg = msg
 
@@ -482,6 +587,29 @@ class TaskRunner:
             row.progress_stage = msg.get("stage") or row.progress_stage
             session.commit()
 
+    def _apply_partial_transcript(self, task_id: str, msg: Dict[str, Any]) -> None:
+        segments = msg.get("segments") or []
+        if not segments:
+            return
+        with session_scope() as session:
+            row = session.get(TaskRow, task_id)
+            if row is None or row.status != "running":
+                return
+            row.transcript = {
+                "segments": segments,
+                "partial": True,
+                "rawText": msg.get("rawText") or "",
+                "rawTextPath": msg.get("rawTextPath"),
+                "speakerModeEffective": None,
+                "warnings": [],
+            }
+            if msg.get("outputDir"):
+                outputs = dict(row.outputs or {})
+                outputs.setdefault("dir", msg.get("outputDir"))
+                outputs["rawTextPath"] = msg.get("rawTextPath")
+                row.outputs = outputs
+            session.commit()
+
     def _finalize(self, task_id: str, msg: Dict[str, Any], elapsed_sec: float) -> None:
         prewarm_chat = False
         with session_scope() as session:
@@ -497,8 +625,28 @@ class TaskRunner:
                 row.status = "done"
                 row.progress = 1.0
                 row.progress_stage = "完成"
-                row.outputs = msg.get("outputs")
-                row.transcript = {"segments": msg.get("segments") or []}
+                previous_outputs = dict(row.outputs or {})
+                final_outputs = dict(msg.get("outputs") or {})
+                if previous_outputs.get("rawTextPath") and not final_outputs.get(
+                    "rawTextPath"
+                ):
+                    final_outputs["rawTextPath"] = previous_outputs["rawTextPath"]
+                row.outputs = final_outputs
+                row.transcript = {
+                    "segments": msg.get("segments") or [],
+                    "partial": False,
+                    "speakerModeEffective": msg.get("speakerModeEffective"),
+                    "warnings": msg.get("warnings") or [],
+                }
+                suggested_labels = msg.get("suggestedSpeakerLabels") or {}
+                if suggested_labels:
+                    edits = dict(row.edits or {"speakerLabels": {}, "segmentOverrides": {}})
+                    labels = dict(edits.get("speakerLabels") or {})
+                    for speaker_id, label in suggested_labels.items():
+                        labels.setdefault(str(speaker_id), str(label))
+                    edits["speakerLabels"] = labels
+                    edits.setdefault("segmentOverrides", {})
+                    row.edits = edits
                 row.summary_text = msg.get("summaryText")
                 prewarm_chat = bool((row.config or {}).get("enableChat"))
             elif kind == "stopped":

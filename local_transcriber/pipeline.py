@@ -12,6 +12,7 @@ from .models import PipelineResult, SpeakerTurn, SummaryResult, TranscriptionJob
 from .summarizer import OllamaSummarizer
 
 ProgressCallback = Callable[[str, float], None]
+PartialTranscriptCallback = Callable[[dict[str, Any]], None]
 
 ASR_PROGRESS_START = 0.04
 ASR_CHUNK_PROGRESS_END = 0.82
@@ -21,8 +22,17 @@ EXPORT_PROGRESS_START = 0.96
 
 
 class LocalTranscriptionPipeline:
-    def __init__(self, on_progress: Optional[ProgressCallback] = None) -> None:
+    def __init__(
+        self,
+        on_progress: Optional[ProgressCallback] = None,
+        on_partial_transcript: Optional[PartialTranscriptCallback] = None,
+    ) -> None:
         self.on_progress = on_progress or (lambda _message, _value: None)
+        self.on_partial_transcript = on_partial_transcript or (lambda _payload: None)
+        self._partial_segments: List[TranscriptSegment] = []
+        self._partial_chunk_indices: set[int] = set()
+        self._partial_raw_text_path: Optional[Path] = None
+        self._partial_output_dir: Optional[Path] = None
 
     def run(self, job: TranscriptionJob) -> PipelineResult:
         if not job.audio_path.exists() and job.asr_backend != "demo":
@@ -31,6 +41,7 @@ class LocalTranscriptionPipeline:
         job.output_dir.mkdir(parents=True, exist_ok=True)
         output_dir = self._job_output_dir(job)
         output_dir.mkdir(parents=True, exist_ok=True)
+        self._prepare_partial_transcript(job, output_dir)
 
         self._progress("准备转录音频", ASR_PROGRESS_START)
         segments = self._transcribe(job)
@@ -119,6 +130,8 @@ class LocalTranscriptionPipeline:
                 self._progress(f"正在转录音频 {index}/{total}", value)
             else:
                 self._progress("正在转录音频", value)
+            if event == "chunk_completed":
+                self._record_partial_chunk(payload)
             # 最后一个 chunk 完成后，pyannote 会在后台跑全局 diarization
             # （CPU/MPS 上几分钟，mlx-qwen3-asr 没有 diarization_started 事件）。
             # 主动切 stage 让用户知道阶段已经变了，UI 不再卡在 "X/X"。
@@ -162,3 +175,55 @@ class LocalTranscriptionPipeline:
         except (TypeError, ValueError):
             return None
         return parsed if parsed > 0 else None
+
+    def _prepare_partial_transcript(
+        self,
+        job: TranscriptionJob,
+        output_dir: Path,
+    ) -> None:
+        self._partial_segments = []
+        self._partial_chunk_indices = set()
+        self._partial_output_dir = output_dir
+        stem = job.audio_path.stem or "demo"
+        self._partial_raw_text_path = output_dir / f"{stem}-raw.partial.txt"
+
+    def _record_partial_chunk(self, payload: dict[str, Any]) -> None:
+        text = str(payload.get("text") or "").strip()
+        if not text:
+            return
+
+        index = self._positive_int(payload.get("chunk_index"))
+        if index is not None:
+            if index in self._partial_chunk_indices:
+                return
+            self._partial_chunk_indices.add(index)
+
+        start = self._float_or_none(payload.get("chunk_offset_sec"))
+        duration = self._float_or_none(payload.get("chunk_duration_sec"))
+        end = start + duration if start is not None and duration is not None else None
+        self._partial_segments.append(
+            TranscriptSegment(
+                start=start,
+                end=end,
+                speaker="SPEAKER_00",
+                text=text,
+                source="raw-chunk",
+            )
+        )
+
+        raw_text = "\n".join(seg.text for seg in self._partial_segments if seg.text).strip()
+        if self._partial_raw_text_path is not None:
+            self._partial_raw_text_path.write_text(raw_text, encoding="utf-8")
+
+        self.on_partial_transcript(
+            {
+                "segments": list(self._partial_segments),
+                "rawText": raw_text,
+                "rawTextPath": str(self._partial_raw_text_path)
+                if self._partial_raw_text_path is not None
+                else None,
+                "outputDir": str(self._partial_output_dir)
+                if self._partial_output_dir is not None
+                else None,
+            }
+        )

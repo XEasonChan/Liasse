@@ -79,11 +79,17 @@ export const TaskList = {
     paramSummary(task) {
       const cfg = task.config || {};
       const parts = [];
-      if (cfg.autoSegment && cfg.diarize) {
+      const mode = cfg.speakerMode || (cfg.diarize ? "pyannote" : "fast");
+      if (!cfg.autoSegment || mode === "fast") {
+        parts.push(t("list.paramSpeakerModeFast"));
+      } else if (mode === "llm") {
+        parts.push(t("list.paramSpeakerModeLLM"));
+      } else if (mode === "pyannote") {
+        parts.push(t("list.paramSpeakerModePyannote"));
+      }
+      if (cfg.autoSegment && mode !== "fast") {
         if (cfg.numSpeakers) parts.push(t("list.paramSpeakersN", { n: cfg.numSpeakers }));
         else parts.push(t("list.paramSpeakersAuto"));
-      } else {
-        parts.push(t("list.paramNoSpeakers"));
       }
       if (cfg.summarize) parts.push(t("list.paramSummary"));
       if (cfg.asrModel) parts.push(cfg.asrModel.replace("Qwen/Qwen3-ASR-", ""));

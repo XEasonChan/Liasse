@@ -60,6 +60,7 @@ def test_upload_creates_task(client):
     assert task["status"] == "queued"
     assert task["fileName"] == "interview.wav"
     assert task["fileSizeBytes"] > 0
+    assert task["config"]["speakerMode"] == "pyannote"
     assert task["config"]["diarize"] is True
     assert task["config"]["numSpeakers"] == 2
     assert task["progress"] == 0.0
@@ -167,7 +168,29 @@ def test_create_from_paths_creates_tasks(client, tmp_path):
     assert len(body["tasks"]) == 2
     assert body["tasks"][0]["audioPath"] == str(audio_a)
     assert body["tasks"][0]["status"] == "queued"
+    assert body["tasks"][0]["config"]["speakerMode"] == "pyannote"
     assert body["skipped"] == []
+
+
+def test_create_from_paths_persists_three_speaker_modes(client, tmp_path):
+    audio = tmp_path / "mode.wav"
+    audio.write_bytes(b"data")
+
+    for mode in ("fast", "llm", "pyannote"):
+        payload = {
+            "paths": [str(audio)],
+            "config": {
+                "asrModel": "Qwen/Qwen3-ASR-0.6B",
+                "language": "Chinese",
+                "speakerMode": mode,
+                "numSpeakers": 2,
+            },
+        }
+        resp = client.post("/api/tasks/create-from-paths", json=payload)
+        assert resp.status_code == 200, resp.text
+        task = resp.json()["tasks"][0]
+        assert task["config"]["speakerMode"] == mode
+        assert task["config"]["diarize"] is (mode == "pyannote")
 
 
 def test_create_from_paths_skips_missing(client, tmp_path):
@@ -325,6 +348,107 @@ def test_cleanup_orphans_marks_running_as_stopped(client, tmp_path):
         row = s.get(TaskRow, task["id"])
         assert row.status == "stopped"
         assert "interrupted" in (row.error_message or "").lower()
+
+
+def test_task_runner_persists_partial_transcript(client, tmp_path):
+    audio = tmp_path / "audio.wav"
+    audio.write_bytes(b"data")
+    payload = {
+        "paths": [str(audio)],
+        "config": {"asrModel": "Qwen/Qwen3-ASR-0.6B", "language": "English"},
+    }
+    task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
+
+    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.task_runner import TaskRunner
+    import os
+
+    with session_scope() as s:
+        row = s.get(TaskRow, task["id"])
+        row.status = "running"
+        s.commit()
+
+    runner = TaskRunner(Path(os.environ["WHISPERQWEN_DB"]))
+    runner._apply_partial_transcript(
+        task["id"],
+        {
+            "segments": [
+                {
+                    "id": "raw-0",
+                    "speaker": "SPEAKER_00",
+                    "start": 0.0,
+                    "end": 2.0,
+                    "text": "fallback text",
+                }
+            ],
+            "rawText": "fallback text",
+            "rawTextPath": str(tmp_path / "sample-raw.partial.txt"),
+            "outputDir": str(tmp_path / "outputs"),
+        },
+    )
+
+    with session_scope() as s:
+        row = s.get(TaskRow, task["id"])
+        assert row.transcript["partial"] is True
+        assert row.transcript["rawText"] == "fallback text"
+        assert row.transcript["segments"][0]["text"] == "fallback text"
+        assert row.outputs["rawTextPath"].endswith("sample-raw.partial.txt")
+
+
+def test_task_runner_finalize_persists_speaker_mode_warnings_and_suggested_labels(client, tmp_path):
+    audio = tmp_path / "audio.wav"
+    audio.write_bytes(b"data")
+    payload = {
+        "paths": [str(audio)],
+        "config": {
+            "asrModel": "Qwen/Qwen3-ASR-0.6B",
+            "language": "English",
+            "speakerMode": "llm",
+        },
+    }
+    task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
+
+    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.task_runner import TaskRunner
+    import os
+
+    with session_scope() as s:
+        row = s.get(TaskRow, task["id"])
+        row.status = "running"
+        row.edits = {"speakerLabels": {"SPEAKER_00": "已改名"}, "segmentOverrides": {}}
+        s.commit()
+
+    runner = TaskRunner(Path(os.environ["WHISPERQWEN_DB"]))
+    runner._finalize(
+        task["id"],
+        {
+            "type": "done",
+            "outputs": {},
+            "segments": [
+                {
+                    "id": "seg-0",
+                    "speaker": "SPEAKER_00",
+                    "start": 0.0,
+                    "end": 1.0,
+                    "text": "hello",
+                }
+            ],
+            "speakerModeEffective": "llm",
+            "warnings": ["智能分离失败，已保留未分离逐字稿"],
+            "suggestedSpeakerLabels": {
+                "SPEAKER_00": "采访者",
+                "SPEAKER_01": "受访者",
+            },
+        },
+        elapsed_sec=1.0,
+    )
+
+    with session_scope() as s:
+        row = s.get(TaskRow, task["id"])
+        assert row.transcript["speakerModeEffective"] == "llm"
+        assert row.transcript["warnings"] == ["智能分离失败，已保留未分离逐字稿"]
+        assert row.edits["speakerLabels"]["SPEAKER_00"] == "已改名"
+        assert row.edits["speakerLabels"]["SPEAKER_01"] == "受访者"
 
 
 def test_health_returns_blockers_field(client):

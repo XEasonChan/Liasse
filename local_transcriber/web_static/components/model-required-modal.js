@@ -5,6 +5,7 @@ import { t, i18n, fmtDurI18n } from "../i18n.js";
 function modelIdFor(feature) {
   switch (feature) {
     case "diarize": return "pyannote/speaker-diarization-community-1";
+    case "speaker-llm":
     case "summary":
     case "chat":
       return "qwen3:4b";
@@ -18,6 +19,7 @@ function modelIdFor(feature) {
 function featureKey(feature) {
   return {
     diarize: "upload.cfgDiarize",
+    "speaker-llm": "upload.speakerModeLLM",
     summary: "upload.cfgSummarize",
     chat: "upload.cfgChat",
     "asr-1.7b": "upload.cfgASRHigh",

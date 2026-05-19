@@ -30,7 +30,8 @@ export const UploadZone = {
       config: {
         asrModel: "Qwen/Qwen3-ASR-0.6B",
         language: "English",
-        diarize: true,
+        speakerMode: "llm",
+        diarize: false,
         numSpeakers: 2,
         autoSegment: true,
         summarize: false,
@@ -45,23 +46,33 @@ export const UploadZone = {
       const s = await resp.json();
       if (s.defaultASRModel) this.config.asrModel = s.defaultASRModel;
       if (s.defaultLanguage) this.config.language = s.defaultLanguage;
-      if (typeof s.defaultDiarize === "boolean") this.config.diarize = s.defaultDiarize;
+      if (s.defaultSpeakerMode) {
+        this.config.speakerMode = s.defaultSpeakerMode;
+      } else if (typeof s.defaultDiarize === "boolean") {
+        this.config.speakerMode = s.defaultDiarize ? "llm" : "fast";
+      }
+      this.config.diarize = this.config.speakerMode === "pyannote";
       if (s.defaultNumSpeakers !== undefined) this.config.numSpeakers = s.defaultNumSpeakers;
       if (typeof s.defaultSummarize === "boolean") this.config.summarize = s.defaultSummarize;
     } catch (_) { /* ignore */ }
   },
   computed: {
     accept() { return ACCEPT_EXT.join(","); },
-    diarizeBlocked() { return !this.config.autoSegment; },
-    diarizeState() {
-      if (this.diarizeBlocked) return "off";
-      if (!this.diarizeReady) return "warn";
-      return this.config.diarize ? "on" : "";
+    speakerModeOptions() {
+      return [
+        { key: "fast", label: t("upload.speakerModeFast"), title: t("upload.tipSpeakerFast") },
+        { key: "llm", label: t("upload.speakerModeLLM"), title: this.llmReady ? t("upload.tipSpeakerLLM") : t("upload.tipSpeakerLLMNeed") },
+        { key: "pyannote", label: t("upload.speakerModePyannote"), title: this.diarizeReady ? t("upload.tipSpeakerPyannote") : t("upload.tipDiarizeNeed") },
+      ];
     },
-    diarizeTooltip() {
-      if (this.diarizeBlocked) return t("upload.tipDiarizeBlocked");
-      if (!this.diarizeReady) return t("upload.tipDiarizeNeed");
-      return t("upload.tipDiarizeOn");
+    speakerModeActive() {
+      return this.config.autoSegment ? this.config.speakerMode : "fast";
+    },
+    speakerCountActive() {
+      if (!this.config.autoSegment) return false;
+      if (this.config.speakerMode === "llm") return this.llmReady;
+      if (this.config.speakerMode === "pyannote") return this.diarizeReady;
+      return false;
     },
     summaryToggleClass() {
       if (!this.llmReady) return "warn";
@@ -82,10 +93,10 @@ export const UploadZone = {
       }
     },
     speakerSummary() {
-      if (this.config.autoSegment && this.config.diarize && this.diarizeReady) return t("upload.cfgSpeakers");
-      if (!this.config.autoSegment || !this.config.diarize) return t("upload.summaryDiarizeOff");
-      if (!this.diarizeReady) return t("upload.summaryDiarizeNeed");
-      return t("upload.cfgSpeakers");
+      if (!this.config.autoSegment || this.config.speakerMode === "fast") return t("upload.speakerModeFast");
+      if (this.config.speakerMode === "llm") return this.llmReady ? t("upload.speakerModeLLM") : t("upload.summaryNeedQwen");
+      if (this.config.speakerMode === "pyannote") return this.diarizeReady ? t("upload.speakerModePyannote") : t("upload.summaryDiarizeNeed");
+      return t("upload.speakerModeFast");
     },
     summarySummary() {
       if (!this.llmReady) return t("upload.summaryNeedQwen");
@@ -93,10 +104,17 @@ export const UploadZone = {
     },
   },
   methods: {
-    handleDiarizeClick() {
-      if (this.diarizeBlocked) return;
-      if (!this.diarizeReady) { this.$emit("need-model", "diarize"); return; }
-      this.config.diarize = !this.config.diarize;
+    selectSpeakerMode(mode) {
+      if (mode === "llm" && !this.llmReady) {
+        this.$emit("need-model", "speaker-llm");
+        return;
+      }
+      if (mode === "pyannote" && !this.diarizeReady) {
+        this.$emit("need-model", "diarize");
+        return;
+      }
+      this.config.speakerMode = mode;
+      this.config.diarize = mode === "pyannote";
     },
     handleSummaryClick() {
       if (!this.llmReady) { this.$emit("need-model", "summary"); return; }
@@ -326,8 +344,11 @@ export const UploadZone = {
       if (!this.llmReady) {
         cfg.summarize = false;
         cfg.enableChat = false;
+        if (cfg.speakerMode === "llm") cfg.speakerMode = "fast";
       }
-      if (!cfg.autoSegment) cfg.diarize = false;
+      if (!this.diarizeReady && cfg.speakerMode === "pyannote") cfg.speakerMode = "fast";
+      if (!cfg.autoSegment) cfg.speakerMode = "fast";
+      cfg.diarize = cfg.speakerMode === "pyannote";
       if (cfg.numSpeakers === "auto") cfg.numSpeakers = null;
       return cfg;
     },
@@ -377,17 +398,33 @@ export const UploadZone = {
         <div class="config-row" @click.stop>
           <span class="config-prefix">{{ t('upload.currentSettings') }}</span>
           <div class="config-controls">
-            <div class="setting-pill setting-pill-combo" :class="diarizeState">
-              <button
-                class="setting-pill-action"
-                :disabled="diarizeBlocked"
-                :title="diarizeTooltip"
-                @click="handleDiarizeClick"
-              >
+            <div class="setting-pill setting-pill-radio">
+              <span class="setting-label">{{ t('upload.cfgSpeakerMode') }}</span>
+              <div class="compact-radio">
+                <label
+                  v-for="mode in speakerModeOptions"
+                  :key="mode.key"
+                  :class="{ active: speakerModeActive === mode.key, disabled: !config.autoSegment && mode.key !== 'fast' }"
+                  :title="!config.autoSegment && mode.key !== 'fast' ? t('upload.tipDiarizeBlocked') : mode.title"
+                >
+                  <input
+                    type="radio"
+                    :value="mode.key"
+                    :checked="speakerModeActive === mode.key"
+                    :disabled="!config.autoSegment && mode.key !== 'fast'"
+                    @change="selectSpeakerMode(mode.key)"
+                  />
+                  <span>{{ mode.label }}</span>
+                </label>
+              </div>
+            </div>
+
+            <div v-if="speakerCountActive" class="setting-pill setting-pill-combo">
+              <button class="setting-pill-action" :title="t('upload.cfgSpeakers')">
                 <lucide-icon name="users" :size="14" />
                 <span>{{ speakerSummary }}</span>
               </button>
-              <select v-if="config.diarize && !diarizeBlocked && diarizeReady" class="setting-inline-select" v-model="config.numSpeakers" :title="t('upload.cfgDiarize')">
+              <select class="setting-inline-select" v-model="config.numSpeakers" :title="t('upload.cfgSpeakers')">
                 <option :value="null">{{ t('upload.speakersAuto') }}</option>
                 <option :value="2">{{ t('upload.speakersN', { n: 2 }) }}</option>
                 <option :value="3">{{ t('upload.speakersN', { n: 3 }) }}</option>
