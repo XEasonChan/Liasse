@@ -18,8 +18,16 @@ from pydantic import BaseModel, ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import chat as chat_module
 from . import downloader as downloader_module
+from .services import (
+    check_model_cache,
+    check_ollama,
+    check_ollama_model,
+    check_runtime_ready,
+    probe_audio_duration,
+    read_install_progress,
+    unique_path,
+)
 from .settings_store import default_settings, load_settings, save_settings
 from .db import TaskRow, init_db, session_scope, utc_now
 from .schemas import (
@@ -64,12 +72,9 @@ if _env_file.exists():
                 os.environ.setdefault(_k.strip(), _v.strip())
 
 
-def get_db() -> Session:
-    db = session_scope()
-    try:
-        yield db
-    finally:
-        db.close()
+# get_db 在 .db 模块里定义，这里直接 re-import（不是重复定义）。tasks
+# routes 的 Depends(get_db) 用它，routers/qa.py 也从 ..db 引同一个。
+from .db import get_db  # noqa: E402, F401
 
 
 @asynccontextmanager
@@ -111,143 +116,13 @@ def create_app() -> FastAPI:
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-    @app.get("/api/health")
-    def health() -> dict:
-        from .hf_paths import is_downloaded
-        asr_ok = is_downloaded("Qwen/Qwen3-ASR-0.6B")
-        aligner_ok = is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B")
-        pyannote_ok = is_downloaded("pyannote/speaker-diarization-community-1")
-        ollama_up = _check_ollama()
-        qwen4b_ok = _check_ollama_model("qwen3:4b") if ollama_up else False
-        runtime_ready = _check_runtime_ready()
-        hf_token_set = bool(
-            os.environ.get("HF_TOKEN")
-            or os.environ.get("PYANNOTE_AUTH_TOKEN")
-            or os.environ.get("HUGGINGFACE_TOKEN")
-        )
-        try:
-            usage = shutil.disk_usage(str(OUTPUTS_DIR))
-            disk_free_gb = round(usage.free / (1024 ** 3), 1)
-        except OSError:
-            disk_free_gb = None
+    # 路由注册：domain-specific routes 拆到 routers/ 子模块，web_app.py 自己
+    # 只装配。每个 router 自带 prefix（声明在装饰器里），include 时不再加。
+    from .routers import health_router, models_router, qa_router
+    app.include_router(health_router)
+    app.include_router(models_router)
+    app.include_router(qa_router)
 
-        blockers: List[str] = []
-        if not shutil.which("ffmpeg") or not shutil.which("ffprobe"):
-            blockers.append("ffmpeg")
-        if not asr_ok:
-            blockers.append("asr_model")
-        if not runtime_ready:
-            blockers.append("runtime")
-
-        return {
-            "ok": not blockers,
-            "blockers": blockers,
-            "runtime_ready": runtime_ready,
-            "checks": {
-                "ffmpeg": bool(shutil.which("ffmpeg")),
-                "ffprobe": bool(shutil.which("ffprobe")),
-                "ollama": ollama_up,
-                "hf_token": hf_token_set,
-                "asr_model": asr_ok,
-                "aligner_model": aligner_ok,
-                "pyannote_model": pyannote_ok,
-                "qwen3_4b_model": qwen4b_ok,
-                "runtime_ready": runtime_ready,
-                "disk_free_gb": disk_free_gb,
-                "models": _check_model_cache(),
-            },
-        }
-
-    @app.get("/api/install/progress")
-    def install_progress() -> dict:
-        return _read_install_progress()
-
-    @app.get("/api/models")
-    def models() -> dict:
-        from .hf_paths import is_downloaded
-        items = [
-            {
-                "id": "Qwen/Qwen3-ASR-0.6B",
-                "kind": "asr",
-                "downloaded": is_downloaded("Qwen/Qwen3-ASR-0.6B"),
-                "label": "Qwen3-ASR 0.6B（默认转录）",
-                "sizeBytes": 1_200_000_000,
-                "required": True,
-                "bundled": True,
-                "downloadCommand": (
-                    "venv/bin/python -c \"from huggingface_hub import snapshot_download; "
-                    "snapshot_download('Qwen/Qwen3-ASR-0.6B')\""
-                ),
-                "downloadHint": "默认安装应已自带。如缺失，运行下面的命令重新下载。",
-            },
-            {
-                "id": "Qwen/Qwen3-ForcedAligner-0.6B",
-                "kind": "aligner",
-                "downloaded": is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B"),
-                "label": "Qwen3 时间戳对齐器",
-                "sizeBytes": 1_300_000_000,
-                "required": False,
-                "bundled": True,
-                "downloadCommand": (
-                    "venv/bin/python -c \"from huggingface_hub import snapshot_download; "
-                    "snapshot_download('Qwen/Qwen3-ForcedAligner-0.6B')\""
-                ),
-                "downloadHint": "默认安装应已自带。如缺失，自动分段需要它，运行下面命令补回。",
-            },
-            {
-                "id": "Qwen/Qwen3-ASR-1.7B",
-                "kind": "asr",
-                "downloaded": is_downloaded("Qwen/Qwen3-ASR-1.7B"),
-                "label": "Qwen3-ASR 1.7B（高质量，可选）",
-                "sizeBytes": 3_400_000_000,
-                "required": False,
-                "bundled": False,
-                "downloadCommand": (
-                    "venv/bin/python -c \"from huggingface_hub import snapshot_download; "
-                    "snapshot_download('Qwen/Qwen3-ASR-1.7B')\""
-                ),
-                "downloadHint": "比 0.6B 慢约 50% 但识别质量更高。下载约 3.4 GB，需要 Hugging Face 账户。",
-            },
-            {
-                "id": "pyannote/speaker-diarization-community-1",
-                "kind": "diarization",
-                "downloaded": is_downloaded("pyannote/speaker-diarization-community-1"),
-                "label": "pyannote 发言人识别 4.x",
-                "sizeBytes": 600_000_000,
-                "required": False,
-                "bundled": False,
-                "downloadCommand": (
-                    "# 1. 在浏览器同意许可：https://huggingface.co/pyannote/speaker-diarization-community-1\n"
-                    "# 2. 在 .env 填入 HF_TOKEN=hf_xxx\n"
-                    "venv/bin/python -c \"from huggingface_hub import snapshot_download; import os; "
-                    "snapshot_download('pyannote/speaker-diarization-community-1', token=os.environ.get('HF_TOKEN'))\""
-                ),
-                "downloadHint": "「发言人识别」功能需要这个模型。约 600 MB。首次下载前需要在 Hugging Face 网页同意一次许可。",
-            },
-            {
-                "id": "qwen3:4b",
-                "kind": "llm",
-                "downloaded": _check_ollama_model("qwen3:4b"),
-                "label": "Qwen3 4B（总结 / AI Chat）",
-                "sizeBytes": 2_500_000_000,
-                "required": False,
-                "bundled": False,
-                "downloadCommand": "ollama pull qwen3:4b",
-                "downloadHint": "「生成总结」和「AI Chat」都用这个本地 LLM。约 2.5 GB。先确认 Ollama 已启动（brew install ollama && ollama serve）。",
-            },
-            {
-                "id": "qwen3:8b",
-                "kind": "llm",
-                "downloaded": _check_ollama_model("qwen3:8b"),
-                "label": "Qwen3 8B（更高质量，可选）",
-                "sizeBytes": 5_200_000_000,
-                "required": False,
-                "bundled": False,
-                "downloadCommand": "ollama pull qwen3:8b",
-                "downloadHint": "比 4B 更慢但回答更细致。下载约 5.2 GB，运行时 6 GB+ 内存。",
-            },
-        ]
-        return {"models": items}
 
     @app.post("/api/tasks/upload")
     async def upload_tasks(
@@ -273,10 +148,10 @@ def create_app() -> FastAPI:
             if not data:
                 continue
             safe_name = Path(file.filename or "audio").name
-            target = _unique_path(upload_dir / safe_name)
+            target = unique_path(upload_dir / safe_name)
             target.write_bytes(data)
 
-            duration = _probe_duration(target)
+            duration = probe_audio_duration(target)
             task = TaskRow(
                 audio_path=str(target),
                 file_name=safe_name,
@@ -321,7 +196,7 @@ def create_app() -> FastAPI:
                 skipped.append({"path": raw_path, "reason": f"读取大小失败：{exc}"})
                 continue
 
-            duration = _probe_duration(path)
+            duration = probe_audio_duration(path)
             task = TaskRow(
                 audio_path=str(path),
                 file_name=path.name,
@@ -485,81 +360,6 @@ def create_app() -> FastAPI:
         db.commit()
         return {"ok": True, "removed": len(rows)}
 
-    @app.post("/api/tasks/{task_id}/summary")
-    def regenerate_summary(task_id: str, db: Session = Depends(get_db)) -> dict:
-        task = db.get(TaskRow, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="任务不存在")
-        if not task.transcript or not task.transcript.get("segments"):
-            raise HTTPException(status_code=400, detail="还没有逐字稿可用于总结")
-
-        edits = task.edits or {}
-        transcript_text = chat_module.segments_to_text(
-            task.transcript["segments"],
-            speaker_labels=edits.get("speakerLabels") or {},
-            overrides=edits.get("segmentOverrides") or {},
-        )
-        model = (task.config or {}).get("summaryModel") or "qwen3:4b"
-        try:
-            summary = chat_module.generate_summary(transcript_text, model=model)
-        except RuntimeError as exc:
-            raise HTTPException(status_code=502, detail=str(exc))
-        task.summary_text = summary
-        db.commit()
-        return {"summary": summary, "model": model}
-
-    @app.post("/api/tasks/{task_id}/chat")
-    def chat_stream(task_id: str, payload: ChatRequest, db: Session = Depends(get_db)):
-        from .memory_monitor import MemoryBudget
-        from .qa_engine import QAEngine, build_index_for_task
-
-        task = db.get(TaskRow, task_id)
-        if not task:
-            raise HTTPException(status_code=404, detail="任务不存在")
-        if not task.transcript or not task.transcript.get("segments"):
-            raise HTTPException(status_code=400, detail="还没有逐字稿可用于问答")
-
-        index = build_index_for_task(task)
-        if index is None:
-            raise HTTPException(status_code=400, detail="逐字稿为空，无法建立检索索引")
-
-        history = list(task.chat_messages or [])
-        user_message = payload.message
-        ts_request = datetime.utcnow().isoformat()
-        user_pref = (task.config or {}).get("userPref") or "auto"
-        engine = QAEngine(index=index, budget=MemoryBudget.detect(), user_pref=user_pref)
-
-        def event_stream():
-            collected: List[str] = []
-            try:
-                for delta in engine.answer(user_message, history=history):
-                    collected.append(delta)
-                    yield f"event: delta\ndata: {json.dumps(delta, ensure_ascii=False)}\n\n"
-            except Exception as exc:
-                yield f"event: error\ndata: {json.dumps(str(exc), ensure_ascii=False)}\n\n"
-                return
-
-            answer = "".join(collected).strip()
-            try:
-                with session_scope() as s2:
-                    row = s2.get(TaskRow, task_id)
-                    if row is not None:
-                        msgs = list(row.chat_messages or [])
-                        msgs.append({"role": "user", "content": user_message, "ts": ts_request})
-                        if answer:
-                            msgs.append({
-                                "role": "assistant",
-                                "content": answer,
-                                "ts": datetime.utcnow().isoformat(),
-                            })
-                        row.chat_messages = msgs
-                        s2.commit()
-            except Exception:
-                pass
-            yield "event: done\ndata: {}\n\n"
-
-        return StreamingResponse(event_stream(), media_type="text/event-stream")
-
     @app.get("/api/settings")
     def get_settings() -> dict:
         return load_settings()
@@ -605,89 +405,6 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=500, detail=f"无法打开：{exc}")
         return {"ok": True, "path": str(target)}
 
-    @app.post("/api/models/download")
-    def start_model_download(payload: DownloadModelRequest) -> dict:
-        try:
-            job = downloader_module.start_download(payload.modelId)
-        except ValueError as exc:
-            raise HTTPException(status_code=400, detail=str(exc))
-        return {
-            "jobId": job.job_id,
-            "modelId": job.model_id,
-            "kind": job.kind,
-            "status": job.status,
-        }
-
-    @app.get("/api/models/download/{job_id}/stream")
-    def stream_download(job_id: str):
-        job = downloader_module.get_job(job_id)
-        if not job:
-            raise HTTPException(status_code=404, detail="下载任务不存在")
-
-        def event_stream():
-            yield (
-                f"event: snapshot\ndata: "
-                f"{json.dumps({'progress': job.progress, 'bytesDone': job.bytes_done, 'bytesTotal': job.bytes_total, 'status': job.status}, ensure_ascii=False)}\n\n"
-            )
-            while True:
-                try:
-                    msg = job.events.get(timeout=30.0)
-                except Exception:
-                    if job.status in {"done", "failed"}:
-                        break
-                    yield "event: ping\ndata: {}\n\n"
-                    continue
-                evt = msg.pop("event")
-                if evt == "__close__":
-                    break
-                yield f"event: {evt}\ndata: {json.dumps(msg, ensure_ascii=False)}\n\n"
-
-        return StreamingResponse(event_stream(), media_type="text/event-stream")
-
-    @app.post("/api/models/download/{job_id}/cancel")
-    def cancel_download(job_id: str) -> dict:
-        ok = downloader_module.cancel_job(job_id)
-        return {"ok": ok}
-
-    @app.post("/api/ollama/start")
-    def start_ollama() -> dict:
-        if _check_ollama():
-            return {"started": True, "alreadyRunning": True, "message": "Ollama 已在运行"}
-
-        if not shutil.which("ollama"):
-            raise HTTPException(
-                status_code=400,
-                detail="找不到 ollama 二进制（请先 brew install ollama）",
-            )
-
-        log_path = OUTPUTS_DIR / "ollama.log"
-        env = {**os.environ, "OLLAMA_FLASH_ATTENTION": "1", "OLLAMA_KV_CACHE_TYPE": "q8_0"}
-        try:
-            with open(log_path, "ab") as log_f:
-                subprocess.Popen(
-                    ["ollama", "serve"],
-                    stdout=log_f,
-                    stderr=subprocess.STDOUT,
-                    env=env,
-                    start_new_session=True,
-                )
-        except OSError as exc:
-            raise HTTPException(status_code=500, detail=f"启动失败：{exc}")
-
-        import time as _time
-
-        deadline = _time.time() + 8.0
-        while _time.time() < deadline:
-            if _check_ollama():
-                return {
-                    "started": True,
-                    "alreadyRunning": False,
-                    "message": "Ollama 已启动",
-                    "logPath": str(log_path),
-                }
-            _time.sleep(0.3)
-        raise HTTPException(status_code=504, detail="Ollama 启动超时（8 秒）")
-
     @app.get("/", response_class=HTMLResponse)
     def index() -> HTMLResponse:
         html_file = STATIC_DIR / "index.html"
@@ -701,135 +418,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-
-def _check_ollama() -> bool:
-    try:
-        with socket.create_connection(("127.0.0.1", 11434), timeout=0.5):
-            return True
-    except OSError:
-        return False
-
-
-def _check_ollama_model(name: str) -> bool:
-    if not _check_ollama():
-        return False
-    try:
-        import urllib.request
-
-        proxy_handler = urllib.request.ProxyHandler({})
-        opener = urllib.request.build_opener(proxy_handler)
-        with opener.open("http://127.0.0.1:11434/api/tags", timeout=1.0) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        for m in data.get("models", []):
-            mname = m.get("name", "")
-            if mname == name or mname.startswith(f"{name}@"):
-                return True
-        return False
-    except Exception:
-        return False
-
-
-def _check_model_cache() -> dict:
-    from .hf_paths import is_downloaded
-    return {
-        "qwen3_asr_06b": is_downloaded("Qwen/Qwen3-ASR-0.6B"),
-        "qwen3_asr_17b": is_downloaded("Qwen/Qwen3-ASR-1.7B"),
-        "qwen3_aligner_06b": is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B"),
-        "pyannote_community1": is_downloaded("pyannote/speaker-diarization-community-1"),
-    }
-
-
-def _check_runtime_ready() -> bool:
-    """重依赖（mlx-qwen3-asr 链）是否装好。装好 = 可以上传任务跑转录。"""
-    import importlib.util
-    return importlib.util.find_spec("mlx_qwen3_asr") is not None
-
-
-_INSTALL_LOG_PATH = Path.home() / "Library" / "Logs" / "WhisperQwen" / "install.log"
-
-
-def _read_install_progress() -> dict:
-    """解析 install.log，给前端展示后台 pip 进度。
-
-    返回字段:
-      ready: bool — runtime 已就绪（重依赖装完）
-      running: bool — install.log 还在被更新（最近 60 秒有新内容）
-      installed: int — 已 "Successfully installed" 的批次
-      currently: str — 当前 collecting / downloading 的包名（最近一行抽出）
-      tail: list[str] — 日志最后若干行，前端可直接展示
-      log_path: str
-    """
-    ready = _check_runtime_ready()
-    info: Dict[str, Any] = {
-        "ready": ready,
-        "running": False,
-        "installed": 0,
-        "currently": "",
-        "tail": [],
-        "log_path": str(_INSTALL_LOG_PATH),
-    }
-    if not _INSTALL_LOG_PATH.exists():
-        return info
-
-    try:
-        stat = _INSTALL_LOG_PATH.stat()
-        info["running"] = (time.time() - stat.st_mtime) < 60 and not ready
-        with _INSTALL_LOG_PATH.open("rb") as fp:
-            try:
-                fp.seek(-8192, os.SEEK_END)
-            except OSError:
-                fp.seek(0)
-            data = fp.read().decode("utf-8", errors="replace")
-    except OSError:
-        return info
-
-    lines = [ln for ln in data.splitlines() if ln.strip()]
-    info["tail"] = lines[-12:]
-    info["installed"] = sum(1 for ln in lines if ln.startswith("Successfully installed"))
-    for ln in reversed(lines):
-        if ln.startswith("Collecting ") or ln.startswith("Downloading ") or ln.startswith("  Downloading "):
-            # 抽出包名/文件名
-            token = ln.strip().split(" ", 2)
-            info["currently"] = token[1] if len(token) > 1 else ln.strip()
-            break
-    return info
-
-
-def _unique_path(target: Path) -> Path:
-    if not target.exists():
-        return target
-    stem, suffix = target.stem, target.suffix
-    n = 1
-    while True:
-        candidate = target.with_name(f"{stem}-{n}{suffix}")
-        if not candidate.exists():
-            return candidate
-        n += 1
-
-
-def _probe_duration(path: Path) -> Optional[float]:
-    if not shutil.which("ffprobe"):
-        return None
-    try:
-        completed = subprocess.run(
-            [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                str(path),
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if completed.returncode != 0:
-            return None
-        return float(completed.stdout.strip())
-    except Exception:
-        return None

@@ -1,5 +1,11 @@
 # 8 小时开发计划：WhisperQwen 桌面 UI
 
+> **⚠ 历史文档（2026-05-18 编写）。** 本文用的模块名（`pipeline.py`、
+> `web_models.py`、`LocalTranscriptionPipeline` 等）反映的是初版重写时的
+> 状态。2026-05-19 cleanup pass 之后，许多模块已经改名/拆分/删除。
+> **当前项目结构、数据流、抽象边界以 [/ARCHITECTURE.md](../ARCHITECTURE.md)
+> 为准。** 本文保留作历史记录。
+
 读这份计划前先读 [/CLAUDE.md](../CLAUDE.md) 和 [frontend-spec.md](frontend-spec.md)。本计划是把这两份文档落地为可运行产品的工程方案，所有"待 review"决策已在此锁定。
 
 ## 进度

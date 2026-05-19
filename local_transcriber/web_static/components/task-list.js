@@ -172,6 +172,10 @@ export const TaskList = {
     isRunning(t) { return t.status === "running"; },
     isFailed(t) { return t.status === "failed"; },
     isQueued(t) { return t.status === "queued"; },
+    hasPartialTranscript(t) {
+      const segs = (t.transcript && t.transcript.segments) || [];
+      return Boolean(t.transcript && t.transcript.partial && segs.length > 0);
+    },
     progressPercent(t) {
       const p = Math.min(1, Math.max(0, t.progress || 0));
       return Math.round(p * 100);
@@ -254,6 +258,9 @@ export const TaskList = {
               <span v-if="isQueued(task)">{{ queuePosition(task) }}</span>
               <template v-else-if="isRunning(task)">
                 <span>{{ task.progressStage || task.fileName }} · {{ progressPercent(task) }}%</span>
+                <span v-if="hasPartialTranscript(task)" class="chip chip-partial-ready" style="margin-left:6px" :title="t('list.partialReadyHint')">
+                  <lucide-icon name="file-text" :size="11" /> {{ t('list.partialReady') }}
+                </span>
                 <span class="muted" style="margin-left:6px">{{ elapsedText(task) }}<span v-if="etaText(task)"> · {{ etaText(task) }}</span></span>
               </template>
               <span v-else-if="isDone(task)">{{ completionStat(task) }}</span>

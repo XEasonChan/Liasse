@@ -52,8 +52,6 @@ class TranscriptionJob:
     diarization_num_speakers: Optional[int] = None
     pyannote_model: str = "pyannote/speaker-diarization-community-1"
     hf_token: Optional[str] = None
-    summary_enabled: bool = False
-    summary_model: str = "qwen3:8b"
     export_srt: bool = True
 
 

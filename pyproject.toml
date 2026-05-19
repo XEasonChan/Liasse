@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qwensper"
+version = "0.2.0"
+description = "本地访谈转录桌面应用 — Qwen3-ASR + pyannote/LLM diarization + 本地 LLM 摘要 + RAG 问答。完全离线，IRB 合规。"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = {file = "LICENSE"}
+authors = [
+    {name = "XEason Chan", email = "xe@example.com"},
+]
+keywords = ["asr", "transcription", "interview", "qwen", "mlx", "local-llm", "rag"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: MacOS X",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Chinese (Simplified)",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# Bootstrap 依赖：装完就能起 launch_app.py 让用户看到 UI。
+# 这一组刻意不引 mlx / torch / pyannote 这些大包；它们在 [project.optional-dependencies]
+# 的 [asr] extra 里。完整安装：pip install qwensper[asr,dev]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pywebview",
+    "python-multipart",
+    "python-dotenv",
+    "httpx",
+    "sqlalchemy>=2.0",
+    "pydantic>=2.0",
+    "psutil>=5.9",
+    "jieba>=0.42",
+]
+
+[project.optional-dependencies]
+# 完整 ASR + diarization runtime（大包：mlx, torch, pyannote.audio）。
+# 用户 onboarding 时 launcher.sh 会触发 `pip install qwensper[asr]` 异步装。
+asr = [
+    "mlx-qwen3-asr[diarize,serve]",
+]
+# 开发依赖
+dev = [
+    "pytest",
+    "httpx",  # FastAPI TestClient
+]
+
+[project.urls]
+Homepage = "https://github.com/XEasonChan/Qwensper"
+Issues = "https://github.com/XEasonChan/Qwensper/issues"
+
+[project.scripts]
+# CLI 入口（批处理转录，不开 UI）
+qwensper-cli = "local_transcriber.cli:main"
+
+[project.gui-scripts]
+# GUI 入口（pywebview 桌面窗口 + FastAPI 后端）
+qwensper = "launch_app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["local_transcriber*"]
+exclude = ["tests*", "scripts*", "packaging*", "outputs*", "reference*", "docs*"]
+
+[tool.setuptools.package-data]
+local_transcriber = [
+    "web_static/*.html",
+    "web_static/*.css",
+    "web_static/*.js",
+    "web_static/components/*.js",
+    "web_static/locales/*.js",
+    "web_static/assets/*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --tb=short"
+# 屏蔽已知第三方 DeprecationWarning，让 CI 输出干净。
+filterwarnings = [
+    "ignore::DeprecationWarning:datetime",
+    "ignore::DeprecationWarning:jieba",
+    "ignore::UserWarning:jieba",
+]

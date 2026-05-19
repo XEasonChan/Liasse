@@ -27,7 +27,7 @@ if _env_file.exists():
                 os.environ.setdefault(_k.strip(), _v.strip())
 
 from local_transcriber.models import TranscriptionJob
-from local_transcriber.pipeline import LocalTranscriptionPipeline
+from local_transcriber.transcribe_pipeline import TranscribePipeline
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -96,7 +96,7 @@ def main() -> int:
         diarization_num_speakers=args.num_speakers,
         export_srt=not args.no_srt,
     )
-    result = LocalTranscriptionPipeline(on_progress=progress).run(job)
+    result = TranscribePipeline(on_progress=progress).run(job)
     elapsed = time.perf_counter() - started_at
     metrics_path = write_metrics(
         result.output_dir,

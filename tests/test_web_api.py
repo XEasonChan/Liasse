@@ -462,7 +462,7 @@ def test_health_returns_blockers_field(client):
 
 
 def test_chat_endpoint_uses_qa_engine(client, monkeypatch):
-    """/chat 路由必须经过 QAEngine.answer；不应再调用 chat.generate_digest。"""
+    """/chat 路由必须经过 QAEngine.answer（chat.py 已删除）。"""
     from local_transcriber.db import session_scope, TaskRow
 
     task = _upload_fake_audio(client, "chat-target.wav")
@@ -492,13 +492,14 @@ def test_chat_endpoint_uses_qa_engine(client, monkeypatch):
 
     monkeypatch.setattr(qa_engine_module, "QAEngine", _SpyEngine)
 
-    from local_transcriber import chat as chat_module
-
-    def _fail_digest(*a, **kw):
-        calls["digest"] += 1
-        raise AssertionError("不应再调用 generate_digest")
-
-    monkeypatch.setattr(chat_module, "generate_digest", _fail_digest, raising=False)
+    # chat.py 已删除；以前的 generate_digest spy 不再需要——模块本身不存在
+    # 就是最强的「不可能调用」保证。验证一下 import 失败：
+    import importlib
+    try:
+        importlib.import_module("local_transcriber.chat")
+        raise AssertionError("local_transcriber.chat 应该已被删除")
+    except ModuleNotFoundError:
+        pass
 
     resp = client.post(f"/api/tasks/{task['id']}/chat", json={"message": "教育公平"})
     assert resp.status_code == 200, resp.text
