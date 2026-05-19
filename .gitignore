@@ -1,0 +1,44 @@
+# Local secrets / machine state
+.env
+.DS_Store
+.claude/
+AGENTS.md
+CLAUDE.md
+
+# Python environments and caches
+venv/
+.venv/
+.venv-mlx/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+*.egg-info/
+
+# Generated runtime output
+outputs/
+models/
+build/
+dist/
+*.db
+*.sqlite
+*.sqlite3
+*.log
+
+# Local evaluation media. Do not commit interview recordings.
+test_audio/
+*.mp3
+*.wav
+*.m4a
+*.flac
+*.aac
+*.ogg
+*.wma
+*.mp4
+
+# Historical local vendor snapshot; PyPI packages are used instead.
+vendor/
+
+# Local agent planning notes.
+docs/superpowers/
