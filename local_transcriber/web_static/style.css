@@ -725,17 +725,21 @@ input, select, textarea { font-family: inherit; }
   to   { background-position: 40px 0; }
 }
 .progress-fill.is-running {
-  background-image: linear-gradient(
-    45deg,
-    rgba(255,255,255,.18) 25%,
-    transparent 25%,
-    transparent 50%,
-    rgba(255,255,255,.18) 50%,
-    rgba(255,255,255,.18) 75%,
-    transparent 75%,
-    transparent
-  );
-  background-size: 40px 40px;
+  /* 两层 background：底层紫色 gradient（保留主色调），上层白色斜条纹做动画 */
+  background-image:
+    linear-gradient(
+      45deg,
+      rgba(255,255,255,.22) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255,255,255,.22) 50%,
+      rgba(255,255,255,.22) 75%,
+      transparent 75%,
+      transparent
+    ),
+    linear-gradient(90deg, #5b5cf6, #7c6fff);
+  background-size: 40px 40px, 100% 100%;
+  background-repeat: repeat, no-repeat;
   animation: progress-stripe 1.2s linear infinite;
 }
 .progress-fill.is-failed { background: var(--danger); }

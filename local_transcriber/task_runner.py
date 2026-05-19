@@ -48,6 +48,31 @@ def _release_no_sleep(holder: Optional[subprocess.Popen]) -> None:
             holder.kill()
 
 
+def _accelerate_pyannote_on_mps() -> None:
+    """把 pyannote diarization 从 CPU 迁到 Metal/MPS。
+
+    mlx-qwen3-asr 加载 pyannote.Pipeline 之后从不调 .to(device)，所以 3h50m
+    音频跑一次 diarization 在 CPU 上要 10-15 分钟。我们利用它的内部 cache
+    (`_PYANNOTE_PIPELINE_CACHE`) 提前 load 一次再 .to("mps")，让后续从 cache
+    取到的 pipeline 已经在 MPS 上，通常 3-5 倍加速。
+
+    任何失败都静默退化到 CPU 兜底。
+    """
+    try:
+        import torch
+
+        if not (hasattr(torch.backends, "mps") and torch.backends.mps.is_available()):
+            return
+        # 让 MPS 没实现的少数算子自动 fallback 到 CPU，避免硬崩
+        os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+        from mlx_qwen3_asr import diarization as _diar
+
+        pipeline = _diar._load_pyannote_pipeline()
+        pipeline.to(torch.device("mps"))
+    except Exception as exc:
+        print(f"[worker] pyannote MPS 加速失败，CPU 兜底: {exc}")
+
+
 def _load_env() -> None:
     env_file = ROOT / ".env"
     if not env_file.exists():
@@ -79,6 +104,10 @@ def _worker_entry(
         # unload_model 内部已经吞掉所有网络错误，Ollama 没跑也无所谓。
         for _stale_model in ("qwen3:4b", "qwen3:8b"):
             unload_model(_stale_model)
+
+        # 启用 diarization 时，把 pyannote 迁到 Metal/MPS（3-5x 加速）。
+        if bool(job_payload.get("config", {}).get("diarize")):
+            _accelerate_pyannote_on_mps()
 
         config = job_payload["config"]
         task_id = job_payload["id"]
