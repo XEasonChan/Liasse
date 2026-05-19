@@ -612,7 +612,6 @@ class TaskRunner:
             session.commit()
 
     def _finalize(self, task_id: str, msg: Dict[str, Any], elapsed_sec: float) -> None:
-        prewarm_chat = False
         with session_scope() as session:
             row = session.get(TaskRow, task_id)
             if row is None:
@@ -649,7 +648,6 @@ class TaskRunner:
                     edits.setdefault("segmentOverrides", {})
                     row.edits = edits
                 row.summary_text = msg.get("summaryText")
-                prewarm_chat = bool((row.config or {}).get("enableChat"))
             elif kind == "stopped":
                 if row.status != "stopped":
                     row.status = "stopped"
@@ -661,35 +659,3 @@ class TaskRunner:
                 tb = msg.get("traceback") or ""
                 row.error_message = f"{err}\n\n{tb}" if tb else err
             session.commit()
-
-        if prewarm_chat:
-            threading.Thread(target=self._prewarm_digest, args=(task_id,), daemon=True).start()
-
-    def _prewarm_digest(self, task_id: str) -> None:
-        try:
-            from . import chat as chat_module
-
-            with session_scope() as session:
-                row = session.get(TaskRow, task_id)
-                if row is None or row.chat_context_digest:
-                    return
-                segments = (row.transcript or {}).get("segments", []) if row.transcript else []
-                if not segments:
-                    return
-                edits = row.edits or {}
-                transcript_text = chat_module.segments_to_text(
-                    segments,
-                    speaker_labels=edits.get("speakerLabels") or {},
-                    overrides=edits.get("segmentOverrides") or {},
-                )
-                model = (row.config or {}).get("summaryModel") or "qwen3:4b"
-
-            digest = chat_module.generate_digest(transcript_text, model=model)
-
-            with session_scope() as session:
-                row = session.get(TaskRow, task_id)
-                if row is not None and not row.chat_context_digest:
-                    row.chat_context_digest = digest
-                    session.commit()
-        except Exception as exc:
-            print(f"[task_runner] 预热 digest 失败 task={task_id}: {exc}")
