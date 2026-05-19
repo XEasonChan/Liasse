@@ -282,4 +282,16 @@ export const zh = {
     Spanish: "西班牙语",
     auto: "自动",
   },
+  dialog: {
+    ok: "好",
+    confirm: "确定",
+    cancel: "取消",
+    rename: "重命名",
+    renameSpeakerTitle: '重命名「{current}」',
+    renameSpeakerSubtitle: "整个逐字稿里这个发言人都会显示新名字。",
+    renamePlaceholder: "新名字…",
+    renameEmpty: "名字不能为空",
+    saveSegmentFailedTitle: "保存失败",
+    renameSpeakerFailedTitle: "重命名失败",
+  },
 };

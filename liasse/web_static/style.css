@@ -422,6 +422,20 @@ input, select, textarea { font-family: inherit; }
 .upload-zone.is-busy .spinner { width: 32px; height: 32px; border-width: 3px; }
 
 /* ---------- buttons ---------- */
+/* ============ Button family — System D · Cobalt & Lavender ============
+   层级 (按视觉权重)：
+     .btn-primary    主操作（cobalt 实心）     — 1 个/视图
+     .btn            次操作（默认 secondary）    — 多个
+     .btn-destructive 破坏性操作（oxblood 实心） — 删除/不可逆
+     .btn-ghost       第三层（无边框文字按钮）
+     .btn-danger      第三层 + 危险色（删除按钮的轻量版）
+   尺寸:
+     .btn-sm  32px (table row inline)
+     .btn     38px (默认)
+     .btn-lg  44px (dialog primary, hero CTA)
+   形状:
+     .btn-icon  正方形仅图标
+*/
 .btn {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 0 16px; height: 38px;
@@ -431,10 +445,16 @@ input, select, textarea { font-family: inherit; }
   color: var(--text-primary);
   font-size: var(--font-small);
   font-weight: 500;
-  transition: background .12s, border-color .12s;
+  font-family: inherit;
+  transition: background .12s, border-color .12s, box-shadow .12s;
+  cursor: pointer;
 }
 .btn:hover { background: var(--bg-surface-hover); border-color: var(--border-strong); }
-/* Primary button — sans, functional. Cobalt is the brand color, not italic serif. */
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--cobalt-soft);
+  border-color: var(--cobalt);
+}
 .btn-primary {
   background: var(--cobalt);
   color: var(--text-inverse);
@@ -442,13 +462,27 @@ input, select, textarea { font-family: inherit; }
   font-weight: 500;
 }
 .btn-primary:hover { background: var(--cobalt-hover); border-color: var(--cobalt-hover); }
+.btn-primary:focus-visible {
+  box-shadow: 0 0 0 3px var(--cobalt-soft), 0 0 0 1px var(--paper-2) inset;
+}
+.btn-destructive {
+  background: var(--danger);
+  color: var(--text-inverse);
+  border-color: var(--danger);
+}
+.btn-destructive:hover { background: #5d2020; border-color: #5d2020; }
+.btn-destructive:focus-visible {
+  box-shadow: 0 0 0 3px var(--danger-soft), 0 0 0 1px var(--paper-2) inset;
+}
 .btn-ghost { background: transparent; border-color: transparent; color: var(--text-secondary); }
 .btn-ghost:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
 .btn-danger { color: var(--danger); border-color: transparent; background: transparent; }
 .btn-danger:hover { background: var(--danger-soft); }
 .btn-sm { height: 32px; padding: 0 12px; font-size: var(--font-micro); border-radius: 8px; }
+.btn-lg { height: 44px; padding: 0 22px; font-size: var(--font-base); border-radius: 12px; }
 .btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: 8px; }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:disabled,
+.btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
 
 /* ---------- config row ---------- */
 .config-row {

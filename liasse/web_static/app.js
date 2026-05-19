@@ -7,6 +7,7 @@ import { ModelRequiredModal } from "./components/model-required-modal.js";
 import { LucideIcon } from "./components/icons.js";
 import { StatusBar } from "./components/statusbar.js";
 import { ToastStack, toast } from "./components/toast.js";
+import { DialogHost } from "./components/dialog.js";
 import { t } from "./i18n.js";
 
 const { createApp, ref, reactive, computed, onMounted, onBeforeUnmount, watch } = window.Vue;
@@ -74,7 +75,7 @@ const App = {
   components: {
     Sidebar, UploadZone, TaskList, TaskDetail, SettingsPage,
     ErrorModal, ConfirmDeleteModal, ModelRequiredModal,
-    StatusBar, ToastStack, LucideIcon,
+    StatusBar, ToastStack, DialogHost, LucideIcon,
   },
   setup() {
     const route = ref(parseHash());
@@ -351,6 +352,7 @@ const App = {
     </main>
 
     <toast-stack />
+    <dialog-host />
 
     <error-modal v-if="errorModalFor" :task="errorModalFor" @close="errorModalFor = null" />
     <confirm-delete-modal v-if="deleteModalFor" :task="deleteModalFor" @close="deleteModalFor = null" @confirm="confirmDelete" />

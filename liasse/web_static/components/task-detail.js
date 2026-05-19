@@ -1,5 +1,6 @@
 import { LucideIcon } from "./icons.js";
 import { ChatPanel } from "./chat-panel.js";
+import { dialog } from "./dialog.js";
 import { t, i18n, fmtDurI18n } from "../i18n.js";
 
 export const TaskDetail = {
@@ -154,19 +155,32 @@ export const TaskDetail = {
     langLabel(l) { return t(`audioLang.${l}`) || l; },
     async renameSpeaker(spk) {
       const current = this.speakerLabel(spk);
-      const next = window.prompt(`Rename "${current}":`, current);
-      if (next == null || next.trim() === "" || next === current) return;
+      const next = await dialog.prompt({
+        title: t("dialog.renameSpeakerTitle", { current }),
+        subtitle: t("dialog.renameSpeakerSubtitle"),
+        defaultValue: current,
+        placeholder: t("dialog.renamePlaceholder"),
+        confirmLabel: t("dialog.rename"),
+        validator: (v) => (v == null || v.trim() === "") ? t("dialog.renameEmpty") : null,
+      });
+      if (next == null) return;                  // 用户点了取消
+      const trimmed = next.trim();
+      if (trimmed === current) return;           // 没改名
       try {
         const resp = await fetch(`/api/tasks/${this.taskId}/edits/speaker`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ speakerId: spk, label: next.trim() }),
+          body: JSON.stringify({ speakerId: spk, label: trimmed }),
         });
         if (!resp.ok) throw new Error(await resp.text());
         const data = await resp.json();
         this.task.edits = data.edits;
       } catch (err) {
-        alert(err.message || err);
+        await dialog.alert({
+          title: t("dialog.renameSpeakerFailedTitle"),
+          body: err.message || String(err),
+          tone: "danger",
+        });
       }
     },
     async saveSegmentEdit(seg, ev) {
@@ -183,7 +197,11 @@ export const TaskDetail = {
         const data = await resp.json();
         this.task.edits = data.edits;
       } catch (err) {
-        alert(t("modal.saveFailed", { msg: err.message || err }));
+        await dialog.alert({
+          title: t("dialog.saveSegmentFailedTitle"),
+          body: err.message || String(err),
+          tone: "danger",
+        });
       } finally {
         this.saving = false;
       }

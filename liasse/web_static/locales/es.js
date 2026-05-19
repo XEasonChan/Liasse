@@ -282,4 +282,16 @@ export const es = {
     Spanish: "Español",
     auto: "Automático",
   },
+  dialog: {
+    ok: "OK",
+    confirm: "Confirmar",
+    cancel: "Cancelar",
+    rename: "Renombrar",
+    renameSpeakerTitle: 'Renombrar «{current}»',
+    renameSpeakerSubtitle: "El nuevo nombre aparecerá para este hablante en toda la transcripción.",
+    renamePlaceholder: "Nuevo nombre…",
+    renameEmpty: "El nombre no puede estar vacío",
+    saveSegmentFailedTitle: "Falló al guardar",
+    renameSpeakerFailedTitle: "Falló al renombrar",
+  },
 };

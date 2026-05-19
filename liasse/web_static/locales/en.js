@@ -282,4 +282,16 @@ export const en = {
     Spanish: "Spanish",
     auto: "Auto",
   },
+  dialog: {
+    ok: "OK",
+    confirm: "Confirm",
+    cancel: "Cancel",
+    rename: "Rename",
+    renameSpeakerTitle: 'Rename "{current}"',
+    renameSpeakerSubtitle: "The new name will appear for this speaker throughout the transcript.",
+    renamePlaceholder: "New name…",
+    renameEmpty: "Name can't be empty",
+    saveSegmentFailedTitle: "Save failed",
+    renameSpeakerFailedTitle: "Rename failed",
+  },
 };
