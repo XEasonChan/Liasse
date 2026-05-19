@@ -181,6 +181,18 @@ def create_app() -> FastAPI:
         skipped: List[Dict[str, str]] = []
         cfg = payload.config
 
+        # 去重：同一 audio_path 已有「未失败也未停止」的任务时跳过
+        # （queued / running / done）。失败 / 停止状态可以重传重跑。
+        # 用户截图里同一个 cut-2min-mid.m4a 出现两条已完成 = 这条 bug。
+        existing_active = {
+            row.audio_path
+            for row in db.execute(
+                select(TaskRow).where(
+                    TaskRow.status.in_(("queued", "running", "done"))
+                )
+            ).scalars()
+        }
+
         for raw_path in payload.paths:
             try:
                 path = Path(raw_path).expanduser().resolve()
@@ -190,6 +202,15 @@ def create_app() -> FastAPI:
             if not path.exists() or not path.is_file():
                 skipped.append({"path": raw_path, "reason": "文件不存在"})
                 continue
+
+            resolved_str = str(path)
+            if resolved_str in existing_active:
+                skipped.append({
+                    "path": raw_path,
+                    "reason": "该文件已有任务（删除旧任务后可重新上传）",
+                })
+                continue
+
             try:
                 size = path.stat().st_size
             except OSError as exc:
@@ -198,7 +219,7 @@ def create_app() -> FastAPI:
 
             duration = probe_audio_duration(path)
             task = TaskRow(
-                audio_path=str(path),
+                audio_path=resolved_str,
                 file_name=path.name,
                 file_size_bytes=size,
                 duration_sec=duration,
@@ -210,6 +231,8 @@ def create_app() -> FastAPI:
             db.add(task)
             db.flush()
             created.append(task.to_api())
+            # 防止同一请求里多个同路径文件
+            existing_active.add(resolved_str)
 
         db.commit()
         return {"tasks": created, "skipped": skipped}
@@ -245,6 +268,16 @@ def create_app() -> FastAPI:
                 if out_path.exists() and OUTPUTS_DIR in out_path.resolve().parents:
                     shutil.rmtree(out_path, ignore_errors=True)
                     deleted = True
+        # multipart 上传时把文件复制到 outputs/uploaded_audio/，长期累积膨胀。
+        # delete_outputs=true 时同步清掉。is_relative_to 检查保护原生路径模式下的原始音频。
+        if delete_outputs and task.audio_path:
+            try:
+                audio_path = Path(task.audio_path).resolve()
+                upload_dir = (OUTPUTS_DIR / "uploaded_audio").resolve()
+                if audio_path.is_relative_to(upload_dir) and audio_path.exists():
+                    audio_path.unlink()
+            except (OSError, ValueError):
+                pass
         db.delete(task)
         db.commit()
         return DeleteResponse(ok=True, deletedOutputs=deleted)

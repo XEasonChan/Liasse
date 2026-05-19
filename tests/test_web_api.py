@@ -20,7 +20,7 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setenv("WHISPERQWEN_DISABLE_RUNNER", "1")
 
     import importlib
-    from local_transcriber import web_app as web_app_module
+    from liasse import web_app as web_app_module
 
     importlib.reload(web_app_module)
     fastapi_app = web_app_module.create_app()
@@ -124,7 +124,7 @@ def test_clear_completed(client):
     t1 = _upload_fake_audio(client, "f.wav")
     t2 = _upload_fake_audio(client, "g.wav")
 
-    from local_transcriber.db import TaskRow, session_scope
+    from liasse.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, t1["id"])
@@ -173,10 +173,11 @@ def test_create_from_paths_creates_tasks(client, tmp_path):
 
 
 def test_create_from_paths_persists_three_speaker_modes(client, tmp_path):
-    audio = tmp_path / "mode.wav"
-    audio.write_bytes(b"data")
-
+    # 每个 mode 用独立 audio 文件：create-from-paths 现在对同一 audio_path
+    # 有「未失败/停止」的活跃任务时会跳过（去重）。测试只关心 speakerMode 持久化。
     for mode in ("fast", "llm", "pyannote"):
+        audio = tmp_path / f"mode-{mode}.wav"
+        audio.write_bytes(b"data")
         payload = {
             "paths": [str(audio)],
             "config": {
@@ -191,6 +192,60 @@ def test_create_from_paths_persists_three_speaker_modes(client, tmp_path):
         task = resp.json()["tasks"][0]
         assert task["config"]["speakerMode"] == mode
         assert task["config"]["diarize"] is (mode == "pyannote")
+
+
+def test_create_from_paths_dedups_active_audio_path(client, tmp_path):
+    """同一路径上传第二次：第一次创建，第二次 skipped。回归：用户截图里
+    同一个 cut-2min-mid.m4a 出现 2 条任务。"""
+    audio = tmp_path / "dup.wav"
+    audio.write_bytes(b"data")
+    payload = {
+        "paths": [str(audio)],
+        "config": {"asrModel": "Qwen/Qwen3-ASR-0.6B", "language": "Chinese"},
+    }
+    first = client.post("/api/tasks/create-from-paths", json=payload).json()
+    assert len(first["tasks"]) == 1 and not first["skipped"]
+
+    second = client.post("/api/tasks/create-from-paths", json=payload).json()
+    assert second["tasks"] == []
+    assert len(second["skipped"]) == 1
+    assert "已有任务" in second["skipped"][0]["reason"]
+
+
+def test_create_from_paths_dedups_within_single_request(client, tmp_path):
+    """同一请求里塞 2 个相同 path：只创建 1 个，另一个 skipped。"""
+    audio = tmp_path / "same.wav"
+    audio.write_bytes(b"data")
+    payload = {
+        "paths": [str(audio), str(audio)],
+        "config": {"asrModel": "Qwen/Qwen3-ASR-0.6B", "language": "Chinese"},
+    }
+    resp = client.post("/api/tasks/create-from-paths", json=payload).json()
+    assert len(resp["tasks"]) == 1
+    assert len(resp["skipped"]) == 1
+
+
+def test_create_from_paths_allows_repeat_after_deletion(client, tmp_path):
+    """删掉旧任务后，同路径应能重新上传。"""
+    from liasse.db import TaskRow, session_scope
+
+    audio = tmp_path / "again.wav"
+    audio.write_bytes(b"data")
+    payload = {
+        "paths": [str(audio)],
+        "config": {"asrModel": "Qwen/Qwen3-ASR-0.6B", "language": "Chinese"},
+    }
+    first = client.post("/api/tasks/create-from-paths", json=payload).json()
+    tid = first["tasks"][0]["id"]
+
+    with session_scope() as s:
+        row = s.get(TaskRow, tid)
+        s.delete(row)
+        s.commit()
+
+    second = client.post("/api/tasks/create-from-paths", json=payload).json()
+    assert len(second["tasks"]) == 1
+    assert second["skipped"] == []
 
 
 def test_create_from_paths_skips_missing(client, tmp_path):
@@ -237,7 +292,7 @@ def test_open_path_accepts_outputs_subdir(client, monkeypatch):
         return _R()
 
     monkeypatch.setattr(subprocess, "run", fake_run)
-    from local_transcriber import web_app as wa
+    from liasse import web_app as wa
 
     outputs = wa.OUTPUTS_DIR
     outputs.mkdir(parents=True, exist_ok=True)
@@ -258,7 +313,7 @@ def test_retry_failed_task_requeues(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.db import TaskRow, session_scope
+    from liasse.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, task["id"])
@@ -289,7 +344,7 @@ def test_retry_running_task_rejected(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.db import TaskRow, session_scope
+    from liasse.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, task["id"])
@@ -309,7 +364,7 @@ def test_retry_missing_audio_rejected(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.db import TaskRow, session_scope
+    from liasse.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, task["id"])
@@ -330,8 +385,8 @@ def test_cleanup_orphans_marks_running_as_stopped(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.db import TaskRow, session_scope
-    from local_transcriber.task_runner import TaskRunner
+    from liasse.db import TaskRow, session_scope
+    from liasse.task_runner import TaskRunner
     import os
 
     with session_scope() as s:
@@ -359,8 +414,8 @@ def test_task_runner_persists_partial_transcript(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.db import TaskRow, session_scope
-    from local_transcriber.task_runner import TaskRunner
+    from liasse.db import TaskRow, session_scope
+    from liasse.task_runner import TaskRunner
     import os
 
     with session_scope() as s:
@@ -408,8 +463,8 @@ def test_task_runner_finalize_persists_speaker_mode_warnings_and_suggested_label
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.db import TaskRow, session_scope
-    from local_transcriber.task_runner import TaskRunner
+    from liasse.db import TaskRow, session_scope
+    from liasse.task_runner import TaskRunner
     import os
 
     with session_scope() as s:
@@ -463,7 +518,7 @@ def test_health_returns_blockers_field(client):
 
 def test_chat_endpoint_uses_qa_engine(client, monkeypatch):
     """/chat 路由必须经过 QAEngine.answer（chat.py 已删除）。"""
-    from local_transcriber.db import session_scope, TaskRow
+    from liasse.db import session_scope, TaskRow
 
     task = _upload_fake_audio(client, "chat-target.wav")
     with session_scope() as s:
@@ -481,7 +536,7 @@ def test_chat_endpoint_uses_qa_engine(client, monkeypatch):
 
     calls = {"answer": 0, "digest": 0}
 
-    from local_transcriber import qa_engine as qa_engine_module
+    from liasse import qa_engine as qa_engine_module
     real_engine_cls = qa_engine_module.QAEngine
 
     class _SpyEngine(real_engine_cls):
@@ -496,8 +551,8 @@ def test_chat_endpoint_uses_qa_engine(client, monkeypatch):
     # 就是最强的「不可能调用」保证。验证一下 import 失败：
     import importlib
     try:
-        importlib.import_module("local_transcriber.chat")
-        raise AssertionError("local_transcriber.chat 应该已被删除")
+        importlib.import_module("liasse.chat")
+        raise AssertionError("liasse.chat 应该已被删除")
     except ModuleNotFoundError:
         pass
 
@@ -512,7 +567,7 @@ def test_chat_endpoint_uses_qa_engine(client, monkeypatch):
 
 
 def test_chat_endpoint_rejects_empty_transcript(client):
-    from local_transcriber.db import session_scope, TaskRow
+    from liasse.db import session_scope, TaskRow
 
     task = _upload_fake_audio(client, "empty-chat.wav")
     with session_scope() as s:
@@ -523,3 +578,73 @@ def test_chat_endpoint_rejects_empty_transcript(client):
 
     resp = client.post(f"/api/tasks/{task['id']}/chat", json={"message": "你好"})
     assert resp.status_code == 400
+
+
+def test_delete_task_removes_uploaded_audio_copy(client, tmp_path, monkeypatch):
+    """delete_outputs=true 应同时清掉 outputs/uploaded_audio 下的上传副本，
+    而不只是 task.outputs 目录。原生路径模式（audio_path 不在 uploaded_audio
+    下）保护原始音频不被误删。"""
+    from liasse import web_app as wa
+
+    monkeypatch.setattr(wa, "OUTPUTS_DIR", tmp_path)
+    upload_dir = tmp_path / "uploaded_audio"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    fake_copy = upload_dir / "uploaded.m4a"
+    fake_copy.write_bytes(b"FAKE")
+
+    outside = tmp_path / "outside.m4a"
+    outside.write_bytes(b"REAL")
+
+    from liasse.db import TaskRow, session_scope
+
+    with session_scope() as s:
+        s.add(TaskRow(
+            id="t-upload",
+            audio_path=str(fake_copy),
+            file_name="uploaded.m4a",
+            status="done",
+            config={},
+        ))
+        s.add(TaskRow(
+            id="t-native",
+            audio_path=str(outside),
+            file_name="outside.m4a",
+            status="done",
+            config={},
+        ))
+        s.commit()
+
+    resp = client.delete("/api/tasks/t-upload?delete_outputs=true")
+    assert resp.status_code == 200
+    assert not fake_copy.exists(), "uploaded_audio 副本必须随 delete_outputs=true 一起清掉"
+
+    resp = client.delete("/api/tasks/t-native?delete_outputs=true")
+    assert resp.status_code == 200
+    assert outside.exists(), "原生路径模式下原始音频绝对不能被删"
+
+
+def test_delete_task_keeps_uploaded_when_delete_outputs_false(client, tmp_path, monkeypatch):
+    """delete_outputs=false（默认）只移除 DB 记录，副本和 outputs 都保留。"""
+    from liasse import web_app as wa
+
+    monkeypatch.setattr(wa, "OUTPUTS_DIR", tmp_path)
+    upload_dir = tmp_path / "uploaded_audio"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    fake_copy = upload_dir / "keep.m4a"
+    fake_copy.write_bytes(b"FAKE")
+
+    from liasse.db import TaskRow, session_scope
+
+    with session_scope() as s:
+        s.add(TaskRow(
+            id="t-keep",
+            audio_path=str(fake_copy),
+            file_name="keep.m4a",
+            status="done",
+            config={},
+        ))
+        s.commit()
+
+    resp = client.delete("/api/tasks/t-keep")
+    assert resp.status_code == 200
+    assert fake_copy.exists(), "delete_outputs=false 时副本必须保留"

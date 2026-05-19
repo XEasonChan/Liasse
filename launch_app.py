@@ -1,20 +1,35 @@
 from __future__ import annotations
 
+import os
 import socket
 import subprocess
 import threading
 import time
 from pathlib import Path
 
+# 必须在 import webview / uvicorn 之前清掉 proxy env，否则用户开了 Clash/SS
+# 等系统代理时，pywebview WKWebView 内 fetch 走 proxy 失败 → 前端弹
+# "Enqueue failed: Load failed"。
+# 我们的所有 fetch 都打 127.0.0.1:5173，永远不需要 proxy。
+for _proxy_var in (
+    "HTTP_PROXY", "http_proxy",
+    "HTTPS_PROXY", "https_proxy",
+    "ALL_PROXY", "all_proxy",
+):
+    os.environ.pop(_proxy_var, None)
+# 显式给一个 NO_PROXY 兜底，提示 NSURLSession bypass localhost
+os.environ.setdefault("NO_PROXY", "127.0.0.1,localhost,*.local")
+os.environ.setdefault("no_proxy", "127.0.0.1,localhost,*.local")
+
 import uvicorn
 import webview
 
-from local_transcriber.web_app import app
+from liasse.web_app import app
 
 
 HOST = "127.0.0.1"
 PORT = 5173
-APP_ICON_PATH = Path(__file__).resolve().parent / "local_transcriber" / "web_static" / "assets" / "app-icon.png"
+APP_ICON_PATH = Path(__file__).resolve().parent / "liasse" / "web_static" / "assets" / "app-icon.png"
 
 AUDIO_FILE_TYPES = (
     "音频文件 (*.mp3;*.wav;*.m4a;*.flac;*.aac;*.ogg;*.wma;*.mp4)",
