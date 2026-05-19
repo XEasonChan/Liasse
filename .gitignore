@@ -46,3 +46,8 @@ reference/
 
 # Local agent planning notes.
 docs/superpowers/
+
+# Benchmark samples + GT + intermediate outputs (big, gitignored)
+scripts/benchmark/samples/*.m4a
+scripts/benchmark/samples/*.wav
+scripts/benchmark/results/_pipeline_outputs/
