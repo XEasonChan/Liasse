@@ -69,19 +69,27 @@ mkdir -p "$APP_HF_HUB"
 bundle_model() {
   local repo_dir="$1"
   local label="$2"
+  local repo_id="$3"
   if [ -d "$HF_HUB/$repo_dir" ]; then
     echo "    ✓ 捆绑 $label"
     rsync -a "$HF_HUB/$repo_dir/" "$APP_HF_HUB/$repo_dir/"
   else
-    echo "    ! 跳过 $label (本机未下载 — 用户首次启动会被引导)"
+    echo ""
+    echo "ERROR: 本机没有 $label ($HF_HUB/$repo_dir)"
+    echo "       捆绑该模型是默认行为。先在本机下载它："
+    echo ""
+    echo "         venv/bin/python -c \"from huggingface_hub import snapshot_download; snapshot_download('$repo_id')\""
+    echo ""
+    echo "       或者设置 INCLUDE_ASR_06B=0 / INCLUDE_FORCED_ALIGNER=0 来主动跳过。"
+    exit 2
   fi
 }
 
 if [ "$INCLUDE_ASR_06B" = "1" ]; then
-  bundle_model "models--Qwen--Qwen3-ASR-0.6B" "Qwen3-ASR 0.6B"
+  bundle_model "models--Qwen--Qwen3-ASR-0.6B" "Qwen3-ASR 0.6B" "Qwen/Qwen3-ASR-0.6B"
 fi
 if [ "$INCLUDE_FORCED_ALIGNER" = "1" ]; then
-  bundle_model "models--Qwen--Qwen3-ForcedAligner-0.6B" "Qwen3 ForcedAligner 0.6B"
+  bundle_model "models--Qwen--Qwen3-ForcedAligner-0.6B" "Qwen3 ForcedAligner 0.6B" "Qwen/Qwen3-ForcedAligner-0.6B"
 fi
 
 # 不捆绑 pyannote（许可证要求用户单独同意） / 不捆绑 ollama 模型（不在 HF cache 里）
