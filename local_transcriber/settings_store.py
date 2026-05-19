@@ -7,12 +7,26 @@ from typing import Any, Dict
 
 
 ROOT = Path(__file__).resolve().parent.parent
-SETTINGS_PATH = Path(os.environ.get("WHISPERQWEN_SETTINGS", str(ROOT / "outputs" / "settings.json")))
+SETTINGS_PATH = Path(
+    os.environ.get("LIASSE_SETTINGS")
+    or os.environ.get("WHISPERQWEN_SETTINGS")  # legacy
+    or str(ROOT / "outputs" / "settings.json")
+)
+
+
+def _default_output_dir() -> str:
+    """Prefer ~/Documents/Liasse; fall back to legacy ~/Documents/WhisperQwen if it
+    exists and the new path does not (preserves users' historical output)."""
+    new_path = Path.home() / "Documents" / "Liasse"
+    legacy = Path.home() / "Documents" / "WhisperQwen"
+    if not new_path.exists() and legacy.exists() and any(legacy.iterdir()):
+        return str(legacy.resolve())
+    return str(new_path.resolve())
 
 
 def default_settings() -> Dict[str, Any]:
     return {
-        "outputDir": str((Path.home() / "Documents" / "WhisperQwen").resolve()),
+        "outputDir": _default_output_dir(),
         "fullyOffline": False,
         "defaultASRModel": "Qwen/Qwen3-ASR-0.6B",
         "defaultLanguage": "English",

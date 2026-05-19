@@ -8,7 +8,15 @@ from pathlib import Path
 from typing import Any, Dict
 
 
-_INSTALL_LOG_PATH = Path.home() / "Library" / "Logs" / "WhisperQwen" / "install.log"
+_NEW_LOG_PATH = Path.home() / "Library" / "Logs" / "Liasse" / "install.log"
+_LEGACY_LOG_PATH = Path.home() / "Library" / "Logs" / "WhisperQwen" / "install.log"
+# Prefer the legacy path only if it has content and the new one doesn't yet exist —
+# preserves any in-progress install log from before the rebrand.
+_INSTALL_LOG_PATH = (
+    _LEGACY_LOG_PATH
+    if (_LEGACY_LOG_PATH.exists() and not _NEW_LOG_PATH.exists())
+    else _NEW_LOG_PATH
+)
 
 
 def check_model_cache() -> Dict[str, bool]:

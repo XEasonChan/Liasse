@@ -2,68 +2,89 @@
 
 产品级 backlog，与 [docs/dev-plan.md](docs/dev-plan.md) 的 M1–M7 里程碑分开维护。完成某项后把 `- [ ]` 改成 `- [x]` 并注明日期。
 
+**优先级**：P0 = 影响日常可用 / 必须修；P1 = 主要新功能；P2 = 体验改善与基建。
+
+每项标记 → **[plan](docs/superpowers/plans/...)** 指向详细研发计划。所有 plan 写于 `docs/superpowers/plans/2026-05-19-*.md`。Roadmap：[docs/superpowers/plans/2026-05-19-roadmap.md](docs/superpowers/plans/2026-05-19-roadmap.md)。
+
 ---
 
 ## 已知 bug
 
-### Speaker alignment：长 ASR segment + 细粒度 pyannote turn 不匹配
-
-**现象**：`pyannote` 精细模式下，pyannote 正确识别出 2 个 speaker（36 + 16 turns），但
-`alignment.assign_speakers` 把所有 ASR segments 都套成了 SPEAKER_00。
-
-**根因**：ASR 给的 segments 通常 8-30 秒长，一段会跨越 5-10 个 pyannote 细 turn
-(0.3-5 秒/个)。`assign_speakers` 的算法是「找单个 overlap 最长的 turn」，因为
-SPEAKER_00 占总时长多，长 segment 跟它的最大单 turn 重叠总是赢。
-
-**修复方向**：改 `alignment.py` 算法，按时间总量加权而不是单 turn 最长：
-对每个 segment，遍历所有有 overlap 的 turn，按 speaker 累计 overlap 时长，
-选累计最长的那个 speaker。或者：把长 ASR segment 按 pyannote turn 边界**拆细**，
-再每小段独立分配 speaker（这条更优但要改 schema）。
-
-**测试**：用 2 分钟双人样本（test_audio/cut-2min-mid.m4a，pyannote 输出
-SPEAKER_00×36 + SPEAKER_01×16 turns）当 fixture，期望 alignment 后 segment
-里也出现两个 speaker。
+- [x] **Speaker alignment：长 ASR segment + 细粒度 pyannote turn 不匹配**（2026-05-19 已修，commit `alignment.py` 加权 overlap 算法 + `tests/test_alignment.py` 回归）
 
 ---
 
-## 功能
+## P0 — 修补类（合并为一个 plan）
 
-### 翻译 + 专业词库（Qwen3 4B）
+→ [plan-p0-housekeeping.md](docs/superpowers/plans/2026-05-19-plan-p0-housekeeping.md)
 
-- [ ] **逐字稿/总结双语导出**：在任务详情页增加「翻译」操作，支持中↔英（及后续扩展语言）；译文与原文分段对齐，可单独导出 Markdown / JSON。
+- [ ] **摘要 / 总结「重新生成」UI 入口**：当前总结写一次后无法重新触发；用户改了发言人名或大量编辑 segment 后总结对不上。详情页加按钮 → `POST /api/tasks/{id}/summary`（端点已存在）。
+- [ ] **删除任务时同步清理上传副本**：`web_app.py` DELETE 路由的 `delete_outputs=true` 只清 `task.outputs` 目录，遗漏 `outputs/uploaded_audio/<file>`，长期会膨胀。
+- [ ] **BM25 索引在用户编辑后自动失效重建**：现在 `qa_engine.build_index_for_task` 用当前 transcript 建索引，但编辑 segment 后旧索引仍 cached（如有 cache），下一次 chat 看到旧文。需在 `/edits/*` 路由里清缓存或加版本号。
+
+---
+
+## P1 — 翻译 + 专业词库（Qwen3 4B）
+
+→ [plan-p1a-translation-and-glossary.md](docs/superpowers/plans/2026-05-19-plan-p1a-translation-and-glossary.md)
+
+- [ ] **逐字稿/总结双语导出**：详情页加「翻译」操作；译文与原文 segment 对齐；可单独导出 Markdown / JSON。
 - [ ] **专业词库（Glossary）**：
-  - 设置页维护词库：词条（源语言）、首选译法、可选备注/领域标签。
-  - 支持项目级默认词库 + 单任务覆盖（例如某次法律访谈导入专用术语表）。
-  - 词库持久化到本地 JSON（如 `outputs/glossaries/`），完全离线，不上传。
-- [ ] **翻译引擎**：复用现有 Ollama 栈，默认模型 **`qwen3:4b`**（与总结 / digest 一致）；`ollama pull qwen3:4b` 已在 README 与 `/api/health` 检查中覆盖。
-  - 新建 `local_transcriber/translate.py`（或扩展现有 `chat.py`）：按 segment 或按 chunk 调用，prompt 中注入词库条目，要求专有名词严格遵循词库。
-  - 长逐字稿分块翻译，避免超出 4B 上下文；块边界尽量落在发言人段落之间。
-- [ ] **API / UI**：
-  - `POST /api/tasks/{id}/translate`（目标语言、是否使用词库 ID）
-  - 任务对象增加 `translations` 或独立侧车文件路径；详情页 Tab 或折叠区展示「原文 | 译文」。
-- [ ] **验收**：60 秒样本 + 含 5–10 条专业术语的词库 → 译文中术语一致；完全离线模式下仍可翻译（仅依赖本地 Ollama）。
-
-### 长音频（3–4 小时）
-
-- [ ] 在 `pipeline.py` 前增加显式 **pre-chunker**（参考 [docs/long-audio-chunking-research.md](docs/long-audio-chunking-research.md)），段级进度写入 SQLite，支持中断后续跑。
-- [ ] 任务列表展示「第 N/M 段」粗粒度 ETA。
-
-### 详情页增强（低优先级）
-
-- [ ] 可选：内嵌音频播放器（frontend-spec 曾标为 MVP 不做，按需 reopen）。
-- [ ] 时间线 Tab（发言人轨道可视化，D4 曾锁定不做）。
+  - 设置页 CRUD：词条（源语言 → 首选译法 + 可选备注/领域标签）
+  - 项目级默认词库 + 单任务覆盖
+  - 持久化 `outputs/glossaries/<name>.json`，完全离线
+- [ ] **翻译引擎 `local_transcriber/translate.py`**：默认 `qwen3:4b`；按 segment 分批调用 Ollama，prompt 注入词库要求严格遵循。
+- [ ] **API**：
+  - `GET / POST / PUT / DELETE /api/glossaries[/<name>]`
+  - `POST /api/tasks/{id}/translate`（body `{target, glossaryName?}`）
+- [ ] **测试**：60s 双语样本 + 含 5–10 条术语的词库 → 译文中术语一致；离线模式下仍可翻译。
+- [ ] **`pytest`**：CRUD 词库、mock Ollama、术语注入 prompt、TaskRow 持久化译文。
 
 ---
 
-## 工程 / 质量
+## P1 — 长音频 pre-chunker
 
-- [ ] 为翻译与词库 API 补充 `pytest`（CRUD 词库、mock Ollama 返回、术语是否出现在 prompt）。
-- [ ] 更新 README「已有能力」表与设置页模型说明（列出翻译依赖 `qwen3:4b`）。
+→ [plan-p1b-long-audio-prechunker.md](docs/superpowers/plans/2026-05-19-plan-p1b-long-audio-prechunker.md)
+
+- [ ] **音频预切分模块 `local_transcriber/audio_chunker.py`**：silero-vad cut + 25-30min merge；fallback 到 ffmpeg 等长 30min 切片。
+- [ ] **TaskRow 加 `chunks` 列**：段级状态 `queued | running | done | failed`，可恢复。
+- [ ] **改造 `transcribe_pipeline.py`**：超过 `preChunkerMinSeconds` 阈值时按段循环；进度按段加 `chunk_completed` 消息。
+- [ ] **任务列表 / 详情页 UI**：显示「第 X/N 段 · 段内 Y%」；retry 时只重跑未完成段。
+- [ ] **pyannote 跑完整音频后映射回 chunk**（保 speaker 全局一致）。
+- [ ] **测试**：silero / ffmpeg 切分单测；60s 短样不切；30min 样本切 1-2 段；resume 测试。
 
 ---
 
-## 明确不做（备忘）
+## P2 — 体验与基建
 
+→ [plan-p2-polish.md](docs/superpowers/plans/2026-05-19-plan-p2-polish.md)（下一轮细化）
+
+- [ ] **1.7B ASR 模型一键下载入口**：settings「模型管理」加 row + 调已有 `downloader.py` SSE，model-required-modal 复用。
+- [ ] **模型版本 health 自检**：`/api/health` 加 pyannote 4.x / mlx-qwen3-asr / qwen3:4b 版本字段；版本变化时提示用户。
+- [ ] **README「已有能力」表**：列出翻译能力、长音频段级恢复、词库；列出依赖模型清单（含 qwen3:4b）。
+- [ ] **设置页模型说明**：翻译依赖 `qwen3:4b`，长音频建议 silero-vad，pyannote 4.x speaker-diarization-community-1 等。
+- [ ] **「打开日志」按钮**：当前 alert，应该走 `POST /api/open-path` 真实打开 Finder/对应文件。
+- [ ] **详情页「批量改名/合并段」**：M5 遗留 — 当前只能逐段编辑文字，发言人改名仅在「逐字稿」头点开。
+
+---
+
+## P3 — 明确不做
+
+- 详情页内嵌音频播放器（D3 锁定）
+- 时间线 Tab（D4 锁定）
 - 云端翻译 API / 在线术语服务
-- npm 前端构建
+- npm 前端构建步骤
 - 实时录音转录
+- 用户账号 / 协作 / 服务器部署
+
+---
+
+## 完成度参考
+
+- ✅ 2026-05-18 — M1-M7 全部完成（首版重写）
+- ✅ 2026-05-18 — UX 改造（路径化上传 + 状态机 + 依赖弹窗 + 15 个 todo）
+- ✅ 2026-05-19 — visibility（heartbeat ETA）+ i18n 三语 + 中断恢复 + 模型评估
+- ✅ 2026-05-19 — cleanup pass（拆 routers/services、删 chat.py + summarizer.py 双轨、单元测试 126 passed）
+- ✅ 2026-05-19 — pyannote 与 ASR 并行（精确模式 ≈ ASR 时长）
+- ✅ 2026-05-19 — alignment bug 修复（加权 overlap）
+- ✅ 2026-05-19 — 上传区配置简化 + 主 CTA 放大（onboarding 动线）

@@ -1,4 +1,4 @@
-# 8 小时开发计划：WhisperQwen 桌面 UI
+# 8 小时开发计划：Liasse 桌面 UI
 
 > **⚠ 历史文档（2026-05-18 编写）。** 本文用的模块名（`pipeline.py`、
 > `web_models.py`、`LocalTranscriptionPipeline` 等）反映的是初版重写时的
@@ -10,7 +10,7 @@
 
 ## 进度
 
-- ✅ **M1 已完成（2026-05-18，pre-flight 跑通）** — 产物：`launch_app.py`、`local_transcriber/web_app.py`、`Start WhisperQwen.command`，pywebview 已装。健康检查全绿，窗口能开。**Agent 从 M2 开始。**
+- ✅ **M1 已完成（2026-05-18，pre-flight 跑通）** — 产物：`launch_app.py`、`local_transcriber/web_app.py`、`Start Liasse.command`，pywebview 已装。健康检查全绿，窗口能开。**Agent 从 M2 开始。**
 
 ## 已锁定决策（来自 frontend-spec.md D1-D8）
 
@@ -87,7 +87,7 @@ local_transcriber/
     └── icons/              ← Inline SVG，从 lucide.dev 选
 
 launch_app.py               ← 项目根，pywebview 入口
-Start WhisperQwen.command   ← 双击启动，会启动 ollama 必要时
+Start Liasse.command   ← 双击启动，会启动 ollama 必要时
 requirements-mlx.txt        ← 添加 fastapi、uvicorn、pywebview、sqlalchemy、aiosqlite（实际 fastapi 已有，再补 pywebview）
 ```
 
@@ -105,18 +105,18 @@ requirements-mlx.txt        ← 添加 fastapi、uvicorn、pywebview、sqlalchem
 1. 装新依赖：`venv/bin/pip install pywebview` 然后 `pip freeze | grep -iE "pywebview|fastapi|uvicorn|sqlalchemy" >> requirements-mlx.txt`（去重）
 2. 建 `local_transcriber/web_app.py`，FastAPI 应用，2 个路由：
    - `GET /api/health` → `{ ok: true, checks: { ffmpeg, ollama, hf_cache, models } }`
-   - `GET /` → 暂时返回 `"WhisperQwen backend up"` 的 HTML
+   - `GET /` → 暂时返回 `"Liasse backend up"` 的 HTML
 3. 建 `launch_app.py`：用 uvicorn 在子线程跑 web_app，主线程用 pywebview 开 800x600 窗口
-4. 建 `Start WhisperQwen.command`：检查 ollama 在跑 → 启动 `venv/bin/python launch_app.py`
+4. 建 `Start Liasse.command`：检查 ollama 在跑 → 启动 `venv/bin/python launch_app.py`
 
 **DOD**：
-- 双击 `Start WhisperQwen.command` 后桌面窗口打开，显示 "WhisperQwen backend up"
+- 双击 `Start Liasse.command` 后桌面窗口打开，显示 "Liasse backend up"
 - `curl http://127.0.0.1:5173/api/health` 返回所有检查为 true
 
 **验证**：
 ```bash
 venv/bin/python -c "import fastapi, uvicorn, pywebview, sqlalchemy; print('imports ok')"
-# 然后手动双击 Start WhisperQwen.command 看窗口
+# 然后手动双击 Start Liasse.command 看窗口
 curl http://127.0.0.1:5173/api/health
 ```
 
@@ -252,7 +252,7 @@ user: {question}
 3. 字段：
    ```json
    {
-     "outputDir": "~/Documents/WhisperQwen/",
+     "outputDir": "~/Documents/Liasse/",
      "fullyOffline": false,
      "defaultASRModel": "Qwen/Qwen3-ASR-0.6B",
      "defaultLanguage": "Chinese",
@@ -271,9 +271,9 @@ user: {question}
 
 **做什么**：
 
-1. 更新 `README.md`：用户角度的 quickstart（4 步：装 brew 依赖、跑 Setup MLX Test Env、配置 HF token、双击 Start WhisperQwen）
+1. 更新 `README.md`：用户角度的 quickstart（4 步：装 brew 依赖、跑 Setup MLX Test Env、配置 HF token、双击 Start Liasse）
 2. ✅ (2026-05-19) 已删除 `run_app.py`（旧入口）和 `Start Local Transcriber.command`；`local_transcriber/app.py`（旧 Tkinter UI）拆出单独清理
-3. 验证：在干净 zsh session 里双击 `Start WhisperQwen.command`，完成从 cold-start 到看到任务列表的全流程
+3. 验证：在干净 zsh session 里双击 `Start Liasse.command`，完成从 cold-start 到看到任务列表的全流程
 4. 写 `outputs/BUILD_REPORT.md`：每个 M1-M7 实际耗时、通过情况、任何遗留 TODO
 5. 跑 `pytest tests/ -v` 全过
 
@@ -311,7 +311,7 @@ user: {question}
 
 跑完以下流程，没有崩溃 / 错误，UI 反应合理：
 
-1. 关掉所有终端，**只双击** `Start WhisperQwen.command`
+1. 关掉所有终端，**只双击** `Start Liasse.command`
 2. 窗口打开，看到主页
 3. 拖拽一个 m4a 文件进去
 4. 看到任务出现在列表，进度从 0% 涨

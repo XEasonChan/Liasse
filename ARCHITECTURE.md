@@ -1,7 +1,13 @@
-# Qwensper Architecture
+# Liasse · Architecture
 
 > 给新接手这个仓库的人/agent 看的一份"30 分钟读完就能干活"的地图。
-> 写于 2026-05-19，主要 cleanup pass 后。
+> 写于 2026-05-19，主要 cleanup pass 后；产品 rebrand 到 Liasse 后更新于同日。
+>
+> **命名约定**：
+> - **产品名** = `Liasse`（用户看到的、品牌、UI、文档）
+> - **工作目录 / repo 名** = `Qwensper`（历史保留，不动）
+> - **Python 包** = `local_transcriber`（pending → `liasse`，独立 PR）
+> - 内部模块名出现在 import / 路径里时仍是 `local_transcriber`，不是错。
 
 ## 一句话
 

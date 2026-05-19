@@ -110,11 +110,11 @@ def main() -> None:
     _set_macos_app_icon()
 
     webview.create_window(
-        title="WhisperQwen",
+        title="Liasse",
         url=f"http://{HOST}:{PORT}",
-        width=1280,
-        height=820,
-        min_size=(960, 640),
+        width=1440,
+        height=900,
+        min_size=(1024, 640),
         js_api=JSApi(),
     )
     webview.start()

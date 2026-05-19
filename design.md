@@ -812,10 +812,20 @@ const taskStatusLabel = {
 .waveform > i.upcoming {
   opacity: 0.55;
 }
-/* 说话人 A / B / C 区分 — 通过色相微调，不靠饱和度 */
-.waveform > i.speaker-a { /* default lavender */ }
-.waveform > i.speaker-b { filter: hue-rotate(-12deg); }
-.waveform > i.speaker-c { filter: hue-rotate(18deg); }
+/* 说话人 A / B / C 区分 — 用语义色板而不是 hue-rotate（小尺寸上更可区分） */
+.waveform > i.speaker-a {
+  background: linear-gradient(180deg, var(--lavender-3) 0%, var(--lavender-1) 100%);
+}
+.waveform > i.speaker-b {
+  background: linear-gradient(180deg, #8ba391 0%, var(--success) 100%);
+}
+.waveform > i.speaker-c {
+  background: linear-gradient(180deg, #c4a06b 0%, var(--warning) 100%);
+}
+/* 超过 3 个说话人时，fallback 到深浅 ink 灰阶 */
+.waveform > i.speaker-d {
+  background: linear-gradient(180deg, var(--muted-2) 0%, var(--ink-soft) 100%);
+}
 ```
 
 ### 9.8 Bottom Background Process Bar

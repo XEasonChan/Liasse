@@ -1,4 +1,4 @@
-# 打包 WhisperQwen.dmg
+# 打包 Liasse.dmg
 
 构建一个可双击打开的 macOS .app + .dmg。配合 in-app 的「需要下载模型」对话框，用户首次启动后会被引导下载 pyannote 和 qwen3:4b。
 
@@ -8,10 +8,10 @@
 ./packaging/build_dmg.sh
 ```
 
-产物在 `dist/WhisperQwen-<version>.dmg`。
+产物在 `dist/Liasse-<version>.dmg`。
 
 默认行为：
-- 把项目源码 + `Start WhisperQwen.command` + `launch_app.py` + `local_transcriber/` 整个拷进 `.app/Contents/Resources/app/`
+- 把项目源码 + `Start Liasse.command` + `launch_app.py` + `local_transcriber/` 整个拷进 `.app/Contents/Resources/app/`
 - 排除 `.env` / `outputs/` / `tests/` / `docs/` / `vendor/` / `venv/` / `CLAUDE.md` / `.claude/` 等内部文件
 - 把 **Qwen3-ASR 0.6B** 和 **Qwen3-ForcedAligner 0.6B** 模型（共约 3.5 GB）从本机 `~/.cache/huggingface/hub/` 复制到 `.app/Contents/Resources/app/.hf_cache/hub/`
 - 调 `hdiutil create` 生成 UDZO 压缩的 .dmg
@@ -39,10 +39,10 @@ INCLUDE_ASR_06B=0 ./packaging/build_dmg.sh
 
 ## 用户首次启动流程
 
-1. 双击 `.dmg` → 拖 `WhisperQwen.app` 到 `Applications/`
+1. 双击 `.dmg` → 拖 `Liasse.app` 到 `Applications/`
 2. 首次右键 → 打开（绕过 Gatekeeper，因为没签名）。系统弹「来自未知开发者」确认一次即可
 3. 第一次启动会触发 `launcher.sh`：
-   - 检查 `Applications/WhisperQwen.app/Contents/Resources/app/venv/`
+   - 检查 `Applications/Liasse.app/Contents/Resources/app/venv/`
    - 没有就用系统的 Python 3.12（推荐 `brew install python@3.12`）建一个，再装 `requirements-mlx.txt`
    - 这一步约 3-5 分钟，期间用 `osascript` 弹通知告诉用户
 4. 启动 `launch_app.py`，pywebview 窗口出现
@@ -74,13 +74,13 @@ INCLUDE_ASR_06B=0 ./packaging/build_dmg.sh
 INCLUDE_ASR_06B=0 INCLUDE_FORCED_ALIGNER=0 ./packaging/build_dmg.sh
 
 # 2. plutil 校验
-plutil -lint build/WhisperQwen.app/Contents/Info.plist
+plutil -lint build/Liasse.app/Contents/Info.plist
 
 # 3. 列 .app 内容确认没有 .env / CLAUDE.md
-find build/WhisperQwen.app -name '.env' -o -name 'CLAUDE.md' -o -name '.claude'
+find build/Liasse.app -name '.env' -o -name 'CLAUDE.md' -o -name '.claude'
 
 # 4. mount .dmg 检查
-hdiutil attach dist/WhisperQwen-0.2.0.dmg -nobrowse -mountpoint /tmp/wq_mount
+hdiutil attach dist/Liasse-0.2.0.dmg -nobrowse -mountpoint /tmp/wq_mount
 ls /tmp/wq_mount/
 hdiutil detach /tmp/wq_mount
 ```

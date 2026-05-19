@@ -65,11 +65,14 @@
 
   --progress-track:   #ece5d4;
 
-  /* legacy accent aliases — old code referencing --accent now resolves to lavender */
-  --accent:           var(--lavender-2);
-  --accent-hover:     var(--lavender-deep);
-  --accent-soft:      var(--lavender-soft);
-  --accent-border:    var(--lavender-border);
+  /* Legacy --accent aliases.
+     Text-bearing roles map to COBALT (#1A3A78, 10.1:1 contrast on paper, AAA).
+     Decorative bg/border roles stay LAVENDER (the content accent).
+     This enforces design.md §5.4 "lavender never carries text" automatically. */
+  --accent:           var(--cobalt);          /* used as text/icon stroke color */
+  --accent-hover:     var(--cobalt-hover);
+  --accent-soft:      var(--lavender-soft);   /* decorative surface */
+  --accent-border:    var(--lavender-border); /* decorative border */
 
   /* shadows — barely there */
   --shadow-card:      0 1px 0 rgba(31, 27, 22, 0.04);
@@ -188,44 +191,69 @@ input, select, textarea { font-family: inherit; }
   gap: 20px;
   flex-shrink: 0;
 }
-.brand { display: flex; align-items: center; gap: 12px; }
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 4px;
+}
 .brand-mark {
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   display: grid; place-items: center;
-  border-radius: 11px;
+  border-radius: 10px;
   overflow: hidden;
-  background: var(--bg-surface);
-  box-shadow: 0 10px 24px rgba(31, 35, 62, 0.10);
+  background: transparent;
 }
 .brand-mark img {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
-  transform: scale(1.42);
+  object-fit: contain;
 }
-.brand-name { font-weight: 600; font-size: 17px; line-height: 1.1; }
-.brand-version { color: var(--text-tertiary); font-size: var(--font-micro); margin-top: 2px; }
+.brand-name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.brand-name em { font-style: italic; color: var(--ink); }
+.brand-version {
+  color: var(--muted);
+  font-family: var(--font-meta);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
 
-.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav { display: flex; flex-direction: column; gap: 2px; }
 .nav-item {
   display: flex; align-items: center; gap: 12px;
-  padding: 0 14px; height: 44px;
+  padding: 0 14px; height: 40px;
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: 4px;
   color: var(--text-secondary);
   background: transparent;
   width: 100%;
   text-align: left;
-  font-size: var(--font-body);
+  font-family: var(--font-meta);
+  font-size: var(--font-small);
+  letter-spacing: 0.02em;
   transition: background .12s, color .12s, border-color .12s;
 }
-.nav-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
+.nav-item:hover { background: var(--cream-soft); color: var(--text-primary); }
+/* Active state: lavender-soft fill + cobalt text (cobalt 10.1:1 contrast, AAA).
+   The "lavender never carries text" rule: lavender is the surface, cobalt is the text. */
 .nav-item.active {
-  background: linear-gradient(180deg, var(--lavender-soft), rgba(236, 232, 245, 0.6));
-  color: var(--accent);
-  border-color: var(--accent-border);
-  font-weight: 500;
+  background: var(--lavender-soft);
+  color: var(--cobalt);
+  border-color: var(--lavender-border);
+  font-style: italic;
+  font-family: var(--font-display);
+  font-size: 17px;
 }
 .sidebar-settings-nav {
   margin-top: -12px;
@@ -1039,3 +1067,102 @@ input, select, textarea { font-family: inherit; }
   background: currentColor;
 }
 .ollama-pill.is-online .ollama-dot { animation: pulse-progress 2s ease-in-out infinite; }
+
+/* ============================================================
+   Sidebar collapse — viewport < 1180px goes icon-only
+   Per rebrand_plan.md §3.12
+   ============================================================ */
+@media (max-width: 1180px) {
+  :root { --sidebar-width: 72px; }
+  .sidebar { padding: 20px 12px; }
+  .brand { justify-content: center; }
+  .brand > div:last-child { display: none; }    /* hide wordmark + version */
+  .nav-item { justify-content: center; padding: 0; }
+  .nav-item > span { display: none; }            /* hide nav labels, keep icons */
+  .nav-item.active { font-size: 0; }             /* hide italic label */
+  .model-card { display: none; }                 /* model details hidden when collapsed */
+  .sidebar-settings-nav { margin-top: auto; }
+}
+
+/* ============================================================
+   Print / PDF export — used when lawyers export deposition transcripts
+   Per rebrand_plan.md §3.13
+   ============================================================ */
+@media print {
+  /* Reset background and paper texture */
+  body { background: white; color: black; font-size: 11pt; }
+  body::before { display: none; }
+
+  /* Hide all chrome */
+  .sidebar,
+  .bottom-process-bar,
+  .nav,
+  .upload-zone,
+  .config-row,
+  .tabs,
+  .chat-input,
+  button,
+  .btn,
+  .btn-icon,
+  .detail-back {
+    display: none !important;
+  }
+
+  /* Strip overflow and padding from main content for printing */
+  .main, .main-scroll { overflow: visible !important; padding: 0 !important; }
+  #app { display: block !important; height: auto !important; }
+
+  /* Print pages with running headers */
+  @page {
+    margin: 1in 0.9in;
+    @top-left {
+      content: "Liasse";
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-style: italic;
+      font-size: 10pt;
+      color: #1A3A78;
+    }
+    @top-right {
+      content: counter(page) " / " counter(pages);
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 9pt;
+      color: #6a6158;
+    }
+    @bottom-center {
+      content: "Private local transcription · Stored on this Mac";
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 8.5pt;
+      font-style: italic;
+      color: #6a6158;
+    }
+  }
+
+  /* Body type renders as serif, single-column */
+  .page-title {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 22pt;
+    color: black;
+    margin: 0 0 12pt 0;
+  }
+  .transcript, .segment-text, .summary-body {
+    font-family: 'DM Serif Text', Georgia, serif;
+    line-height: 1.55;
+    columns: 1;
+    color: black;
+  }
+  .speaker-label { font-style: italic; font-weight: 500; }
+  .timecode, .duration, .filesize {
+    font-variant-numeric: tabular-nums;
+    color: #6a6158;
+    font-size: 9pt;
+  }
+
+  /* Status chips and waveforms hidden in print */
+  .status-chip, .waveform, .progress, .pill { display: none !important; }
+
+  /* No widows / orphans on long transcript bodies */
+  p, .segment { orphans: 3; widows: 3; page-break-inside: avoid; }
+  h1, h2, h3 { page-break-after: avoid; }
+
+  a { color: black; text-decoration: none; }
+}

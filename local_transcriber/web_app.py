@@ -102,7 +102,7 @@ async def lifespan(app: FastAPI):
 
 
 def create_app() -> FastAPI:
-    app = FastAPI(title="WhisperQwen", version="0.2.0", lifespan=lifespan)
+    app = FastAPI(title="Liasse", version="0.2.0", lifespan=lifespan)
 
     @app.middleware("http")
     async def _no_cache_for_static(request, call_next):
@@ -411,7 +411,7 @@ def create_app() -> FastAPI:
         if html_file.exists():
             return HTMLResponse(html_file.read_text(encoding="utf-8"))
         return HTMLResponse(
-            "<h1>WhisperQwen backend up</h1><p>前端静态文件还没生成。</p>"
+            "<h1>Liasse backend up</h1><p>前端静态文件还没生成。</p>"
         )
 
     return app
