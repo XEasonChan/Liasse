@@ -73,6 +73,67 @@ def _accelerate_pyannote_on_mps() -> None:
         print(f"[worker] pyannote MPS 加速失败，CPU 兜底: {exc}")
 
 
+_PYANNOTE_HOOK_LABEL_MAP = {
+    "segmentation": "切分音频",
+    "embeddings": "提取声纹",
+    "discrete_diarization": "聚类发言人",
+    "speaker_counting": "估计发言人数",
+    "reconstruction": "重建分段",
+}
+
+
+def _make_pyannote_progress_hook(progress_queue):
+    """工厂：返回一个 pyannote 4.x hook callable。
+
+    pyannote hook 签名:
+        hook(step_name, step_artifact, file=None, total=None, completed=None)
+    """
+
+    def _hook(step_name, step_artifact, file=None, total=None, completed=None):
+        label = _PYANNOTE_HOOK_LABEL_MAP.get(step_name, step_name)
+        # progress 保持在 ASR_CHUNK_PROGRESS_END (0.82) ~ 0.87 之间小幅推进，
+        # 这样前端 ETA 公式平滑外推；diarization_completed 之后会跳到 0.87+。
+        value = 0.82
+        if total and completed is not None and total > 0:
+            stage = f"识别发言人 · {label} ({completed}/{total})"
+            value = 0.82 + 0.05 * min(1.0, max(0.0, completed / total))
+        else:
+            stage = f"识别发言人 · {label}"
+        try:
+            progress_queue.put({"type": "progress", "stage": stage, "value": value})
+        except Exception:
+            pass
+
+    return _hook
+
+
+def _install_pyannote_progress_hook(progress_queue: "mp.Queue") -> None:
+    """给 pyannote.audio.core.pipeline.Pipeline.__call__ monkey-patch 一层
+    hook 注入。让前端能看到 diarization 内部 segmentation / embeddings /
+    clustering 三个阶段的实时进度（embeddings 还能按 batch 报 N/M）。
+
+    mlx-qwen3-asr 调用 pipeline(audio) 时不传 hook，所以我们 patch class 层
+    的 __call__ —— 只要 kwargs 里没显式 hook，就注入我们的。
+    """
+    try:
+        import pyannote.audio.core.pipeline as _pyp
+    except ImportError:
+        return
+    if getattr(_pyp.Pipeline, "_qwensper_hook_patched", False):
+        return
+
+    _original_call = _pyp.Pipeline.__call__
+    hook = _make_pyannote_progress_hook(progress_queue)
+
+    def _patched_call(self, file, preload=False, **kwargs):
+        if kwargs.get("hook") is None:
+            kwargs["hook"] = hook
+        return _original_call(self, file, preload=preload, **kwargs)
+
+    _pyp.Pipeline.__call__ = _patched_call
+    _pyp.Pipeline._qwensper_hook_patched = True
+
+
 def _load_env() -> None:
     env_file = ROOT / ".env"
     if not env_file.exists():
@@ -105,9 +166,11 @@ def _worker_entry(
         for _stale_model in ("qwen3:4b", "qwen3:8b"):
             unload_model(_stale_model)
 
-        # 启用 diarization 时，把 pyannote 迁到 Metal/MPS（3-5x 加速）。
+        # 启用 diarization 时，把 pyannote 迁到 Metal/MPS（3-5x 加速）+
+        # 注入 progress hook（让前端看到 diarization 内部阶段进度）。
         if bool(job_payload.get("config", {}).get("diarize")):
             _accelerate_pyannote_on_mps()
+            _install_pyannote_progress_hook(progress_queue)
 
         config = job_payload["config"]
         task_id = job_payload["id"]
