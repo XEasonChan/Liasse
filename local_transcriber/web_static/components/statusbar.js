@@ -31,16 +31,20 @@ export const StatusBar = {
       const startMs = new Date(task.startedAt + (task.startedAt.endsWith("Z") ? "" : "Z")).getTime();
       const elapsed = (props.now - startMs) / 1000;
       if (elapsed < 3) return "";
+      // 优先：基于实际本机进度外推（progress 由后端按已完成的 chunk 数推出来）
+      if (task.progress && task.progress > 0.02 && task.progress < 0.999) {
+        const remaining = (elapsed / task.progress) * (1 - task.progress);
+        if (isFinite(remaining) && remaining > 0) {
+          return t("status.etaLabel", { dur: fmtDurI18n(remaining, i18n.locale) });
+        }
+      }
+      // 兜底：刚启动还没有真实进度时，用音频长度 × 1.5 给个粗略估计
       if (task.durationSec && task.durationSec > 0) {
         const estTotal = task.durationSec * 1.5;
         const remaining = estTotal - elapsed;
         if (remaining > 0) return t("status.etaLabel", { dur: fmtDurI18n(remaining, i18n.locale) });
         if (-remaining < estTotal * 0.5) return t("status.etaNear");
         return t("status.etaSlow");
-      }
-      if (task.progress && task.progress > 0.02) {
-        const remaining = (elapsed / task.progress) * (1 - task.progress);
-        if (isFinite(remaining) && remaining > 0) return t("status.etaLabel", { dur: fmtDurI18n(remaining, i18n.locale) });
       }
       return "";
     });
