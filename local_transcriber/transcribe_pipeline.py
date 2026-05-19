@@ -20,7 +20,7 @@ SUMMARY_PROGRESS_START = 0.91
 EXPORT_PROGRESS_START = 0.96
 
 
-class LocalTranscriptionPipeline:
+class TranscribePipeline:
     def __init__(
         self,
         on_progress: Optional[ProgressCallback] = None,

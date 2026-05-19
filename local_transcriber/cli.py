@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 
 from .models import TranscriptionJob
-from .pipeline import LocalTranscriptionPipeline
+from .transcribe_pipeline import TranscribePipeline
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -50,7 +50,7 @@ def main() -> None:
             hf_token=args.hf_token,
             export_srt=not args.no_srt,
         )
-        result = LocalTranscriptionPipeline(on_progress=progress).run(job)
+        result = TranscribePipeline(on_progress=progress).run(job)
         print(f"完成：{result.markdown_path}", flush=True)
 
 

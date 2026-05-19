@@ -174,7 +174,7 @@ def _worker_entry(
         _load_env()
         from .models import SummaryResult, TranscriptionJob
         from .ollama_lifecycle import unload_model
-        from .pipeline import LocalTranscriptionPipeline
+        from .transcribe_pipeline import TranscribePipeline
 
         # ASR + diarization 不需要 Ollama LLM，先把可能残留的 4B/8B 卸掉给 MLX 让路。
         # unload_model 内部已经吞掉所有网络错误，Ollama 没跑也无所谓。
@@ -246,7 +246,7 @@ def _worker_entry(
         )
 
         progress_queue.put({"type": "progress", "stage": "加载模型", "value": 0.02})
-        result = LocalTranscriptionPipeline(
+        result = TranscribePipeline(
             on_progress=on_progress,
             on_partial_transcript=on_partial_transcript,
         ).run(job)

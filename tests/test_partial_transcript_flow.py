@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 from local_transcriber.db import TaskRow, init_db, session_scope
-from local_transcriber.pipeline import LocalTranscriptionPipeline
+from local_transcriber.transcribe_pipeline import TranscribePipeline
 
 
 @pytest.fixture
@@ -31,7 +31,7 @@ def test_pipeline_emits_partial_transcript_on_chunk_completed(tmp_path):
     """
     received: list[dict] = []
 
-    pipeline = LocalTranscriptionPipeline(
+    pipeline = TranscribePipeline(
         on_partial_transcript=lambda payload: received.append(payload),
     )
 
@@ -69,7 +69,7 @@ def test_pipeline_dedupes_repeated_chunk_index(tmp_path):
     pipeline 必须去重，不能让前端看到的 segments 重复。"""
     received: list[dict] = []
 
-    pipeline = LocalTranscriptionPipeline(
+    pipeline = TranscribePipeline(
         on_partial_transcript=lambda payload: received.append(payload),
     )
     pipeline._prepare_partial_transcript(
@@ -90,7 +90,7 @@ def test_pipeline_ignores_empty_text_chunks(tmp_path):
     """空文本 chunk（mlx-qwen3-asr 偶尔会发）不应进 partial transcript。"""
     received: list[dict] = []
 
-    pipeline = LocalTranscriptionPipeline(
+    pipeline = TranscribePipeline(
         on_partial_transcript=lambda payload: received.append(payload),
     )
     pipeline._prepare_partial_transcript(
