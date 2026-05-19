@@ -76,6 +76,9 @@ class LocalTranscriptionPipeline:
         )
 
     def _transcribe(self, job: TranscriptionJob) -> List[TranscriptSegment]:
+        # 记给 _asr_progress 用：知道是否启用 diarization，决定最后一 chunk 完成后
+        # stage 要切到 "正在识别发言人" 还是 "转录完成"。
+        self._diarize_enabled = bool(job.diarization_enabled)
         backend = create_asr_backend(
             backend=job.asr_backend,
             qwen_model=job.qwen_model,
@@ -116,6 +119,20 @@ class LocalTranscriptionPipeline:
                 self._progress(f"正在转录音频 {index}/{total}", value)
             else:
                 self._progress("正在转录音频", value)
+            # 最后一个 chunk 完成后，pyannote 会在后台跑全局 diarization
+            # （CPU/MPS 上几分钟，mlx-qwen3-asr 没有 diarization_started 事件）。
+            # 主动切 stage 让用户知道阶段已经变了，UI 不再卡在 "X/X"。
+            if (
+                event == "chunk_completed"
+                and total
+                and index
+                and index == total
+                and getattr(self, "_diarize_enabled", False)
+            ):
+                self._progress(
+                    "正在识别发言人，请稍候（pyannote 全局推理，2-5 分钟）",
+                    ASR_CHUNK_PROGRESS_END,
+                )
             return
 
         if event == "diarization_completed":
