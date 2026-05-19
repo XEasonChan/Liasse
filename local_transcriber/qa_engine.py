@@ -5,8 +5,10 @@ from typing import Iterator, List, Optional
 
 from .memory_monitor import MemoryBudget
 from .model_router import TaskKind, route
+from .models import TranscriptSegment
 from .ollama_lifecycle import OllamaClient
 from .timefmt import format_clock
+from .transcript_chunker import chunk_interview
 from .transcript_index import SearchResult, TranscriptIndex
 
 
@@ -71,3 +73,38 @@ class QAEngine:
                 f"score={r.score:.2f} ---\n{r.chunk.text}"
             )
         return "\n\n".join(parts)
+
+
+def build_index_for_task(task) -> Optional[TranscriptIndex]:
+    """从 TaskRow 构造 BM25 索引；应用 edits 里的 speaker 标签和文本覆盖。
+
+    `task` 期望具有 `.transcript` (dict 含 'segments' 列表) 和 `.edits` (dict
+    含 'speakerLabels' / 'segmentOverrides')。空 segments 返回 None，调用方应
+    在路由层把它转成 4xx。
+    """
+    transcript = getattr(task, "transcript", None) or {}
+    raw_segments = transcript.get("segments") or []
+    if not raw_segments:
+        return None
+
+    edits = getattr(task, "edits", None) or {}
+    labels = edits.get("speakerLabels") or {}
+    overrides = edits.get("segmentOverrides") or {}
+
+    segments: List[TranscriptSegment] = []
+    for seg in raw_segments:
+        spk_raw = seg.get("speaker", "SPEAKER_00")
+        spk = labels.get(spk_raw) or spk_raw
+        text = overrides.get(seg.get("id", ""), seg.get("text", ""))
+        segments.append(TranscriptSegment(
+            start=seg.get("start"),
+            end=seg.get("end"),
+            text=text,
+            speaker=spk,
+            source="task",
+        ))
+
+    chunks = chunk_interview(segments)
+    if not chunks:
+        return None
+    return TranscriptIndex.build(chunks)

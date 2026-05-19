@@ -74,3 +74,47 @@ def test_qa_handles_no_retrieval_match():
     msgs = Cls.return_value.stream_chat.call_args.kwargs["messages"]
     # system prompt 应包含「未检索」的提示
     assert "未检索" in msgs[0]["content"] or "未匹配" in msgs[0]["content"]
+
+
+from local_transcriber.qa_engine import build_index_for_task
+
+
+class _FakeTaskRow:
+    def __init__(self, segments, edits=None):
+        self.transcript = {"segments": segments}
+        self.edits = edits or {}
+
+
+def test_build_index_for_task_applies_speaker_labels_and_overrides():
+    segments = [
+        {"id": "seg-0", "speaker": "SPEAKER_00", "start": 0.0, "end": 5.0,
+         "text": "原始 A 文本"},
+        {"id": "seg-1", "speaker": "SPEAKER_01", "start": 5.0, "end": 10.0,
+         "text": "原始 B 文本"},
+    ]
+    edits = {
+        "speakerLabels": {"SPEAKER_00": "研究者", "SPEAKER_01": "受访者"},
+        "segmentOverrides": {"seg-1": "改过的 B 文本"},
+    }
+    task = _FakeTaskRow(segments, edits)
+
+    index = build_index_for_task(task)
+
+    assert index is not None
+    hits = index.search("改过的", top_k=3)
+    assert any("改过的 B 文本" in r.chunk.text for r in hits)
+    hits = index.search("受访者", top_k=3)
+    assert any("受访者" in r.chunk.text for r in hits)
+
+
+def test_build_index_for_task_returns_none_when_no_segments():
+    task = _FakeTaskRow(segments=[])
+    assert build_index_for_task(task) is None
+
+
+def test_build_index_for_task_handles_missing_edits():
+    segments = [{"id": "seg-0", "speaker": "A", "start": 0.0, "end": 5.0, "text": "测试"}]
+    task = _FakeTaskRow(segments, edits=None)
+    index = build_index_for_task(task)
+    assert index is not None
+    assert len(index.search("测试", top_k=1)) == 1
