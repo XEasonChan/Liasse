@@ -24,6 +24,7 @@ mkdir -p "$APP_BUNDLE/Contents/MacOS"
 mkdir -p "$APP_BUNDLE/Contents/Resources/app"
 cp "$PKG/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
 cp "$PKG/launcher.sh" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+cp "$ROOT/local_transcriber/web_static/assets/app-icon.icns" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 chmod +x "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
 
 echo "[3/6] 拷贝项目源码 → Resources/app/"

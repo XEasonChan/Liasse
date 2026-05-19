@@ -15,6 +15,7 @@ export const UploadZone = {
     llmReady: { type: Boolean, default: false },
     diarizeReady: { type: Boolean, default: true },
     asrReady: { type: Boolean, default: true },
+    runtimeReady: { type: Boolean, default: true },
     nativeReady: { type: Boolean, default: false },
   },
   emits: ["upload", "need-model"],
@@ -109,6 +110,10 @@ export const UploadZone = {
 
     async triggerFiles() {
       if (this.isBusy) return;
+      if (!this.runtimeReady) {
+        toast.info("正在安装运行环境", "请等核心引擎装好后再上传文件（顶部 banner 有进度）。");
+        return;
+      }
       if (!this.asrReady) {
         this.$emit("need-model", "asr-required");
         return;
@@ -122,6 +127,10 @@ export const UploadZone = {
 
     async triggerFolder() {
       if (this.isBusy) return;
+      if (!this.runtimeReady) {
+        toast.info("正在安装运行环境", "请等核心引擎装好后再上传文件（顶部 banner 有进度）。");
+        return;
+      }
       if (!this.asrReady) {
         this.$emit("need-model", "asr-required");
         return;
@@ -166,6 +175,10 @@ export const UploadZone = {
       e.preventDefault();
       this.isDragOver = false;
       if (this.isBusy) return;
+      if (!this.runtimeReady) {
+        toast.info("正在安装运行环境", "请等核心引擎装好后再上传文件（顶部 banner 有进度）。");
+        return;
+      }
       if (!this.asrReady) {
         this.$emit("need-model", "asr-required");
         return;
@@ -340,13 +353,15 @@ export const UploadZone = {
       >
         <div class="upload-main" @click="onZoneClick">
           <div class="upload-icon">
-            <lucide-icon v-if="!isBusy" name="folder-up" :size="30" :stroke-width="1.7" />
+            <lucide-icon v-if="!isBusy" name="folder-up" :size="22" :stroke-width="1.7" />
             <div v-else class="spinner"></div>
           </div>
 
           <div class="upload-copy">
             <div class="upload-title">{{ isBusy ? busyText : t('upload.title') }}</div>
-            <div v-if="!isBusy" class="upload-hint">{{ t('upload.hint') }}</div>
+            <div v-if="!isBusy" class="upload-hint">
+              {{ t('upload.formats') }}<span v-if="nativeReady"> · {{ t('upload.nativePathBadge') }}</span>
+            </div>
           </div>
 
           <div v-if="!isBusy" class="upload-buttons" @click.stop>
@@ -356,11 +371,6 @@ export const UploadZone = {
             <button class="btn" :disabled="isBusy" @click="triggerFolder">
               <lucide-icon name="folder-open" :size="16" /> {{ t('upload.chooseFolder') }}
             </button>
-          </div>
-
-          <div v-if="!isBusy" class="upload-formats">
-            {{ t('upload.formats') }}
-            <span v-if="nativeReady" class="muted" style="margin-left:8px">· {{ t('upload.nativePathBadge') }}</span>
           </div>
         </div>
 

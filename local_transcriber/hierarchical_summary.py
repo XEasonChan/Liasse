@@ -144,8 +144,7 @@ def _parse_l1(raw: str, chunk_index: int) -> L1Result:
     )
 
 
-L2_PROMPT_TEMPLATE = """/no_think
-你是严谨的访谈研究助理。下面是一份 1对1 访谈所有分段的结构化要点（按时间顺序）。
+L2_PROMPT_TEMPLATE = """你是严谨的访谈研究助理。下面是一份 1对1 访谈所有分段的结构化要点（按时间顺序）。
 请综合成一份完整的访谈总结，输出中文 Markdown。
 
 要求：
@@ -155,11 +154,12 @@ L2_PROMPT_TEMPLATE = """/no_think
 - 不引入要点之外的信息；不重复同一引用
 - 区分受访者（受访者通常是回答者）和研究者（研究者通常是提问者）的观点
 - 整体 800-1500 字
-- 直接输出 Markdown，不要写思考过程
 
 分段要点：
 {digest}
 """
+
+_EMPTY_L2_OUTPUT = "## 访谈总结\n\n（无可综合的分段要点。请确认转录已生成 L1 抽取结果。）"
 
 
 def format_l1_digest(results: List[L1Result]) -> str:
@@ -189,6 +189,9 @@ def synthesize_l2(results: List[L1Result],
                   client: Optional[OllamaClient] = None,
                   unload_after: bool = False) -> str:
     """把 L1 列表综合成 Markdown 总结。"""
+    if not results:
+        return _EMPTY_L2_OUTPUT
+
     budget = budget or MemoryBudget.detect()
     choice = route(TaskKind.L2_SYNTHESIS, budget, user_pref=user_pref)
     client = client or OllamaClient()

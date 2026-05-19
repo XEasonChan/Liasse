@@ -1,9 +1,11 @@
 #!/bin/zsh
 # WhisperQwen launcher — runs inside Contents/MacOS/ of the .app bundle.
-# Responsibilities:
-#   1. Locate Contents/Resources/app (the project source)
-#   2. On first launch, build the venv from Python 3.12
-#   3. Hand off to launch_app.py via pywebview
+# 流程（v0.2.x）:
+#   1. 找 Python 3.12 / 建 venv（首次启动 5-10 秒）
+#   2. 装 requirements-bootstrap.txt（轻量集，30-60 秒）→ UI 能起来
+#   3. 立即 exec launch_app.py，让用户看到界面
+#   4. 同步在后台 pip install requirements-mlx.txt（5-10 GB，~30 分钟）
+#      前端通过 /api/install/progress 显示进度，装完自动解锁上传按钮
 set -e
 
 APP_BUNDLE="$(cd "$(dirname "$0")/.."; pwd)"
@@ -12,6 +14,7 @@ APP_DIR="$RESOURCES/app"
 LOG_DIR="$HOME/Library/Logs/WhisperQwen"
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/launcher.log"
+INSTALL_LOG="$LOG_DIR/install.log"
 exec >>"$LOG" 2>&1
 echo ""
 echo "==== launch $(date -u +'%Y-%m-%dT%H:%M:%SZ') ===="
@@ -28,7 +31,6 @@ cd "$APP_DIR"
 export HF_HOME="$APP_DIR/.hf_cache"
 mkdir -p "$HF_HOME"
 
-# 找一个可用的 Python 3.12
 choose_python() {
   for candidate in \
     "$APP_DIR/venv/bin/python" \
@@ -48,6 +50,8 @@ choose_python() {
   return 1
 }
 
+# 阶段 1：保证 venv 存在 + bootstrap 已装
+NEEDS_BOOTSTRAP=0
 if [ ! -x "$APP_DIR/venv/bin/python" ]; then
   PYTHON_BIN="$(choose_python)"
   if [ -z "$PYTHON_BIN" ]; then
@@ -61,12 +65,33 @@ OSA
     exit 1
   fi
   echo "首次启动：用 $PYTHON_BIN 建 venv"
-
-  /usr/bin/osascript -e 'display notification "首次启动正在安装运行环境，约 3-5 分钟…" with title "WhisperQwen"' || true
-
+  /usr/bin/osascript -e 'display notification "正在准备运行环境（约 1 分钟），完成后界面会自动打开…" with title "WhisperQwen"' || true
   "$PYTHON_BIN" -m venv "$APP_DIR/venv"
   "$APP_DIR/venv/bin/python" -m pip install --upgrade pip wheel
-  "$APP_DIR/venv/bin/python" -m pip install -r "$APP_DIR/requirements-mlx.txt"
+  NEEDS_BOOTSTRAP=1
+fi
+
+# 检查 bootstrap 集是否齐（探一两个代表性的包）
+if ! "$APP_DIR/venv/bin/python" -c "import fastapi, uvicorn, webview" 2>/dev/null; then
+  NEEDS_BOOTSTRAP=1
+fi
+
+if [ "$NEEDS_BOOTSTRAP" = "1" ]; then
+  echo "装 bootstrap（轻量集）..."
+  "$APP_DIR/venv/bin/python" -m pip install -r "$APP_DIR/requirements-bootstrap.txt" 2>&1 | tee -a "$INSTALL_LOG"
+fi
+
+# 阶段 2：核心 ASR 引擎没装好 → 后台装，前端会显示进度
+if ! "$APP_DIR/venv/bin/python" -c "import mlx_qwen3_asr" 2>/dev/null; then
+  echo "后台装核心 ASR 引擎（5-10 GB，约 20-40 分钟）..."
+  # 先清空 install.log 让 /api/install/progress 看到的是这次的进度
+  : > "$INSTALL_LOG"
+  echo "[$(date -u +'%Y-%m-%dT%H:%M:%SZ')] 开始安装核心运行环境" >> "$INSTALL_LOG"
+  nohup "$APP_DIR/venv/bin/python" -m pip install -r "$APP_DIR/requirements-mlx.txt" \
+    >> "$INSTALL_LOG" 2>&1 &
+  INSTALL_PID=$!
+  echo "$INSTALL_PID" > "$APP_DIR/.install-pid"
+  echo "后台 pip pid=$INSTALL_PID, log=$INSTALL_LOG"
 fi
 
 # 提示 ollama

@@ -81,11 +81,13 @@ const App = {
     const tasks = ref([]);
     const models = ref([]);
     const health = ref({ checks: {} });
+    const installProgress = ref(null);
     const errorModalFor = ref(null);
     const deleteModalFor = ref(null);
     const modelModalFor = ref(null);
     const pollIntervalId = ref(null);
     const modelsIntervalId = ref(null);
+    const installIntervalId = ref(null);
     const nativeReady = ref(false);
     const preflightShown = ref(false);
     const now = ref(Date.now());
@@ -93,6 +95,11 @@ const App = {
 
     const onHashChange = () => { route.value = parseHash(); };
 
+    const runtimeReady = computed(() => {
+      // 健康未抓到时默认 true，避免一开机就闪 banner
+      if (!health.value || health.value.runtime_ready === undefined) return true;
+      return !!health.value.runtime_ready;
+    });
     const asrReady = computed(() => !!(health.value.checks && health.value.checks.asr_model));
     const llmReady = computed(() => {
       const m = models.value.find((mm) => mm.id === "qwen3:4b");
@@ -143,6 +150,14 @@ const App = {
       } catch (_) { /* ignore */ }
     }
 
+    async function refreshInstallProgress() {
+      try {
+        const resp = await fetch("/api/install/progress");
+        if (!resp.ok) return;
+        installProgress.value = await resp.json();
+      } catch (_) { /* ignore */ }
+    }
+
     async function preflight() {
       if (preflightShown.value) return;
       await refreshModels();
@@ -183,14 +198,20 @@ const App = {
       waitForPywebview();
       refreshTasks();
       refreshModels().then(() => preflight());
+      refreshInstallProgress();
       pollIntervalId.value = setInterval(() => { refreshTasks(); }, 2000);
       modelsIntervalId.value = setInterval(() => refreshModels(), 15000);
+      // 运行环境没就绪时每 3 秒探一次进度；就绪后切到 30 秒一次（廉价心跳）
+      installIntervalId.value = setInterval(() => {
+        if (!runtimeReady.value) refreshInstallProgress();
+      }, 3000);
       tickerId.value = setInterval(() => { now.value = Date.now(); }, 1000);
     });
     onBeforeUnmount(() => {
       window.removeEventListener("hashchange", onHashChange);
       if (pollIntervalId.value) clearInterval(pollIntervalId.value);
       if (modelsIntervalId.value) clearInterval(modelsIntervalId.value);
+      if (installIntervalId.value) clearInterval(installIntervalId.value);
       if (tickerId.value) clearInterval(tickerId.value);
     });
 
@@ -258,7 +279,8 @@ const App = {
 
     return {
       t,
-      route, tasks, models, health, asrReady, llmReady, diarizeReady, nativeReady, now,
+      route, tasks, models, health, installProgress, runtimeReady,
+      asrReady, llmReady, diarizeReady, nativeReady, now,
       errorModalFor, deleteModalFor, modelModalFor,
       onNavigate, onUpload, onStop, onRetry, onDelete, confirmDelete, onShowError,
       clearCompleted, openTask, onNeedModel, onModelsRechecked, onHealthRefresh,
@@ -274,10 +296,27 @@ const App = {
           <p class="page-subtitle">{{ t('home.subtitle') }}</p>
         </div>
 
+        <div v-if="!runtimeReady" class="runtime-install-banner">
+          <div class="runtime-install-icon"><div class="spinner"></div></div>
+          <div class="runtime-install-text">
+            <div class="runtime-install-title">正在安装核心运行环境</div>
+            <div class="runtime-install-sub">
+              <template v-if="installProgress && installProgress.currently">
+                正在下载 <code>{{ installProgress.currently }}</code>
+                <span v-if="installProgress.installed"> · 已完成 {{ installProgress.installed }} 批</span>
+              </template>
+              <template v-else>
+                首次启动需要下载 ASR / 发言人识别等核心依赖（约 5-10 GB，20-40 分钟）。下载完成后可以直接开始转录，无需重启。
+              </template>
+            </div>
+          </div>
+        </div>
+
         <upload-zone
           :llm-ready="llmReady"
           :diarize-ready="diarizeReady"
           :asr-ready="asrReady"
+          :runtime-ready="runtimeReady"
           :native-ready="nativeReady"
           @upload="onUpload"
           @need-model="onNeedModel"

@@ -18,6 +18,13 @@ const STATUS_CLS = {
   stopped: "chip-stopped",
 };
 
+const FILTER_PREDICATES = {
+  all: () => true,
+  active: (t) => t.status === "queued" || t.status === "running" || t.status === "stopping",
+  done: (t) => t.status === "done",
+  failed: (t) => t.status === "failed" || t.status === "stopped",
+};
+
 export const TaskList = {
   name: "TaskList",
   components: { LucideIcon },
@@ -27,40 +34,61 @@ export const TaskList = {
   },
   emits: ["open", "stop", "delete", "clear-completed", "show-error", "retry"],
   data() {
-    return {
-      activeFilter: "all",
-    };
+    return { filter: "all" };
   },
   computed: {
+    queuedTasks() { return this.tasks.filter((t) => t.status === "queued"); },
+    filteredTasks() {
+      const pred = FILTER_PREDICATES[this.filter] || FILTER_PREDICATES.all;
+      return this.tasks.filter(pred);
+    },
+    counts() {
+      const c = { all: this.tasks.length, active: 0, done: 0, failed: 0 };
+      for (const task of this.tasks) {
+        if (FILTER_PREDICATES.active(task)) c.active += 1;
+        else if (task.status === "done") c.done += 1;
+        else if (task.status === "failed" || task.status === "stopped") c.failed += 1;
+      }
+      return c;
+    },
     hasCompleted() {
       return this.tasks.some((t) => ["done", "failed", "stopped"].includes(t.status));
     },
-    queuedTasks() {
-      return this.tasks.filter((t) => t.status === "queued");
-    },
     filters() {
       return [
-        { key: "all", label: t("list.filterAll"), count: this.tasks.length },
-        { key: "active", label: t("list.filterActive"), count: this.tasks.filter((task) => ["queued", "running", "stopping"].includes(task.status)).length },
-        { key: "done", label: t("list.filterDone"), count: this.tasks.filter((task) => task.status === "done").length },
-        { key: "failed", label: t("list.filterFailed"), count: this.tasks.filter((task) => ["failed", "stopped"].includes(task.status)).length },
+        { key: "all", label: t("list.filterAll"), count: this.counts.all },
+        { key: "active", label: t("list.filterActive"), count: this.counts.active },
+        { key: "done", label: t("list.filterDone"), count: this.counts.done },
+        { key: "failed", label: t("list.filterFailed"), count: this.counts.failed },
       ];
     },
-    filteredTasks() {
-      if (this.activeFilter === "active") return this.tasks.filter((task) => ["queued", "running", "stopping"].includes(task.status));
-      if (this.activeFilter === "done") return this.tasks.filter((task) => task.status === "done");
-      if (this.activeFilter === "failed") return this.tasks.filter((task) => ["failed", "stopped"].includes(task.status));
-      return this.tasks;
+    isFilteredEmpty() {
+      return this.tasks.length > 0 && this.filteredTasks.length === 0;
     },
   },
   methods: {
     t,
+    setFilter(key) { this.filter = key; },
     chipLabel(task) { return t(STATUS_KEY[task.status] || "list.statusQueued"); },
     chipCls(task) { return STATUS_CLS[task.status] || "chip-queued"; },
     queuePosition(task) {
       const idx = this.queuedTasks.findIndex((q) => q.id === task.id);
       if (idx < 0) return "";
       return t("list.queuePosition", { n: idx + 1 });
+    },
+    paramSummary(task) {
+      const cfg = task.config || {};
+      const parts = [];
+      if (cfg.autoSegment && cfg.diarize) {
+        if (cfg.numSpeakers) parts.push(t("list.paramSpeakersN", { n: cfg.numSpeakers }));
+        else parts.push(t("list.paramSpeakersAuto"));
+      } else {
+        parts.push(t("list.paramNoSpeakers"));
+      }
+      if (cfg.summarize) parts.push(t("list.paramSummary"));
+      if (cfg.asrModel) parts.push(cfg.asrModel.replace("Qwen/Qwen3-ASR-", ""));
+      if (cfg.language) parts.push(t(`audioLang.${cfg.language}`) || cfg.language);
+      return parts.join(" · ");
     },
     formatBytes(n) {
       if (!n) return "-";
@@ -88,9 +116,9 @@ export const TaskList = {
       const months = i18n.locale === "es" ? monthsEs : monthsEn;
       return `${months[d.getMonth()]} ${d.getDate()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
     },
-    elapsedSec(t) {
-      if (!t || !t.startedAt) return 0;
-      const startMs = new Date(t.startedAt + (t.startedAt.endsWith("Z") ? "" : "Z")).getTime();
+    elapsedSec(task) {
+      if (!task || !task.startedAt) return 0;
+      const startMs = new Date(task.startedAt + (task.startedAt.endsWith("Z") ? "" : "Z")).getTime();
       return Math.max(0, (this.now - startMs) / 1000);
     },
     fmtDur(sec) { return fmtDurI18n(sec, i18n.locale); },
@@ -105,8 +133,7 @@ export const TaskList = {
       const elapsed = this.elapsedSec(task);
       if (elapsed < 3) return "";
       if (task.durationSec && task.durationSec > 0) {
-        const REALTIME_FACTOR = 1.5;
-        const estTotal = task.durationSec * REALTIME_FACTOR;
+        const estTotal = task.durationSec * 1.5;
         const remaining = estTotal - elapsed;
         if (remaining > 0) return t("list.etaLabel", { dur: this.fmtDur(remaining) });
         if (-remaining < estTotal * 0.5) return t("list.etaNear");
@@ -135,73 +162,38 @@ export const TaskList = {
     isRunning(t) { return t.status === "running"; },
     isFailed(t) { return t.status === "failed"; },
     isQueued(t) { return t.status === "queued"; },
-    progressValue(t) {
-      const p = Math.min(1, Math.max(0, t.progress || 0));
-      return p * 100;
-    },
     progressPercent(t) {
-      return Math.round(this.progressValue(t));
-    },
-    progressLabel(t) {
-      const pct = this.progressValue(t);
-      if (this.isRunning(t) && pct > 0 && pct < 99.95) return pct.toFixed(1);
-      return String(Math.round(pct));
-    },
-    languageLabel(task) {
-      const lang = task.config && task.config.language ? task.config.language : "English";
-      return t(`audioLang.${lang}`);
-    },
-    modelLabel(task) {
-      const model = task.config && task.config.asrModel ? task.config.asrModel : "Qwen/Qwen3-ASR-0.6B";
-      if (model.includes("1.7B")) return "1.7B";
-      return "0.6B";
-    },
-    speakerLabel(task) {
-      const cfg = task.config || {};
-      if (!cfg.autoSegment || !cfg.diarize) return t("list.paramNoSpeakers");
-      if (cfg.numSpeakers == null || cfg.numSpeakers === "auto") return t("list.paramSpeakersAuto");
-      return t("list.paramSpeakersN", { n: cfg.numSpeakers });
-    },
-    paramsText(task) {
-      const cfg = task.config || {};
-      const parts = [
-        this.speakerLabel(task),
-        cfg.summarize ? t("list.paramSummary") : t("list.paramNoSummary"),
-        this.modelLabel(task),
-        this.languageLabel(task),
-      ];
-      return parts.join(" · ");
+      const p = Math.min(1, Math.max(0, t.progress || 0));
+      return Math.round(p * 100);
     },
     onRowClick(t) {
       if (this.isDone(t) || this.isFailed(t) || this.isRunning(t)) this.$emit("open", t);
     },
   },
   template: `
-    <section class="task-section">
-      <div class="section-head">
-        <div>
+    <section class="col" style="gap:12px">
+      <div class="task-list-toolbar">
+        <div class="task-list-toolbar-left">
           <h2 class="section-title">{{ t('list.title') }}</h2>
-          <p class="section-hint">{{ t('list.hint') }}</p>
-        </div>
-        <div class="section-actions">
-          <div class="filter-chips" role="tablist" :aria-label="t('list.filterLabel')">
+          <div class="filter-chips" role="tablist" :aria-label="t('list.filterLabel') || t('list.title')">
             <button
-              v-for="filter in filters"
-              :key="filter.key"
+              v-for="f in filters"
+              :key="f.key"
               class="filter-chip"
-              :class="{ active: activeFilter === filter.key }"
-              @click="activeFilter = filter.key"
+              :class="{ active: filter === f.key }"
+              :aria-pressed="filter === f.key"
+              @click="setFilter(f.key)"
             >
-              {{ filter.label }}
-              <span class="filter-count">{{ filter.count }}</span>
+              <span>{{ f.label }}</span>
+              <span v-if="f.count > 0" class="filter-count">{{ f.count }}</span>
             </button>
           </div>
-          <button
-            class="btn btn-sm"
-            :disabled="!hasCompleted"
-            @click="$emit('clear-completed')"
-          >{{ t('list.clearCompleted') }}</button>
         </div>
+        <button
+          class="btn btn-sm"
+          :disabled="!hasCompleted"
+          @click="$emit('clear-completed')"
+        >{{ t('list.clearCompleted') }}</button>
       </div>
 
       <div class="task-list">
@@ -214,9 +206,13 @@ export const TaskList = {
           <div style="text-align:right">{{ t('list.colActions') }}</div>
         </div>
 
-        <div v-if="!filteredTasks.length" class="empty-state">
-          <div class="empty-state-title">{{ tasks.length ? t('list.emptyFilterTitle') : t('list.emptyTitle') }}</div>
-          <div>{{ tasks.length ? t('list.emptyFilterHint') : t('list.emptyHint') }}</div>
+        <div v-if="!tasks.length" class="empty-state">
+          <div class="empty-state-title">{{ t('list.emptyTitle') }}</div>
+          <div>{{ t('list.emptyHint') }}</div>
+        </div>
+        <div v-else-if="isFilteredEmpty" class="empty-state">
+          <div class="empty-state-title">{{ t('list.emptyFilterTitle') }}</div>
+          <div>{{ t('list.emptyFilterHint') }}</div>
         </div>
 
         <div
@@ -241,22 +237,22 @@ export const TaskList = {
               <div
                 class="progress-fill"
                 :class="{ 'is-running': isRunning(task), 'is-failed': isFailed(task), 'is-stopped': task.status === 'stopped' }"
-                :style="{ width: progressValue(task) + '%' }"
+                :style="{ width: progressPercent(task) + '%' }"
               ></div>
             </div>
             <div class="progress-stage" :class="{ 'progress-running': isRunning(task) }">
               <span v-if="isQueued(task)">{{ queuePosition(task) }}</span>
               <template v-else-if="isRunning(task)">
-                <span>{{ task.progressStage || task.fileName }} · {{ progressLabel(task) }}%</span>
+                <span>{{ task.progressStage || task.fileName }} · {{ progressPercent(task) }}%</span>
                 <span class="muted" style="margin-left:6px">{{ elapsedText(task) }}<span v-if="etaText(task)"> · {{ etaText(task) }}</span></span>
               </template>
               <span v-else-if="isDone(task)">{{ completionStat(task) }}</span>
               <span v-else-if="isFailed(task)">{{ t('list.clickError') }}</span>
-              <span v-else>{{ task.progressStage || '—' }} · {{ progressLabel(task) }}%</span>
+              <span v-else>{{ task.progressStage || '—' }} · {{ progressPercent(task) }}%</span>
             </div>
           </div>
 
-          <div class="task-params">{{ paramsText(task) }}</div>
+          <div class="task-params muted" :title="paramSummary(task)">{{ paramSummary(task) }}</div>
 
           <div class="task-time">{{ formatTime(task.createdAt) }}</div>
 

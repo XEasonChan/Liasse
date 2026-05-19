@@ -85,6 +85,7 @@ class TaskConfig(BaseModel):
     summarize: bool = False
     enableChat: bool = True
     summaryModel: str = "qwen3:4b"
+    userPref: Literal["auto", "quality", "speed"] = "auto"
 
 
 class SpeakerEditRequest(BaseModel):

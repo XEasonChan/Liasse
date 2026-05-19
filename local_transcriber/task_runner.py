@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import json
 import multiprocessing as mp
 import os
+import subprocess
+import sys
 import threading
 import time
 import traceback
@@ -12,6 +15,37 @@ from typing import Any, Dict, Optional
 from .web_models import TaskRow, init_db, session_scope, utc_now
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def _hold_no_sleep(worker_pid: int) -> Optional[subprocess.Popen]:
+    """跑长任务时持一个 power assertion，防止 macOS idle/system sleep 把 worker 杀掉。
+
+    用 `caffeinate -i -s -w <pid>` —— caffeinate 会跟着 worker 进程一起结束。
+    -i 阻止 idle system sleep，-s 阻止 AC 电源下的 system sleep，不挡 display sleep。
+    非 macOS 或 caffeinate 缺失时静默跳过（返回 None）。
+    """
+    if sys.platform != "darwin":
+        return None
+    try:
+        return subprocess.Popen(
+            ["/usr/bin/caffeinate", "-i", "-s", "-w", str(worker_pid)],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except (FileNotFoundError, OSError):
+        return None
+
+
+def _release_no_sleep(holder: Optional[subprocess.Popen]) -> None:
+    if holder is None:
+        return
+    if holder.poll() is None:
+        holder.terminate()
+        try:
+            holder.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            holder.kill()
 
 
 def _load_env() -> None:
@@ -37,16 +71,25 @@ def _worker_entry(
     """Runs in a fresh subprocess. Loads pipeline + executes job."""
     try:
         _load_env()
-        from .models import TranscriptionJob
+        from .models import SummaryResult, TranscriptionJob
+        from .ollama_lifecycle import unload_model
         from .pipeline import LocalTranscriptionPipeline
 
+        # ASR + diarization 不需要 Ollama LLM，先把可能残留的 4B/8B 卸掉给 MLX 让路。
+        # unload_model 内部已经吞掉所有网络错误，Ollama 没跑也无所谓。
+        for _stale_model in ("qwen3:4b", "qwen3:8b"):
+            unload_model(_stale_model)
+
         config = job_payload["config"]
+        task_id = job_payload["id"]
         audio_path = Path(job_payload["audioPath"])
         output_dir = Path(job_payload["outputDir"])
 
         if os.environ.get("WHISPERQWEN_FULLY_OFFLINE"):
             os.environ["HF_HUB_OFFLINE"] = "1"
             os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
+        legacy_summary = os.environ.get("LOCAL_TRANSCRIBER_LEGACY_SUMMARY") == "1"
 
         def on_progress(message: str, value: float) -> None:
             if stop_event.is_set():
@@ -57,6 +100,10 @@ def _worker_entry(
         auto_segment = True if auto_segment is None else bool(auto_segment)
         # 关闭自动分段时强制不做发言人识别，否则 diarization 没法对齐时间戳
         diarize = bool(config.get("diarize")) and auto_segment
+        summarize_requested = bool(config.get("summarize"))
+        # 新路径：让 task_runner 在 pipeline 之外调用 analyze_transcript，
+        # pipeline.run 内部不再做摘要，避免重复跑一次 Ollama。
+        pipeline_summary_enabled = summarize_requested and legacy_summary
         job = TranscriptionJob(
             audio_path=audio_path,
             output_dir=output_dir,
@@ -67,13 +114,61 @@ def _worker_entry(
             diarization_enabled=diarize,
             diarization_num_speakers=config.get("numSpeakers"),
             hf_token=os.environ.get("HF_TOKEN") or os.environ.get("PYANNOTE_AUTH_TOKEN"),
-            summary_enabled=bool(config.get("summarize")),
+            summary_enabled=pipeline_summary_enabled,
             summary_model=config.get("summaryModel") or "qwen3:4b",
             export_srt=True,
         )
 
         progress_queue.put({"type": "progress", "stage": "加载模型", "value": 0.02})
         result = LocalTranscriptionPipeline(on_progress=on_progress).run(job)
+
+        # 新路径：在 pipeline 之后调用分层分析（L1/L2/索引），更丰富。
+        # 旧路径走 LOCAL_TRANSCRIBER_LEGACY_SUMMARY=1，由 pipeline 内部生成摘要。
+        analysis_payload: Optional[Dict[str, Any]] = None
+        if summarize_requested and not legacy_summary:
+            from .memory_monitor import MemoryBudget
+            from .summary_pipeline import ProgressEvent, analyze as analyze_transcript
+
+            def _bridge_progress(ev: "ProgressEvent") -> None:
+                # analyze() 的进度在 0~1 之间；把它映射到 pipeline 完成后的
+                # 0.88 ~ 1.0 段，避免覆盖 ASR 阶段进度。
+                if stop_event.is_set():
+                    raise InterruptedError("用户停止了任务")
+                mapped = 0.88 + 0.12 * max(0.0, min(1.0, float(ev.value)))
+                progress_queue.put(
+                    {"type": "progress", "stage": ev.message, "value": mapped}
+                )
+
+            try:
+                analysis = analyze_transcript(
+                    segments=result.segments,
+                    output_dir=result.output_dir,
+                    task_id=task_id,
+                    budget=MemoryBudget.detect(),
+                    user_pref=config.get("userPref") or "auto",
+                    on_progress=_bridge_progress,
+                )
+                summary = SummaryResult(
+                    model=f"{analysis.model_used_l1}+{analysis.model_used_l2}",
+                    text=analysis.summary_markdown,
+                    chunks=[
+                        json.dumps(r.to_dict(), ensure_ascii=False)
+                        for r in analysis.l1_results
+                    ],
+                )
+                result.summary = summary
+                analysis_payload = analysis.to_dict()
+            except InterruptedError:
+                raise
+            except Exception as exc:
+                # 摘要失败不应让整个任务失败：转录本身已经成功导出。
+                progress_queue.put(
+                    {
+                        "type": "progress",
+                        "stage": f"摘要生成失败（{exc}），跳过分析",
+                        "value": 0.99,
+                    }
+                )
 
         segments = [
             {
@@ -87,19 +182,20 @@ def _worker_entry(
         ]
         summary_text = result.summary.text if result.summary else None
 
-        progress_queue.put(
-            {
-                "type": "done",
-                "outputs": {
-                    "dir": str(result.output_dir),
-                    "markdownPath": str(result.markdown_path),
-                    "jsonPath": str(result.json_path),
-                    "srtPath": str(result.srt_path) if result.srt_path else None,
-                },
-                "segments": segments,
-                "summaryText": summary_text,
-            }
-        )
+        done_msg: Dict[str, Any] = {
+            "type": "done",
+            "outputs": {
+                "dir": str(result.output_dir),
+                "markdownPath": str(result.markdown_path),
+                "jsonPath": str(result.json_path),
+                "srtPath": str(result.srt_path) if result.srt_path else None,
+            },
+            "segments": segments,
+            "summaryText": summary_text,
+        }
+        if analysis_payload is not None:
+            done_msg["analysis"] = analysis_payload
+        progress_queue.put(done_msg)
     except InterruptedError:
         progress_queue.put({"type": "stopped"})
     except Exception as exc:
@@ -241,6 +337,7 @@ class TaskRunner:
                 self._current_process = proc
                 self._current_stop_event = stop_event
             proc.start()
+            no_sleep_holder = _hold_no_sleep(proc.pid) if proc.pid else None
 
             final_msg: Optional[Dict[str, Any]] = None
             started = time.time()
@@ -273,6 +370,7 @@ class TaskRunner:
             if proc.is_alive():
                 proc.terminate()
                 proc.join(timeout=2)
+            _release_no_sleep(no_sleep_holder)
 
             elapsed = time.time() - started
             self._finalize(job["id"], final_msg or {"type": "failed", "error": "未知错误"}, elapsed)

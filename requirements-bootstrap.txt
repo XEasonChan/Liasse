@@ -1,0 +1,13 @@
+# Bootstrap 依赖：装完就能起 launch_app.py 让用户看到 UI。
+# 这一组刻意不引 mlx / torch / pyannote 这些大包；它们由 launcher.sh
+# 在后台调 `pip install -r requirements-mlx.txt` 继续装。
+# 总大小约 60-80 MB，首次启动 30-60 秒装完。
+fastapi
+uvicorn
+pywebview
+python-multipart
+python-dotenv
+httpx
+sqlalchemy
+psutil>=5.9
+jieba>=0.42
