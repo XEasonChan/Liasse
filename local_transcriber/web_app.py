@@ -21,15 +21,12 @@ from sqlalchemy.orm import Session
 from . import chat as chat_module
 from . import downloader as downloader_module
 from .settings_store import default_settings, load_settings, save_settings
-from .web_models import (
+from .db import TaskRow, init_db, session_scope, utc_now
+from .schemas import (
     DeleteResponse,
     SegmentEditRequest,
     SpeakerEditRequest,
     TaskConfig,
-    TaskRow,
-    init_db,
-    session_scope,
-    utc_now,
 )
 
 

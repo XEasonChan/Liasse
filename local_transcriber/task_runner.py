@@ -12,7 +12,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from .web_models import TaskRow, init_db, normalize_task_config, session_scope, utc_now
+from .db import TaskRow, init_db, session_scope, utc_now
+from .schemas import normalize_task_config
 
 ROOT = Path(__file__).resolve().parent.parent
 

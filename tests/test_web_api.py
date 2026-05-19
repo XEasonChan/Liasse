@@ -124,7 +124,7 @@ def test_clear_completed(client):
     t1 = _upload_fake_audio(client, "f.wav")
     t2 = _upload_fake_audio(client, "g.wav")
 
-    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, t1["id"])
@@ -258,7 +258,7 @@ def test_retry_failed_task_requeues(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, task["id"])
@@ -289,7 +289,7 @@ def test_retry_running_task_rejected(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, task["id"])
@@ -309,7 +309,7 @@ def test_retry_missing_audio_rejected(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.db import TaskRow, session_scope
 
     with session_scope() as s:
         row = s.get(TaskRow, task["id"])
@@ -330,7 +330,7 @@ def test_cleanup_orphans_marks_running_as_stopped(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.db import TaskRow, session_scope
     from local_transcriber.task_runner import TaskRunner
     import os
 
@@ -359,7 +359,7 @@ def test_task_runner_persists_partial_transcript(client, tmp_path):
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.db import TaskRow, session_scope
     from local_transcriber.task_runner import TaskRunner
     import os
 
@@ -408,7 +408,7 @@ def test_task_runner_finalize_persists_speaker_mode_warnings_and_suggested_label
     }
     task = client.post("/api/tasks/create-from-paths", json=payload).json()["tasks"][0]
 
-    from local_transcriber.web_models import TaskRow, session_scope
+    from local_transcriber.db import TaskRow, session_scope
     from local_transcriber.task_runner import TaskRunner
     import os
 

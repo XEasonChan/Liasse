@@ -3,9 +3,8 @@ from __future__ import annotations
 import secrets
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
 from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, Text, create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -75,72 +74,6 @@ class TaskRow(Base):
         }
 
 
-SpeakerMode = Literal["fast", "llm", "pyannote"]
-
-
-def normalize_speaker_mode(config: Optional[Dict[str, Any]]) -> str:
-    raw = dict(config or {})
-    explicit = raw.get("speakerMode")
-    if explicit in {"fast", "llm", "pyannote"}:
-        return str(explicit)
-    if "diarize" in raw:
-        return "pyannote" if bool(raw.get("diarize")) else "fast"
-    return "llm"
-
-
-def normalize_task_config(config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-    return TaskConfig(**dict(config or {})).model_dump()
-
-
-class TaskConfig(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    asrModel: Literal["Qwen/Qwen3-ASR-0.6B", "Qwen/Qwen3-ASR-1.7B"] = "Qwen/Qwen3-ASR-0.6B"
-    language: Literal["Chinese", "English", "Cantonese", "auto"] = "Chinese"
-    speakerMode: SpeakerMode = "llm"
-    diarize: bool = False
-    numSpeakers: Optional[int] = 2
-    autoSegment: bool = True
-    summarize: bool = False
-    enableChat: bool = True
-    summaryModel: str = "qwen3:4b"
-    userPref: Literal["auto", "quality", "speed"] = "auto"
-
-    @model_validator(mode="before")
-    @classmethod
-    def _migrate_legacy_diarize(cls, data: Any) -> Any:
-        if not isinstance(data, dict):
-            return data
-        migrated = dict(data)
-        if migrated.get("speakerMode") not in {"fast", "llm", "pyannote"}:
-            if "diarize" in migrated:
-                migrated["speakerMode"] = "pyannote" if bool(migrated.get("diarize")) else "fast"
-            else:
-                migrated["speakerMode"] = "llm"
-        return migrated
-
-    @model_validator(mode="after")
-    def _sync_legacy_diarize(self) -> "TaskConfig":
-        self.diarize = self.speakerMode == "pyannote"
-        if self.numSpeakers is not None:
-            self.numSpeakers = max(1, min(5, int(self.numSpeakers)))
-        return self
-
-
-class SpeakerEditRequest(BaseModel):
-    speakerId: str = Field(..., min_length=1)
-    label: str = Field(..., min_length=1, max_length=64)
-
-
-class SegmentEditRequest(BaseModel):
-    segmentId: str = Field(..., min_length=1)
-    text: str = Field(...)
-
-
-class DeleteResponse(BaseModel):
-    ok: bool
-    deletedOutputs: bool
-
-
 _engine: Optional[Engine] = None
 _SessionLocal: Optional[sessionmaker] = None
 
@@ -170,14 +103,8 @@ def session_scope() -> Session:
 __all__ = [
     "Base",
     "TaskRow",
-    "TaskConfig",
-    "SpeakerMode",
-    "normalize_speaker_mode",
-    "normalize_task_config",
-    "SpeakerEditRequest",
-    "SegmentEditRequest",
-    "DeleteResponse",
     "init_db",
+    "get_engine",
     "session_scope",
     "new_task_id",
     "utc_now",

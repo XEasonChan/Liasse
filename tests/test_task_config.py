@@ -1,6 +1,6 @@
 from local_transcriber.settings_store import normalize_settings
 from local_transcriber.task_runner import _resolve_speaker_execution
-from local_transcriber.web_models import TaskConfig, normalize_task_config
+from local_transcriber.schemas import TaskConfig, normalize_task_config
 
 
 def test_task_config_defaults_to_llm_mode():
