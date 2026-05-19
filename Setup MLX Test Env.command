@@ -15,12 +15,31 @@ else
 fi
 
 echo "使用 $PYTHON_BIN 创建 venv/"
-"$PYTHON_BIN" -m venv venv
+exit_code=0
+"$PYTHON_BIN" -m venv venv || exit_code=$?
 
-echo "安装 MLX/Qwen 测试依赖（PyPI 官方包）。这一步需要联网。"
-venv/bin/python -m pip install -U pip setuptools wheel
-venv/bin/python -m pip install -r requirements-mlx.txt
+if [ "$exit_code" -eq 0 ]; then
+  echo "安装基础桌面依赖。"
+  venv/bin/python -m pip install -U pip setuptools wheel || exit_code=$?
+fi
+
+if [ "$exit_code" -eq 0 ]; then
+  venv/bin/python -m pip install -r requirements-bootstrap.txt || exit_code=$?
+fi
+
+if [ "$exit_code" -eq 0 ]; then
+  echo "安装 MLX/Qwen 转录依赖（PyPI 官方包）。这一步需要联网。"
+  venv/bin/python -m pip install -r requirements-mlx.txt || exit_code=$?
+fi
 
 echo ""
-echo "完成。现在可以双击 Run Test Audio.command。"
-read "?按回车关闭..."
+if [ "$exit_code" -eq 0 ]; then
+  echo "完成。现在可以运行 ./Check\\ Runtime.command，然后启动 ./Start\\ Liasse.command。"
+else
+  echo "安装失败，请看上面的错误信息。"
+fi
+
+if [ -t 0 ]; then
+  read "?按回车关闭..."
+fi
+exit "$exit_code"

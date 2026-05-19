@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="#use-cases">使用场景</a> · <a href="#how-it-works">如何运作</a> · <a href="#quickstart">快速开始</a> · <a href="#customize-with-codex">自定义</a> · <a href="#privacy">隐私</a>
+  <a href="#use-cases">使用场景</a> · <a href="#how-it-works">如何运作</a> · <a href="#quickstart">快速开始</a> · <a href="#agent-starter">AI Agent Starter</a> · <a href="#privacy">隐私</a>
 </p>
 
 ---
@@ -113,29 +113,48 @@ Liasse 是一个**有 taste 的本地 LLM 产品**——目标是让任何人都
 - **可读可改** — 整个产品是 Python + Vue 3 CDN，没有 webpack、没有 npm 构建、没有 React 框架。任何懂一点点代码的人，加上一个 AI agent（Codex / Claude Code / Cursor），就能在半小时里把界面、文案、模型选型改成自己的样子。
 - **零云依赖** — 一旦模型在本地，App 永远不联网。设置里的"完全离线"开关把 `HF_HUB_OFFLINE=1` 和 `TRANSFORMERS_OFFLINE=1` 都强制开启。
 
-<a id="customize-with-codex"></a>
+<a id="agent-starter"></a>
 
-## 用 Codex 自定义
+## AI Agent Starter
 
-Liasse 故意保持小、可读、无构建步骤——这样**任何 AI coding agent 都能在你的机器上理解并修改它**：
+Liasse 故意保持小、可读、无构建步骤。你可以把仓库链接交给 Claude Code、Codex CLI 或 Cursor，让它在你的 Mac 上逐步检查环境、确认下载、启动应用。
+
+先 clone：
 
 ```bash
-# 用 Claude Code（推荐）
-cd "Liasse 项目目录"
-claude
-
-# 或者 OpenAI Codex CLI
-codex
+git clone https://github.com/XEasonChan/Liasse.git
+cd Liasse
 ```
 
-然后用自然语言提需求即可：
+然后把这段复制给 agent：
 
-- "把侧边栏的 Liasse 字标换成我们实验室的名字。"
-- "新增一个『去隐私信息』功能，自动把转录里的人名替换为 [P1] [P2]。"
-- "把总结模板改成 IRB 报告格式。"
-- "西语场景里默认使用 1.7B ASR，其他语言用 0.6B。"
+```text
+请帮我在这台 Mac 上安装并启动 Liasse。
 
-代码组织（`liasse/` Python 包 + `web_static/` Vue 3 前端）和设计系统（[`design.md`](design.md) 是 single source of truth）都为这种"AI 协作改造"做了准备。
+先阅读 AGENTS.md 和 ARCHITECTURE.md，再行动。目标是完成本地运行，不要改产品功能。
+
+约束：
+- 只使用 Python 3.12；venv 目录必须叫 venv/，不要创建 .venv/。
+- 所有 shell 路径都要加引号，因为目录可能在 iCloud Drive 里。
+- 可以检查 Homebrew、Python、ffmpeg、Ollama、模型缓存和磁盘空间。
+- 需要安装系统依赖时，先告诉我要运行的 brew 命令。
+- 需要下载大模型前先停下来确认。默认只准备 Qwen3-ASR-0.6B、Qwen3-ForcedAligner-0.6B 和 qwen3:4b。
+- 不要默认下载 Qwen3-ASR-1.7B、qwen3:8b 或 pyannote；除非我明确同意。
+- 不要替我写入、打印或覆盖 .env。需要 pyannote 时，提醒我准备 HF_TOKEN 并先接受 Hugging Face 模型许可。
+- 不要擅自启动长期运行的 Ollama 守护进程；先询问我是用 ollama serve 还是 brew services start ollama。
+
+完成后运行健康检查，并告诉我下一步怎么打开桌面应用。
+```
+
+默认安装会涉及这些本地模型：
+
+| 用途 | 默认模型 | 体积 |
+| --- | --- | ---: |
+| 转录 | `Qwen/Qwen3-ASR-0.6B` | 约 1.2 GB |
+| 时间戳对齐 | `Qwen/Qwen3-ForcedAligner-0.6B` | 约 1.3 GB |
+| 总结 / 问答 | `qwen3:4b`（Ollama） | 约 2.5 GB |
+
+可选模型：`Qwen/Qwen3-ASR-1.7B` 约 3.4 GB，`qwen3:8b` 约 5.2 GB，`pyannote/speaker-diarization-community-1` 约 600 MB 且需要 Hugging Face token 与许可确认。
 
 <a id="privacy"></a>
 

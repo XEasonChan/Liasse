@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="#use-cases">Use cases</a> · <a href="#how-it-works">How it works</a> · <a href="#quickstart">Quickstart</a> · <a href="#customize-with-codex">Customize</a> · <a href="#privacy">Privacy</a>
+  <a href="#use-cases">Use cases</a> · <a href="#how-it-works">How it works</a> · <a href="#quickstart">Quickstart</a> · <a href="#agent-starter">AI Agent Starter</a> · <a href="#privacy">Privacy</a>
 </p>
 
 ---
@@ -113,29 +113,48 @@ Liasse is **a tasteful local-LLM product** designed so anyone can install, use, 
 - **Readable and modifiable** — The whole product is Python + Vue 3 from CDN. No webpack, no npm build, no React framework. Anyone with a little code experience, plus an AI agent (Codex / Claude Code / Cursor), can reshape the UI, copy, or model choices in under an hour.
 - **Zero cloud dependence** — Once models are local, the app never goes online. A "fully offline" toggle in settings forces `HF_HUB_OFFLINE=1` and `TRANSFORMERS_OFFLINE=1`.
 
-<a id="customize-with-codex"></a>
+<a id="agent-starter"></a>
 
-## Customize with Codex
+## AI Agent Starter
 
-Liasse stays small, readable, and build-step-free on purpose — so **any AI coding agent can understand and modify it on your machine**:
+Liasse stays small, readable, and build-step-free on purpose. You can give this repository link to Claude Code, Codex CLI, or Cursor and ask it to check the machine, confirm downloads, and launch the app step by step.
+
+Clone first:
 
 ```bash
-# With Claude Code (recommended)
-cd "Liasse project directory"
-claude
-
-# Or OpenAI Codex CLI
-codex
+git clone https://github.com/XEasonChan/Liasse.git
+cd Liasse
 ```
 
-Then ask in plain language:
+Then paste this to your agent:
 
-- "Replace the Liasse wordmark in the sidebar with our lab's name."
-- "Add a redaction pass that replaces person names with `[P1] [P2]` in every transcript."
-- "Change the summary template to match the IRB report format."
-- "Use the 1.7 B ASR by default for Spanish recordings, 0.6 B for the rest."
+```text
+Please help me install and launch Liasse on this Mac.
 
-The codebase (`liasse/` Python package + `web_static/` Vue 3 front-end) and the design system ([`design.md`](design.md) is single source of truth) are set up for this kind of "AI collaboration on a real product."
+Read AGENTS.md and ARCHITECTURE.md before acting. The goal is local setup, not product changes.
+
+Constraints:
+- Use Python 3.12 only; the virtualenv must be named venv/, not .venv/.
+- Quote shell paths because the directory may live in iCloud Drive.
+- You may check Homebrew, Python, ffmpeg, Ollama, model cache, and disk space.
+- Before installing system dependencies, tell me the exact brew command.
+- Before downloading large models, stop and ask. By default, prepare only Qwen3-ASR-0.6B, Qwen3-ForcedAligner-0.6B, and qwen3:4b.
+- Do not download Qwen3-ASR-1.7B, qwen3:8b, or pyannote unless I explicitly approve.
+- Do not write, print, or overwrite .env for me. If pyannote is needed, remind me to provide HF_TOKEN and accept the Hugging Face model license first.
+- Do not silently start a long-running Ollama daemon; ask whether I prefer ollama serve or brew services start ollama.
+
+After setup, run the health check and tell me how to open the desktop app.
+```
+
+Default local models:
+
+| Purpose | Default model | Size |
+| --- | --- | ---: |
+| Transcription | `Qwen/Qwen3-ASR-0.6B` | about 1.2 GB |
+| Timestamp alignment | `Qwen/Qwen3-ForcedAligner-0.6B` | about 1.3 GB |
+| Summary / Q&A | `qwen3:4b` through Ollama | about 2.5 GB |
+
+Optional models: `Qwen/Qwen3-ASR-1.7B` is about 3.4 GB, `qwen3:8b` is about 5.2 GB, and `pyannote/speaker-diarization-community-1` is about 600 MB and requires a Hugging Face token plus license acceptance.
 
 <a id="privacy"></a>
 

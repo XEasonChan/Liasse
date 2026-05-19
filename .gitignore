@@ -2,7 +2,6 @@
 .env
 .DS_Store
 .claude/
-AGENTS.md
 CLAUDE.md
 
 # Python environments and caches
