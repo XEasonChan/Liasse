@@ -27,6 +27,22 @@ class PyannoteDiarizer:
         if self.hf_token:
             kwargs["use_auth_token"] = self.hf_token
         pipeline = Pipeline.from_pretrained(self.model_name_or_path, **kwargs)
+
+        # Apple Silicon: 把 pipeline 切到 Metal/MPS，3-5x 加速。
+        # 失败静默落回 CPU。
+        try:
+            import os as _os
+            import torch as _torch
+
+            if (
+                hasattr(_torch.backends, "mps")
+                and _torch.backends.mps.is_available()
+            ):
+                _os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+                pipeline.to(_torch.device("mps"))
+        except Exception:
+            pass
+
         diarization = pipeline(str(audio_path))
 
         turns: List[SpeakerTurn] = []

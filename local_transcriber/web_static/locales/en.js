@@ -15,7 +15,7 @@ export const en = {
   },
   home: {
     title: "Transcribe",
-    subtitle: "Upload audio files or pick a folder of audio. WhisperQwen transcribes locally, optionally labels speakers, and keeps everything on this machine.",
+    subtitle: "Upload audio files or pick a folder. Liasse transcribes locally, optionally labels speakers, and keeps every byte on this machine.",
   },
   upload: {
     title: "Drop files here or click to choose",

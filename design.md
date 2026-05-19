@@ -1,10 +1,14 @@
-# Electron 本地 ASR 桌面应用设计规范
+# Liasse 本地访谈转录工具 · 设计规范
 
-文件名建议：`design.md`  
-版本：v0.1  
+文件名：`design.md`  
+版本：v0.2 · System D · Cobalt &amp; Lavender  
 状态：可交给 Claude Code / Cursor / 前端 agent 执行  
-设计基准：本对话中生成的浅色桌面应用设计稿  
-目标风格：Granola-like 的简洁桌面工作台风格，但不复制任何品牌资产
+设计基准：2026-05-19 品牌咨询结论（见 `outputs/brand_consulting_report.html`、`outputs/design_system_review.html`）  
+目标风格：欧洲学术出版物 + 现代桌面 app 的混合——黑 / 白 / 米色骨架，cobalt 蓝管"机构与状态"，lavender 渐变管"声音与内容"，全 serif 字体。低噪音、克制、可信。
+
+> **品牌**：Liasse（法语，意为"一束被妥善收束起来的档案材料"）。  
+> **副标题**：Private local transcription for interviews and case files.  
+> **目标用户**：欧洲学术 PI、IRB/DPO、口述史研究者、美国诉讼律师、paralegal、西语/拉美研究项目负责人。
 
 ---
 
@@ -31,16 +35,21 @@
 
 ### 2.1 视觉原则
 
-整体界面需要保持安静、轻量、桌面工具感强：
+整体界面像一份"印刷品 + 现代 app"的混合体——欧陆学术出版的克制，加上桌面工具的可用性：
 
-- 背景使用接近白色的暖灰色。
-- 卡片使用白色或半透明白色。
-- 边框使用极浅灰色，避免强分割线。
-- 主色使用偏蓝紫的渐变色，用于主要按钮、进度条、激活态。
-- 大量留白，减少视觉噪音。
-- 字体使用系统字体，不引入夸张展示字体。
-- 图标使用统一线性 SVG 图标，不使用 emoji。
-- 状态反馈用轻量标签、进度条和淡色背景，而不是高饱和大面积色块。
+- 背景使用偏暖的 off-white（`#fbf8f3`），不是冷蓝白。
+- 卡片使用纯白或极浅米色，边框用 cream 色细线（`#d6cfbf`），避免强分割。
+- **配色分工严格**：
+  - **黑 / 白 / 米色（cream）** = 骨架，承载 90% 的视觉面积。
+  - **Cobalt 蓝（`#1a3a78`）** = 机构性 accent——offline / local 状态、规则线、年份/卷号标签、合规副标题、机构性强调。
+  - **Lavender 渐变（`#7d6db0 → #9285c0 → #aea3d6`）** = 内容性 accent——波形、进度条、说话人标记、回放高亮、引言强调。
+  - 两个 accent **永远不混用**——一旦混用会立刻"软掉"，失去机构感。
+- 字体使用衬线字体（DM Serif Display + DM Serif Text），CJK 字符 fallback 到苹方 / 思源宋体。**不使用 Inter / 系统 sans-serif 作为主字体。**
+- 圆角整体收紧（2-3px 为主），更像印刷物，少用 18-22px 的圆角。
+- 阴影几乎不用——靠 1px hairline 和留白制造层级。
+- 图标使用统一线性 SVG（Lucide），线宽 1.5（比之前的 1.75 更细，与衬线字体协调）。
+- 不使用 emoji。
+- 状态反馈用 hairline 边框 + 小字 + 小标签，不用大面积彩色背景。
 
 ### 2.2 交互原则
 
@@ -132,109 +141,259 @@ Sidebar 使用固定宽度，右侧有一条极浅分割线。
 
 ---
 
-## 5. 颜色系统
+## 5. 颜色系统 — System D · Cobalt &amp; Lavender
 
-建议定义为 CSS variables，方便后续主题化。
+完整 token 表定义为 CSS variables。
 
 ```css
 :root {
-  --bg-app: #f8f8fb;
-  --bg-sidebar: rgba(255, 255, 255, 0.72);
-  --bg-surface: #ffffff;
-  --bg-surface-soft: #fbfbfd;
-  --bg-surface-hover: #f5f5fb;
+  /* ============ paper / surfaces ============ */
+  --paper:            #fbf8f3;   /* 主背景 off-white */
+  --paper-2:          #ffffff;   /* 卡片背景 */
+  --paper-3:          #f4ede0;   /* 暖米色 surface */
+  --cream:            #e4ddcb;   /* 强调 cream 色块 */
+  --cream-soft:       #efe9d8;   /* 柔 cream — 例如非激活区底色 */
 
-  --border-subtle: #e6e7ee;
-  --border-strong: #d6d8e3;
+  --bg-app:           var(--paper);
+  --bg-sidebar:       rgba(255, 255, 255, 0.78);
+  --bg-surface:       var(--paper-2);
+  --bg-surface-soft:  #faf5ec;
+  --bg-surface-hover: #f4ede0;
 
-  --text-primary: #12131a;
-  --text-secondary: #626879;
-  --text-tertiary: #8b91a3;
-  --text-inverse: #ffffff;
+  /* ============ ink (text) ============ */
+  --ink:              #0a0807;   /* 主文本 */
+  --ink-soft:         #2a241f;   /* 次文本 / 段落 */
+  --muted:            #6a6158;   /* 三级文字 / 元信息 */
+  --muted-2:          #8a8175;   /* 占位 / 辅助 */
+  --text-primary:     var(--ink);
+  --text-secondary:   var(--ink-soft);
+  --text-tertiary:    var(--muted);
+  --text-quaternary:  var(--muted-2);
+  --text-inverse:     var(--paper);
 
-  --accent: #5b5cf6;
-  --accent-hover: #4f46e5;
-  --accent-soft: #eef0ff;
-  --accent-border: #d9dcff;
+  /* ============ lines ============ */
+  --line:             #d6cfbf;   /* 默认 hairline */
+  --line-soft:        #e6dfcc;   /* 极浅分割 */
+  --rule:             #b8a98e;   /* 强分隔线（章节） */
+  --border-subtle:    var(--line-soft);
+  --border-strong:    var(--line);
 
-  --success: #22c55e;
-  --success-soft: #e9f9ef;
-  --success-border: #bfeccd;
+  /* ============ cobalt — institutional accent ============ */
+  --cobalt:           #1a3a78;   /* 主 cobalt */
+  --cobalt-hover:     #15305f;
+  --cobalt-soft:      #e4eaf3;   /* cobalt 浅底 */
+  --cobalt-border:    #c7d2e3;
 
-  --warning: #f59e0b;
-  --warning-soft: #fff7e6;
-  --warning-border: #f7d794;
+  /* ============ lavender — content accent ============ */
+  --lavender-1:       #7d6db0;   /* 渐变起点 — 较深 */
+  --lavender-2:       #9285c0;   /* 渐变中点 — 主 lavender */
+  --lavender-3:       #aea3d6;   /* 渐变终点 — 较浅 */
+  --lavender-soft:    #ece8f5;   /* lavender 极浅底 */
+  --lavender-border:  #d8d0ea;
+  --lavender-deep:    #6b5d96;   /* hover / 强调 */
 
-  --danger: #ef4444;
-  --danger-soft: #fff1f1;
-  --danger-border: #fecaca;
+  /* ============ semantic（仍用低饱和） ============ */
+  --success:          #4a6650;   /* archive green，不是亮绿 */
+  --success-soft:     #e7eee9;
+  --success-border:   #c8d4ca;
 
-  --progress-track: #e8e9f1;
-  --shadow-card: 0 18px 45px rgba(31, 35, 62, 0.06);
-  --shadow-button: 0 12px 24px rgba(91, 92, 246, 0.22);
+  --warning:          #94703a;   /* brass，不是亮黄 */
+  --warning-soft:     #f0e7d5;
+  --warning-border:   #dccba6;
+
+  --danger:           #762a2a;   /* oxblood，不是亮红 */
+  --danger-soft:      #f0dcdc;
+  --danger-border:    #d9b8b8;
+
+  --progress-track:   #ece5d4;
+
+  /* ============ accent legacy alias（兼容旧代码） ============ */
+  --accent:           var(--lavender-2);
+  --accent-hover:     var(--lavender-deep);
+  --accent-soft:      var(--lavender-soft);
+  --accent-border:    var(--lavender-border);
+
+  /* ============ shadows — 极少用 ============ */
+  --shadow-card:      0 1px 0 rgba(31, 27, 22, 0.04);
+  --shadow-card-lg:   0 10px 28px rgba(31, 27, 22, 0.06);
+  --shadow-button:    none;     /* 按钮靠边框，不靠阴影 */
 }
 ```
 
 ### 5.1 背景
 
-应用背景使用轻微径向渐变，增强空间感，但不能太明显：
+应用背景纯净，不使用径向渐变彩色光晕。可以加一层极淡的纸面纹理：
 
 ```css
-.app {
-  background:
-    radial-gradient(circle at 72% 0%, rgba(124, 111, 255, 0.08), transparent 36%),
-    radial-gradient(circle at 18% 100%, rgba(91, 92, 246, 0.05), transparent 32%),
-    var(--bg-app);
+body {
+  background: var(--bg-app);
+}
+
+/* 可选：极淡纸纹 — 像 brand_consulting_report.html 里那个 */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(60, 46, 28, 0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: multiply;
+  z-index: 1;
 }
 ```
 
-### 5.2 主按钮渐变
+### 5.2 主按钮 — Cobalt 实心
+
+主操作按钮使用 cobalt 实心，不用渐变。这是"机构性"动作。
 
 ```css
-.primary-button {
-  background: linear-gradient(135deg, #5b5cf6 0%, #7c6fff 100%);
-  color: var(--text-inverse);
-  box-shadow: var(--shadow-button);
+.btn-primary {
+  background: var(--cobalt);
+  color: var(--paper);
+  border: 1px solid var(--cobalt);
+  border-radius: 3px;
+  padding: 10px 18px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 400;
+  letter-spacing: 0;
+  transition: background .12s;
+}
+.btn-primary:hover { background: var(--cobalt-hover); }
+```
+
+### 5.3 Lavender 渐变 — 进度条 / 波形 / 内容高亮
+
+```css
+.progress-fill,
+.waveform-bar,
+.content-highlight {
+  background: linear-gradient(90deg,
+    var(--lavender-1) 0%,
+    var(--lavender-2) 50%,
+    var(--lavender-3) 100%);
+}
+
+/* 垂直版本 — 波形单根柱 */
+.wave-bar {
+  background: linear-gradient(180deg, var(--lavender-3) 0%, var(--lavender-1) 100%);
 }
 ```
+
+### 5.4 配色使用规则（强约束）
+
+| 元素 | 颜色 | 不要用 |
+| --- | --- | --- |
+| 主按钮、机构状态 chip、规则线、章节编号、年份/卷号 | **Cobalt** | lavender |
+| 波形、进度条、说话人色块、回放游标、引言强调 | **Lavender 渐变** | cobalt |
+| 正文、标题 | **Ink** | cobalt 蓝色文字 |
+| 卡片背景 | **Paper / cream** | cobalt soft 或 lavender soft（除 hover/active 状态） |
+| Hover / 激活背景 | **极浅 cobalt soft 或 lavender soft** | 高饱和填充 |
+| 错误 | **Oxblood `#762a2a`** | 亮红 `#ef4444` |
+| 警告 | **Brass `#94703a`** | 亮黄 `#f59e0b` |
+| 成功 | **Archive green `#4a6650`** | 亮绿 `#22c55e` |
 
 ---
 
-## 6. 字体系统
+## 6. 字体系统 — Serif first
 
-使用系统字体：
+**主显示字体（display）**：DM Serif Display — 现代衬线，slab-edged，用于标题、wordmark、强调引言。  
+**主正文字体（text）**：DM Serif Text — DM 系列的工作版本，长文段不刺眼。  
+**辅助字体（meta / 元信息）**：Source Serif 4 — 给小字标签、letterspacing 大写小字。  
+**CJK fallback**：苹方 / 思源宋体（macOS / Windows 系统衬线优先）。
 
 ```css
-font-family:
-  Inter,
-  ui-sans-serif,
-  system-ui,
-  -apple-system,
-  BlinkMacSystemFont,
-  "Segoe UI",
-  "PingFang SC",
-  "Microsoft YaHei",
-  sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root {
+  --font-display:
+    'DM Serif Display',
+    'EB Garamond',
+    'Source Han Serif SC',
+    '思源宋体',
+    Georgia,
+    'Times New Roman',
+    serif;
+
+  --font-text:
+    'DM Serif Text',
+    'EB Garamond',
+    'Source Han Serif SC',
+    '思源宋体',
+    Georgia,
+    'Times New Roman',
+    serif;
+
+  --font-meta:
+    'Source Serif 4',
+    'DM Serif Text',
+    Georgia,
+    serif;
+
+  /* tabular numerals — for time codes, file sizes, durations */
+  --font-numeric: 'DM Serif Text', Georgia, serif;
+}
+
+html, body {
+  font-family: var(--font-text);
+  font-feature-settings: "kern" 1, "liga" 1, "onum" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+.display, h1, h2, .page-title, .brand-name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.012em;
+}
+
+.meta, .eyebrow, .label, .nav-item, .pill, th, .status-chip {
+  font-family: var(--font-meta);
+  letter-spacing: 0.04em;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* italic 是 lavender 强调的默认形态 */
+em, .italic, .accent-italic {
+  font-style: italic;
+  color: var(--lavender-deep);
+}
 ```
 
 字号规范：
 
 ```css
---font-page-title: 30px;
---font-section-title: 20px;
---font-body: 15px;
---font-small: 13px;
---font-micro: 12px;
+:root {
+  --font-display-xl: 48px;   /* hero */
+  --font-display-lg: 36px;   /* page title */
+  --font-display-md: 26px;   /* section title */
+  --font-display-sm: 20px;   /* card title */
+  --font-body:       16px;
+  --font-small:      14px;
+  --font-meta:       12px;
+  --font-micro:      11px;   /* eyebrow / label，搭配 0.22em letterspacing */
+
+  --leading-tight:   1.12;
+  --leading-snug:    1.35;
+  --leading-body:    1.55;
+  --leading-loose:   1.7;
+}
 ```
 
-字重规范：
+字重规范（serif 字体字重普遍较少）：
 
 ```css
---weight-regular: 400;
---weight-medium: 500;
---weight-semibold: 600;
---weight-bold: 700;
+--weight-regular:  400;
+--weight-medium:   500;
+--weight-italic:   400 italic;
 ```
+
+> **注意**：DM Serif Display 和 DM Serif Text 都只有 400 重量。需要"加粗"的视觉强调一律用斜体 italic 而不是 weight。这是欧洲学术出版物里典型的强调系统。
 
 ---
 
@@ -604,12 +763,12 @@ const taskStatusLabel = {
 | 已取消   | `--bg-surface-soft` | `--text-tertiary`  |
 
 
-### 9.7 Progress Bar
+### 9.7 Progress Bar — Lavender gradient
 
 ```css
 .progress {
   height: 6px;
-  border-radius: 999px;
+  border-radius: 3px;
   background: var(--progress-track);
   overflow: hidden;
 }
@@ -617,8 +776,46 @@ const taskStatusLabel = {
 .progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #5b5cf6, #7c6fff);
+  background: linear-gradient(90deg,
+    var(--lavender-1) 0%,
+    var(--lavender-2) 50%,
+    var(--lavender-3) 100%);
 }
+```
+
+### 9.8 Waveform — Lavender vertical-gradient bars
+
+波形是 lavender 的"主场"。每根柱使用垂直渐变（深→浅，从上到下），柱间距 1.5px，柱宽 2px。
+
+```css
+.waveform {
+  display: flex;
+  align-items: center;
+  gap: 1.5px;
+  height: 56px;
+}
+.waveform > i {
+  display: block;
+  width: 2px;
+  border-radius: 1px;
+  background: linear-gradient(180deg,
+    var(--lavender-3) 0%,
+    var(--lavender-1) 100%);
+}
+/* 当前播放位置之前的柱 — 提高饱和度 */
+.waveform > i.played {
+  background: linear-gradient(180deg,
+    var(--lavender-2) 0%,
+    var(--lavender-deep) 100%);
+}
+/* 当前播放位置之后的柱 — 降低饱和度 */
+.waveform > i.upcoming {
+  opacity: 0.55;
+}
+/* 说话人 A / B / C 区分 — 通过色相微调，不靠饱和度 */
+.waveform > i.speaker-a { /* default lavender */ }
+.waveform > i.speaker-b { filter: hue-rotate(-12deg); }
+.waveform > i.speaker-c { filter: hue-rotate(18deg); }
 ```
 
 ### 9.8 Bottom Background Process Bar
@@ -705,8 +902,8 @@ CPU 23%    RAM 6.2/16 GB    GPU 18%       [打开日志]
 ### 11.1 Sidebar
 
 ```text
-WhisperQwen
-v1.0.0
+Liasse
+Private local transcription · v1.0.0
 
 转录
 发言人识别
@@ -716,17 +913,14 @@ AI Chat（Qwen 8B）
 设置
 ```
 
-如果产品名称未定，可以替换为：
-
-```text
-Qwen Local ASR
-```
+> **Wordmark 排版规则**：`Liasse` 一词在 sidebar 顶部、登录页、关于页一律使用 DM Serif Display italic，斜体本身就是它的强调形态。  
+> **副标题**：英文用 `Private local transcription`；中文产品语境用 `本地访谈转录工具`。
 
 ### 11.2 Main Header
 
 ```text
 转录
-上传音频文件或选择包含音频文件的文件夹，自动转录并识别发言人，生成分段结果。
+上传访谈或庭审录音，本地完成转录、说话人识别与分段。音频、转录、总结、日志——任何一项都不离开本机。
 ```
 
 ### 11.3 Upload Zone

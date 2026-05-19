@@ -26,7 +26,7 @@ export const Sidebar = {
           <img src="/static/assets/app-icon-512.png" alt="" />
         </div>
         <div>
-          <div class="brand-name">WhisperQwen</div>
+          <div class="brand-name"><em>Liasse</em></div>
           <div class="brand-version">v0.2 · {{ t('nav.tagline') }}</div>
         </div>
       </div>

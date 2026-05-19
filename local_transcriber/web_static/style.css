@@ -1,68 +1,169 @@
+/* ──────────────────────────────────────────────────────────
+   Liasse · Design System D — Cobalt & Lavender
+   See design.md §5–6 for full token spec.
+   ────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Serif+Text:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
 :root {
-  --bg-app: #f8f8fb;
-  --bg-sidebar: rgba(255, 255, 255, 0.72);
-  --bg-surface: #ffffff;
-  --bg-surface-soft: #fbfbfd;
-  --bg-surface-hover: #f5f5fb;
+  /* surfaces */
+  --paper:            #fbf8f3;
+  --paper-2:          #ffffff;
+  --paper-3:          #f4ede0;
+  --cream:            #e4ddcb;
+  --cream-soft:       #efe9d8;
 
-  --border-subtle: #e6e7ee;
-  --border-strong: #d6d8e3;
+  --bg-app:           var(--paper);
+  --bg-sidebar:       rgba(255, 255, 255, 0.78);
+  --bg-surface:       var(--paper-2);
+  --bg-surface-soft:  #faf5ec;
+  --bg-surface-hover: #f4ede0;
 
-  --text-primary: #12131a;
-  --text-secondary: #626879;
-  --text-tertiary: #8b91a3;
-  --text-inverse: #ffffff;
+  /* ink */
+  --ink:              #0a0807;
+  --ink-soft:         #2a241f;
+  --muted:            #6a6158;
+  --muted-2:          #8a8175;
+  --text-primary:     var(--ink);
+  --text-secondary:   var(--ink-soft);
+  --text-tertiary:    var(--muted);
+  --text-quaternary:  var(--muted-2);
+  --text-inverse:     var(--paper);
 
-  --accent: #5b5cf6;
-  --accent-hover: #4f46e5;
-  --accent-soft: #eef0ff;
-  --accent-border: #d9dcff;
+  /* lines */
+  --line:             #d6cfbf;
+  --line-soft:        #e6dfcc;
+  --rule:             #b8a98e;
+  --border-subtle:    var(--line-soft);
+  --border-strong:    var(--line);
 
-  --success: #22c55e;
-  --success-soft: #e9f9ef;
-  --success-border: #bfeccd;
+  /* cobalt — institutional accent */
+  --cobalt:           #1a3a78;
+  --cobalt-hover:     #15305f;
+  --cobalt-soft:      #e4eaf3;
+  --cobalt-border:    #c7d2e3;
 
-  --warning: #f59e0b;
-  --warning-soft: #fff7e6;
-  --warning-border: #f7d794;
+  /* lavender — content accent */
+  --lavender-1:       #7d6db0;
+  --lavender-2:       #9285c0;
+  --lavender-3:       #aea3d6;
+  --lavender-soft:    #ece8f5;
+  --lavender-border:  #d8d0ea;
+  --lavender-deep:    #6b5d96;
 
-  --danger: #ef4444;
-  --danger-soft: #fff1f1;
-  --danger-border: #fecaca;
+  /* semantic — muted archive palette */
+  --success:          #4a6650;
+  --success-soft:     #e7eee9;
+  --success-border:   #c8d4ca;
 
-  --progress-track: #e8e9f1;
-  --shadow-card: 0 16px 40px rgba(31, 35, 62, 0.045);
-  --shadow-card-strong: 0 18px 45px rgba(31, 35, 62, 0.08);
-  --shadow-button: 0 12px 24px rgba(91, 92, 246, 0.22);
+  --warning:          #94703a;
+  --warning-soft:     #f0e7d5;
+  --warning-border:   #dccba6;
+
+  --danger:           #762a2a;
+  --danger-soft:      #f0dcdc;
+  --danger-border:    #d9b8b8;
+
+  --progress-track:   #ece5d4;
+
+  /* legacy accent aliases — old code referencing --accent now resolves to lavender */
+  --accent:           var(--lavender-2);
+  --accent-hover:     var(--lavender-deep);
+  --accent-soft:      var(--lavender-soft);
+  --accent-border:    var(--lavender-border);
+
+  /* shadows — barely there */
+  --shadow-card:      0 1px 0 rgba(31, 27, 22, 0.04);
+  --shadow-card-strong: 0 10px 28px rgba(31, 27, 22, 0.06);
+  --shadow-button:    none;
 
   --sidebar-width: 280px;
   --main-padding-x: 28px;
   --main-padding-y: 24px;
 
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
-  --radius-xl: 22px;
+  /* tighter radii — printed-page feel */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --radius-xl: 8px;
   --radius-full: 999px;
 
-  --font-page-title: 28px;
-  --font-section-title: 18px;
-  --font-body: 14px;
-  --font-small: 13px;
+  --font-page-title: 36px;
+  --font-section-title: 22px;
+  --font-body: 16px;
+  --font-small: 14px;
   --font-micro: 12px;
+
+  /* typography stacks */
+  --font-display:
+    'DM Serif Display', 'EB Garamond',
+    'Source Han Serif SC', '思源宋体', 'Songti SC', '宋体',
+    Georgia, 'Times New Roman', serif;
+  --font-text:
+    'DM Serif Text', 'EB Garamond',
+    'Source Han Serif SC', '思源宋体', 'Songti SC', '宋体',
+    Georgia, 'Times New Roman', serif;
+  --font-meta:
+    'Source Serif 4', 'DM Serif Text', Georgia, serif;
 }
 
 html, body {
   height: 100%;
   margin: 0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei",
-    "Helvetica Neue", "Segoe UI", sans-serif;
+  font-family: var(--font-text);
   font-size: var(--font-body);
+  font-feature-settings: "kern" 1, "liga" 1, "onum" 1, "calt" 1;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   background: var(--bg-app);
+}
+
+/* very subtle paper grain — like brand_consulting_report.html */
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(60, 46, 28, 0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: multiply;
+  z-index: 1;
+}
+
+#app, .sidebar, .main { position: relative; z-index: 2; }
+
+/* display typography */
+.brand-name,
+.page-title,
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.012em;
+}
+.brand-name em, .page-title em, h1 em, h2 em, h3 em {
+  font-style: italic;
+  color: var(--lavender-deep);
+}
+
+/* italic = primary emphasis form (replaces bold) */
+.italic, em {
+  font-style: italic;
+}
+
+/* meta typography */
+.nav-item, .pill, .status-chip, .eyebrow, .model-row-label, .model-footnote {
+  font-family: var(--font-meta);
+}
+.eyebrow {
+  font-size: var(--font-micro);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* tabular numerals for time codes, durations, sizes */
+.tabular, .duration, .filesize, .timecode {
+  font-variant-numeric: tabular-nums;
 }
 
 #app {
@@ -121,7 +222,7 @@ input, select, textarea { font-family: inherit; }
 }
 .nav-item:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
 .nav-item.active {
-  background: linear-gradient(180deg, rgba(245, 246, 255, 0.96), rgba(241, 242, 255, 0.86));
+  background: linear-gradient(180deg, var(--lavender-soft), rgba(236, 232, 245, 0.6));
   color: var(--accent);
   border-color: var(--accent-border);
   font-weight: 500;
@@ -201,7 +302,7 @@ input, select, textarea { font-family: inherit; }
 }
 .upload-zone.is-drag-over {
   border-color: var(--accent);
-  background: rgba(245, 246, 255, 0.9);
+  background: var(--lavender-soft);
 }
 .upload-main {
   min-height: 192px;
@@ -243,12 +344,13 @@ input, select, textarea { font-family: inherit; }
 }
 .btn:hover { background: var(--bg-surface-hover); border-color: var(--border-strong); }
 .btn-primary {
-  background: linear-gradient(135deg, #5b5cf6, #7c6fff);
+  background: var(--cobalt);
   color: var(--text-inverse);
-  border-color: transparent;
-  box-shadow: var(--shadow-button);
+  border-color: var(--cobalt);
+  font-family: var(--font-display);
+  font-style: italic;
 }
-.btn-primary:hover { filter: brightness(1.05); }
+.btn-primary:hover { background: var(--cobalt-hover); border-color: var(--cobalt-hover); }
 .btn-ghost { background: transparent; border-color: transparent; color: var(--text-secondary); }
 .btn-ghost:hover { background: var(--bg-surface-hover); color: var(--text-primary); }
 .btn-danger { color: var(--danger); border-color: transparent; background: transparent; }
@@ -527,7 +629,10 @@ input, select, textarea { font-family: inherit; }
 .progress-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #5b5cf6, #7c6fff);
+  background: linear-gradient(90deg,
+    var(--lavender-1) 0%,
+    var(--lavender-2) 50%,
+    var(--lavender-3) 100%);
   transition: width .35s ease;
 }
 .progress-stage {
@@ -744,7 +849,10 @@ input, select, textarea { font-family: inherit; }
       transparent 75%,
       transparent
     ),
-    linear-gradient(90deg, #5b5cf6, #7c6fff);
+    linear-gradient(90deg,
+      var(--lavender-1) 0%,
+      var(--lavender-2) 50%,
+      var(--lavender-3) 100%);
   background-size: 40px 40px, 100% 100%;
   background-repeat: repeat, no-repeat;
   animation: progress-stripe 1.2s linear infinite;
@@ -887,8 +995,8 @@ input, select, textarea { font-family: inherit; }
 .banner-icon-spin { animation: spin 1.6s linear infinite; }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(91, 92, 246, 0.0); }
-  50%      { box-shadow: 0 0 0 4px rgba(91, 92, 246, 0.18); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(146, 133, 192, 0.0); }
+  50%      { box-shadow: 0 0 0 4px rgba(146, 133, 192, 0.22); }
 }
 .progress-fill.is-running { animation: progress-stripe 1.2s linear infinite, pulse-glow 1.8s ease-in-out infinite; }
 .banner-failed {

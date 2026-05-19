@@ -15,7 +15,7 @@ export const es = {
   },
   home: {
     title: "Transcribir",
-    subtitle: "Sube archivos de audio o elige una carpeta. WhisperQwen transcribe localmente, puede etiquetar hablantes y mantiene todo en esta máquina.",
+    subtitle: "Sube archivos de audio o elige una carpeta. Liasse transcribe localmente, puede etiquetar hablantes y mantiene todo en esta máquina.",
   },
   upload: {
     title: "Suelta archivos aquí o haz clic para elegir",
