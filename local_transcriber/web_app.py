@@ -510,58 +510,29 @@ def create_app() -> FastAPI:
 
     @app.post("/api/tasks/{task_id}/chat")
     def chat_stream(task_id: str, payload: ChatRequest, db: Session = Depends(get_db)):
+        from .memory_monitor import MemoryBudget
+        from .qa_engine import QAEngine, build_index_for_task
+
         task = db.get(TaskRow, task_id)
         if not task:
             raise HTTPException(status_code=404, detail="任务不存在")
         if not task.transcript or not task.transcript.get("segments"):
             raise HTTPException(status_code=400, detail="还没有逐字稿可用于问答")
 
-        edits = task.edits or {}
-        transcript_text = chat_module.segments_to_text(
-            task.transcript["segments"],
-            speaker_labels=edits.get("speakerLabels") or {},
-            overrides=edits.get("segmentOverrides") or {},
-        )
-        model = (task.config or {}).get("summaryModel") or "qwen3:4b"
-        digest_cached = task.chat_context_digest
+        index = build_index_for_task(task)
+        if index is None:
+            raise HTTPException(status_code=400, detail="逐字稿为空，无法建立检索索引")
+
         history = list(task.chat_messages or [])
         user_message = payload.message
         ts_request = datetime.utcnow().isoformat()
+        user_pref = (task.config or {}).get("userPref") or "auto"
+        engine = QAEngine(index=index, budget=MemoryBudget.detect(), user_pref=user_pref)
 
         def event_stream():
-            digest = digest_cached
-            if not digest:
-                yield f"event: info\ndata: {json.dumps('首次提问，正在生成访谈要点（约 30-90 秒）', ensure_ascii=False)}\n\n"
-                try:
-                    digest = chat_module.generate_digest(transcript_text, model=model)
-                except RuntimeError as exc:
-                    yield f"event: error\ndata: {json.dumps(str(exc), ensure_ascii=False)}\n\n"
-                    return
-                try:
-                    with session_scope() as s2:
-                        row = s2.get(TaskRow, task_id)
-                        if row is not None:
-                            row.chat_context_digest = digest
-                            s2.commit()
-                except Exception:
-                    pass
-                yield f"event: info\ndata: {json.dumps('要点已就绪，开始回答…', ensure_ascii=False)}\n\n"
-
-            collected = []
-            retrieval_context = chat_module.retrieve_context(
-                task.transcript["segments"],
-                user_message,
-                speaker_labels=edits.get("speakerLabels") or {},
-                overrides=edits.get("segmentOverrides") or {},
-            )
+            collected: List[str] = []
             try:
-                for delta in chat_module.stream_chat(
-                    digest=digest,
-                    history=history,
-                    message=user_message,
-                    model=model,
-                    retrieval_context=retrieval_context,
-                ):
+                for delta in engine.answer(user_message, history=history):
                     collected.append(delta)
                     yield f"event: delta\ndata: {json.dumps(delta, ensure_ascii=False)}\n\n"
             except Exception as exc:

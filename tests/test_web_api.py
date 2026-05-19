@@ -459,3 +459,66 @@ def test_health_returns_blockers_field(client):
     assert isinstance(body["blockers"], list)
     assert "asr_model" in body["checks"]
     assert "disk_free_gb" in body["checks"]
+
+
+def test_chat_endpoint_uses_qa_engine(client, monkeypatch):
+    """/chat 路由必须经过 QAEngine.answer；不应再调用 chat.generate_digest。"""
+    from local_transcriber.db import session_scope, TaskRow
+
+    task = _upload_fake_audio(client, "chat-target.wav")
+    with session_scope() as s:
+        row = s.get(TaskRow, task["id"])
+        row.status = "completed"
+        row.transcript = {
+            "segments": [
+                {"id": "seg-0", "speaker": "A", "start": 0.0, "end": 5.0,
+                 "text": "我们讨论教育公平"},
+                {"id": "seg-1", "speaker": "B", "start": 5.0, "end": 10.0,
+                 "text": "资源分配是核心"},
+            ]
+        }
+        s.commit()
+
+    calls = {"answer": 0, "digest": 0}
+
+    from local_transcriber import qa_engine as qa_engine_module
+    real_engine_cls = qa_engine_module.QAEngine
+
+    class _SpyEngine(real_engine_cls):
+        def answer(self, question, history, top_k=None, client=None):
+            calls["answer"] += 1
+            yield "测试"
+            yield "回答"
+
+    monkeypatch.setattr(qa_engine_module, "QAEngine", _SpyEngine)
+
+    from local_transcriber import chat as chat_module
+
+    def _fail_digest(*a, **kw):
+        calls["digest"] += 1
+        raise AssertionError("不应再调用 generate_digest")
+
+    monkeypatch.setattr(chat_module, "generate_digest", _fail_digest, raising=False)
+
+    resp = client.post(f"/api/tasks/{task['id']}/chat", json={"message": "教育公平"})
+    assert resp.status_code == 200, resp.text
+    body = resp.text
+    assert "event: delta" in body
+    assert "测试" in body
+    assert "event: done" in body
+    assert calls["answer"] == 1
+    assert calls["digest"] == 0
+
+
+def test_chat_endpoint_rejects_empty_transcript(client):
+    from local_transcriber.db import session_scope, TaskRow
+
+    task = _upload_fake_audio(client, "empty-chat.wav")
+    with session_scope() as s:
+        row = s.get(TaskRow, task["id"])
+        row.status = "completed"
+        row.transcript = {"segments": []}
+        s.commit()
+
+    resp = client.post(f"/api/tasks/{task['id']}/chat", json={"message": "你好"})
+    assert resp.status_code == 400
