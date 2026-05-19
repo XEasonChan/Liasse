@@ -9,8 +9,10 @@ export const TaskDetail = {
   props: {
     taskId: { type: String, required: true },
     now: { type: Number, default: () => Date.now() },
+    models: { type: Array, default: () => [] },
+    llmReady: { type: Boolean, default: false },
   },
-  emits: ["back", "deleted"],
+  emits: ["back", "deleted", "need-model"],
   data() {
     return {
       task: null,
@@ -40,6 +42,27 @@ export const TaskDetail = {
     },
     transcriptReady() {
       return this.segments.length > 0;
+    },
+    /** 推断当前后端在跑哪个阶段，用 progressStage 字符串匹配。
+     *  返回 "asr-only" | "diarizing" | "aligning" | null。 */
+    asrPhase() {
+      if (!this.isRunning) return null;
+      const stage = String((this.task && this.task.progressStage) || "");
+      if (stage.includes("对齐") || stage.includes("alignment") || stage.includes("套到")) {
+        return "aligning";
+      }
+      if (stage.includes("发言人") || stage.includes("pyannote") || stage.includes("声纹")
+          || stage.includes("speaker") || stage.includes("Speaker")) {
+        return "diarizing";
+      }
+      if (this.transcriptPartial && this.transcriptReady) return "asr-only";
+      return null;
+    },
+    asrPhaseBannerText() {
+      if (this.asrPhase === "diarizing") return t("detail.bannerDiarizing");
+      if (this.asrPhase === "aligning") return t("detail.bannerAligning");
+      if (this.asrPhase === "asr-only") return t("detail.bannerASROnly");
+      return "";
     },
     isRunning() { return this.task && this.task.status === "running"; },
     isQueued() { return this.task && this.task.status === "queued"; },
@@ -207,6 +230,14 @@ export const TaskDetail = {
       }
     },
     async regenerateSummary() {
+      // Hide config in the core flow: if the LLM summary model is not loaded,
+      // prompt download via the global model-required-modal (handled in app.js).
+      // `llmReady` prop mirrors the canonical app-level check (qwen3:4b downloaded
+      // AND ollama running) — same source of truth as upload-zone.
+      if (!this.llmReady) {
+        this.$emit("need-model", "summary");
+        return;
+      }
       this.summaryLoading = true;
       this.summaryError = null;
       try {
@@ -305,7 +336,7 @@ export const TaskDetail = {
                 {{ t('detail.bannerPartialReady', { n: segments.length }) }}
               </div>
               <div class="detail-banner-sub muted">
-                {{ t('detail.bannerPartialReadyHint') }}
+                {{ asrPhaseBannerText || t('detail.bannerPartialReadyHint') }}
               </div>
             </div>
           </div>
