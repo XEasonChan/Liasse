@@ -262,7 +262,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md); design system in [design.md](design.md).
 
 ## License
 
-No open-source license selected yet. Please do not treat it as freely redistributable.
+This project is released under the Apache License 2.0. See [LICENSE](LICENSE).
 
 ---
 
