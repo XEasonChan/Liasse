@@ -106,10 +106,10 @@ def create_app() -> FastAPI:
 
     @app.get("/api/health")
     def health() -> dict:
-        hub = Path.home() / ".cache" / "huggingface" / "hub"
-        asr_ok = (hub / "models--Qwen--Qwen3-ASR-0.6B").exists()
-        aligner_ok = (hub / "models--Qwen--Qwen3-ForcedAligner-0.6B").exists()
-        pyannote_ok = (hub / "models--pyannote--speaker-diarization-community-1").exists()
+        from .hf_paths import is_downloaded
+        asr_ok = is_downloaded("Qwen/Qwen3-ASR-0.6B")
+        aligner_ok = is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B")
+        pyannote_ok = is_downloaded("pyannote/speaker-diarization-community-1")
         ollama_up = _check_ollama()
         qwen4b_ok = _check_ollama_model("qwen3:4b") if ollama_up else False
         hf_token_set = bool(
@@ -148,12 +148,12 @@ def create_app() -> FastAPI:
 
     @app.get("/api/models")
     def models() -> dict:
-        hub = Path.home() / ".cache" / "huggingface" / "hub"
+        from .hf_paths import is_downloaded
         items = [
             {
                 "id": "Qwen/Qwen3-ASR-0.6B",
                 "kind": "asr",
-                "downloaded": (hub / "models--Qwen--Qwen3-ASR-0.6B").exists(),
+                "downloaded": is_downloaded("Qwen/Qwen3-ASR-0.6B"),
                 "label": "Qwen3-ASR 0.6B（默认转录）",
                 "sizeBytes": 1_200_000_000,
                 "required": True,
@@ -167,7 +167,7 @@ def create_app() -> FastAPI:
             {
                 "id": "Qwen/Qwen3-ForcedAligner-0.6B",
                 "kind": "aligner",
-                "downloaded": (hub / "models--Qwen--Qwen3-ForcedAligner-0.6B").exists(),
+                "downloaded": is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B"),
                 "label": "Qwen3 时间戳对齐器",
                 "sizeBytes": 1_300_000_000,
                 "required": False,
@@ -181,7 +181,7 @@ def create_app() -> FastAPI:
             {
                 "id": "Qwen/Qwen3-ASR-1.7B",
                 "kind": "asr",
-                "downloaded": (hub / "models--Qwen--Qwen3-ASR-1.7B").exists(),
+                "downloaded": is_downloaded("Qwen/Qwen3-ASR-1.7B"),
                 "label": "Qwen3-ASR 1.7B（高质量，可选）",
                 "sizeBytes": 3_400_000_000,
                 "required": False,
@@ -195,7 +195,7 @@ def create_app() -> FastAPI:
             {
                 "id": "pyannote/speaker-diarization-community-1",
                 "kind": "diarization",
-                "downloaded": (hub / "models--pyannote--speaker-diarization-community-1").exists(),
+                "downloaded": is_downloaded("pyannote/speaker-diarization-community-1"),
                 "label": "pyannote 发言人识别 4.x",
                 "sizeBytes": 600_000_000,
                 "required": False,
@@ -740,14 +740,12 @@ def _check_ollama_model(name: str) -> bool:
 
 
 def _check_model_cache() -> dict:
-    hub = Path.home() / ".cache" / "huggingface" / "hub"
+    from .hf_paths import is_downloaded
     return {
-        "qwen3_asr_06b": (hub / "models--Qwen--Qwen3-ASR-0.6B").exists(),
-        "qwen3_asr_17b": (hub / "models--Qwen--Qwen3-ASR-1.7B").exists(),
-        "qwen3_aligner_06b": (hub / "models--Qwen--Qwen3-ForcedAligner-0.6B").exists(),
-        "pyannote_community1": (
-            hub / "models--pyannote--speaker-diarization-community-1"
-        ).exists(),
+        "qwen3_asr_06b": is_downloaded("Qwen/Qwen3-ASR-0.6B"),
+        "qwen3_asr_17b": is_downloaded("Qwen/Qwen3-ASR-1.7B"),
+        "qwen3_aligner_06b": is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B"),
+        "pyannote_community1": is_downloaded("pyannote/speaker-diarization-community-1"),
     }
 
 

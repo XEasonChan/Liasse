@@ -151,8 +151,8 @@ def _run_hf_download(job: DownloadJob, repo_id: str) -> None:
         or os.environ.get("HUGGINGFACE_TOKEN")
     )
 
-    cache_dir = Path.home() / ".cache" / "huggingface" / "hub"
-    repo_cache = cache_dir / f"models--{repo_id.replace('/', '--')}"
+    from .hf_paths import model_dir
+    repo_cache = model_dir(repo_id)
     blobs_dir = repo_cache / "blobs"
 
     job.bytes_total = 0
