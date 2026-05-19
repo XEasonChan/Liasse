@@ -18,7 +18,6 @@ from pydantic import BaseModel, ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import chat as chat_module
 from . import downloader as downloader_module
 from .settings_store import default_settings, load_settings, save_settings
 from .db import TaskRow, init_db, session_scope, utc_now
@@ -487,6 +486,10 @@ def create_app() -> FastAPI:
 
     @app.post("/api/tasks/{task_id}/summary")
     def regenerate_summary(task_id: str, db: Session = Depends(get_db)) -> dict:
+        from .memory_monitor import MemoryBudget
+        from .models import TranscriptSegment
+        from .summary_pipeline import analyze as analyze_transcript
+
         task = db.get(TaskRow, task_id)
         if not task:
             raise HTTPException(status_code=404, detail="任务不存在")
@@ -494,19 +497,42 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=400, detail="还没有逐字稿可用于总结")
 
         edits = task.edits or {}
-        transcript_text = chat_module.segments_to_text(
-            task.transcript["segments"],
-            speaker_labels=edits.get("speakerLabels") or {},
-            overrides=edits.get("segmentOverrides") or {},
-        )
-        model = (task.config or {}).get("summaryModel") or "qwen3:4b"
+        labels = edits.get("speakerLabels") or {}
+        overrides = edits.get("segmentOverrides") or {}
+        segments: List[TranscriptSegment] = []
+        for seg in task.transcript["segments"]:
+            spk_raw = seg.get("speaker", "SPEAKER_00")
+            spk = labels.get(spk_raw) or spk_raw
+            text = overrides.get(seg.get("id", ""), seg.get("text", ""))
+            segments.append(TranscriptSegment(
+                start=seg.get("start"),
+                end=seg.get("end"),
+                text=text,
+                speaker=spk,
+                source="task",
+            ))
+
+        outputs = task.outputs or {}
+        output_dir = Path(outputs.get("dir") or "outputs") / task_id
+        user_pref = (task.config or {}).get("userPref") or "auto"
+
         try:
-            summary = chat_module.generate_summary(transcript_text, model=model)
+            analysis = analyze_transcript(
+                segments=segments,
+                output_dir=output_dir,
+                task_id=task_id,
+                budget=MemoryBudget.detect(),
+                user_pref=user_pref,
+            )
         except RuntimeError as exc:
             raise HTTPException(status_code=502, detail=str(exc))
-        task.summary_text = summary
+
+        task.summary_text = analysis.summary_markdown
         db.commit()
-        return {"summary": summary, "model": model}
+        return {
+            "summary": analysis.summary_markdown,
+            "model": f"{analysis.model_used_l1}+{analysis.model_used_l2}",
+        }
 
     @app.post("/api/tasks/{task_id}/chat")
     def chat_stream(task_id: str, payload: ChatRequest, db: Session = Depends(get_db)):

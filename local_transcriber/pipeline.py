@@ -9,7 +9,6 @@ from .asr import create_asr_backend
 from .diarization import PyannoteDiarizer, speaker_turns_from_segments
 from .exporters import export_json, export_markdown, export_srt
 from .models import PipelineResult, SpeakerTurn, SummaryResult, TranscriptionJob, TranscriptSegment
-from .summarizer import OllamaSummarizer
 
 ProgressCallback = Callable[[str, float], None]
 PartialTranscriptCallback = Callable[[dict[str, Any]], None]
@@ -57,10 +56,9 @@ class LocalTranscriptionPipeline:
         else:
             speaker_turns = speaker_turns_from_segments(segments)
 
+        # Summary 由 task_runner 在 pipeline 之后调 summary_pipeline.analyze() 生成。
+        # 这里仍保留 PipelineResult.summary 字段，task_runner 会塞 L2 结果进去。
         summary: Optional[SummaryResult] = None
-        if job.summary_enabled:
-            self._progress("正在生成本地摘要", SUMMARY_PROGRESS_START)
-            summary = OllamaSummarizer(job.summary_model).summarize(segments)
 
         self._progress("正在导出文件", EXPORT_PROGRESS_START)
         markdown_path = output_dir / f"{job.audio_path.stem or 'demo'}-transcript.md"

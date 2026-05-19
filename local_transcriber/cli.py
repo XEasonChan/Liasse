@@ -19,9 +19,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--diarize", action="store_true", help="启用 pyannote 发言人识别")
     parser.add_argument("--pyannote-model", default="pyannote/speaker-diarization-community-1")
     parser.add_argument("--hf-token", default=None)
-    parser.add_argument("--summarize", action="store_true", help="启用 Ollama 本地摘要")
-    parser.add_argument("--summary-model", default="qwen3:8b")
     parser.add_argument("--no-srt", action="store_true", help="不导出 SRT")
+    # 注：CLI 不再支持 --summarize（旧 OllamaSummarizer 已删）。摘要现在
+    # 通过 web UI 的 /summary 路由触发 summary_pipeline.analyze()。批处理
+    # 场景如果需要摘要，请用 Python API 直接调 summary_pipeline.analyze。
     return parser
 
 
@@ -47,8 +48,6 @@ def main() -> None:
             diarization_enabled=args.diarize,
             pyannote_model=args.pyannote_model,
             hf_token=args.hf_token,
-            summary_enabled=args.summarize,
-            summary_model=args.summary_model,
             export_srt=not args.no_srt,
         )
         result = LocalTranscriptionPipeline(on_progress=progress).run(job)

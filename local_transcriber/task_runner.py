@@ -201,8 +201,6 @@ def _worker_entry(
             os.environ["HF_HUB_OFFLINE"] = "1"
             os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
-        legacy_summary = os.environ.get("LOCAL_TRANSCRIBER_LEGACY_SUMMARY") == "1"
-
         def on_progress(message: str, value: float) -> None:
             if stop_event.is_set():
                 raise InterruptedError("用户停止了任务")
@@ -232,9 +230,8 @@ def _worker_entry(
             )
 
         summarize_requested = bool(config.get("summarize"))
-        # 新路径：让 task_runner 在 pipeline 之外调用 analyze_transcript，
+        # Summary 由 task_runner 在 pipeline 之后调 summary_pipeline.analyze() 生成。
         # pipeline.run 内部不再做摘要，避免重复跑一次 Ollama。
-        pipeline_summary_enabled = summarize_requested and legacy_summary
         job = TranscriptionJob(
             audio_path=audio_path,
             output_dir=output_dir,
@@ -245,8 +242,6 @@ def _worker_entry(
             diarization_enabled=pyannote_enabled,
             diarization_num_speakers=config.get("numSpeakers"),
             hf_token=os.environ.get("HF_TOKEN") or os.environ.get("PYANNOTE_AUTH_TOKEN"),
-            summary_enabled=pipeline_summary_enabled,
-            summary_model=config.get("summaryModel") or "qwen3:4b",
             export_srt=True,
         )
 
@@ -294,10 +289,9 @@ def _worker_entry(
                     }
                 )
 
-        # 新路径：在 pipeline 之后调用分层分析（L1/L2/索引），更丰富。
-        # 旧路径走 LOCAL_TRANSCRIBER_LEGACY_SUMMARY=1，由 pipeline 内部生成摘要。
+        # 在 pipeline 之后调用分层分析（L1/L2/索引）生成摘要 + 检索索引。
         analysis_payload: Optional[Dict[str, Any]] = None
-        if summarize_requested and not legacy_summary:
+        if summarize_requested:
             from .memory_monitor import MemoryBudget
             from .summary_pipeline import ProgressEvent, analyze as analyze_transcript
 
