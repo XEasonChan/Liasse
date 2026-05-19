@@ -134,3 +134,121 @@ def test_analyze_resumes_from_sqlite_when_l1_already_done(tmp_path):
                          budget=MemoryBudget(16, 8))
     assert l1_mock.call_count == 0  # 全部从 SQLite 取回
     assert result.summary_markdown.startswith("## 总览（重跑）")
+
+
+def test_analyze_runs_l1_concurrently_on_comfortable(tmp_path, monkeypatch):
+    """comfortable 档应该并发跑 L1。用一个共享 counter + 短 sleep 验证并发性:
+    如果 5 个 chunk 串行 × 0.05s = 0.25s，3 并发应该 ≤ 0.15s。"""
+    import time
+
+    # 制造 5 个长 chunk，触发 5 次 L1 调用
+    segs = []
+    for i in range(5):
+        segs.append(TranscriptSegment(start=i*120, end=(i+1)*120,
+                                       text="问题" + "内容文本" * 200, speaker="A"))
+        segs.append(TranscriptSegment(start=(i+1)*120-1, end=(i+1)*120,
+                                       text="回答" + "答案文本" * 200, speaker="B"))
+
+    in_flight = {"current": 0, "peak": 0}
+    in_flight_lock = __import__("threading").Lock()
+
+    def slow_l1(chunk, total_chunks, **kw):
+        with in_flight_lock:
+            in_flight["current"] += 1
+            in_flight["peak"] = max(in_flight["peak"], in_flight["current"])
+        time.sleep(0.05)
+        with in_flight_lock:
+            in_flight["current"] -= 1
+        return _l1(chunk.index)
+
+    with patch("local_transcriber.summary_pipeline.extract_l1", side_effect=slow_l1), \
+         patch("local_transcriber.summary_pipeline.synthesize_l2", return_value="ok"), \
+         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+               return_value=MagicMock(save=lambda: None)):
+        t0 = time.time()
+        analyze(segs, output_dir=tmp_path, task_id="par",
+                budget=MemoryBudget(16, 8))  # comfortable
+        wall = time.time() - t0
+
+    # comfortable 档默认 3 并发，peak in-flight 应 > 1
+    assert in_flight["peak"] >= 2, f"expected concurrent calls, peak={in_flight['peak']}"
+
+
+def test_analyze_runs_l1_serially_on_tight(tmp_path, monkeypatch):
+    """tight 档应该串行（避免内存峰值）。验证 peak in-flight == 1。"""
+    import time
+
+    segs = []
+    for i in range(4):
+        segs.append(TranscriptSegment(start=i*120, end=(i+1)*120,
+                                       text="问题" + "内容" * 300, speaker="A"))
+        segs.append(TranscriptSegment(start=(i+1)*120-1, end=(i+1)*120,
+                                       text="回答" + "答案" * 300, speaker="B"))
+
+    in_flight = {"current": 0, "peak": 0}
+    lk = __import__("threading").Lock()
+
+    def slow_l1(chunk, total_chunks, **kw):
+        with lk:
+            in_flight["current"] += 1
+            in_flight["peak"] = max(in_flight["peak"], in_flight["current"])
+        time.sleep(0.02)
+        with lk:
+            in_flight["current"] -= 1
+        return _l1(chunk.index)
+
+    with patch("local_transcriber.summary_pipeline.extract_l1", side_effect=slow_l1), \
+         patch("local_transcriber.summary_pipeline.synthesize_l2", return_value="ok"), \
+         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+               return_value=MagicMock(save=lambda: None)), \
+         patch("local_transcriber.summary_pipeline.unload_model"):
+        analyze(segs, output_dir=tmp_path, task_id="ser",
+                budget=MemoryBudget(8, 2))  # tight: total=8GB, free=2GB
+
+    assert in_flight["peak"] == 1, f"tight should be serial, peak={in_flight['peak']}"
+
+
+def test_l1_concurrency_env_override(monkeypatch):
+    """WHISPERQWEN_L1_CONCURRENCY env 必须能强制覆盖（测试 / 调优用）。"""
+    from local_transcriber.summary_pipeline import _l1_concurrency
+
+    budget_tight = MemoryBudget(8, 2)
+    budget_comfy = MemoryBudget(16, 8)
+
+    monkeypatch.delenv("WHISPERQWEN_L1_CONCURRENCY", raising=False)
+    assert _l1_concurrency(budget_tight) == 1
+    assert _l1_concurrency(budget_comfy) == 3
+
+    monkeypatch.setenv("WHISPERQWEN_L1_CONCURRENCY", "5")
+    assert _l1_concurrency(budget_tight) == 5
+    assert _l1_concurrency(budget_comfy) == 5
+
+    monkeypatch.setenv("WHISPERQWEN_L1_CONCURRENCY", "1")
+    assert _l1_concurrency(budget_comfy) == 1
+
+
+def test_analyze_preserves_chunk_order_under_concurrency(tmp_path):
+    """并发完成顺序乱了，l1_results 必须按 chunk.index 排序。"""
+    import random
+    import time
+
+    segs = []
+    for i in range(6):
+        segs.append(TranscriptSegment(start=i*120, end=(i+1)*120,
+                                       text="问题" + "内容" * 250, speaker="A"))
+        segs.append(TranscriptSegment(start=(i+1)*120-1, end=(i+1)*120,
+                                       text="回答" + "答案" * 250, speaker="B"))
+
+    def jittered_l1(chunk, total_chunks, **kw):
+        time.sleep(random.uniform(0.0, 0.05))
+        return _l1(chunk.index)
+
+    with patch("local_transcriber.summary_pipeline.extract_l1", side_effect=jittered_l1), \
+         patch("local_transcriber.summary_pipeline.synthesize_l2", return_value="ok"), \
+         patch("local_transcriber.summary_pipeline.TranscriptIndex.build",
+               return_value=MagicMock(save=lambda: None)):
+        result = analyze(segs, output_dir=tmp_path, task_id="ord",
+                         budget=MemoryBudget(16, 8))
+
+    indices = [l1.chunk_index for l1 in result.l1_results]
+    assert indices == sorted(indices), f"l1_results order broken: {indices}"

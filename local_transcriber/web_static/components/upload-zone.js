@@ -33,7 +33,6 @@ export const UploadZone = {
         speakerMode: "llm",
         diarize: false,
         numSpeakers: 2,
-        autoSegment: true,
         summarize: false,
         enableChat: true,
       },
@@ -66,10 +65,9 @@ export const UploadZone = {
       ];
     },
     speakerModeActive() {
-      return this.config.autoSegment ? this.config.speakerMode : "fast";
+      return this.config.speakerMode;
     },
     speakerCountActive() {
-      if (!this.config.autoSegment) return false;
       if (this.config.speakerMode === "llm") return this.llmReady;
       if (this.config.speakerMode === "pyannote") return this.diarizeReady;
       return false;
@@ -93,7 +91,7 @@ export const UploadZone = {
       }
     },
     speakerSummary() {
-      if (!this.config.autoSegment || this.config.speakerMode === "fast") return t("upload.speakerModeFast");
+      if (this.config.speakerMode === "fast") return t("upload.speakerModeFast");
       if (this.config.speakerMode === "llm") return this.llmReady ? t("upload.speakerModeLLM") : t("upload.summaryNeedQwen");
       if (this.config.speakerMode === "pyannote") return this.diarizeReady ? t("upload.speakerModePyannote") : t("upload.summaryDiarizeNeed");
       return t("upload.speakerModeFast");
@@ -347,7 +345,7 @@ export const UploadZone = {
         if (cfg.speakerMode === "llm") cfg.speakerMode = "fast";
       }
       if (!this.diarizeReady && cfg.speakerMode === "pyannote") cfg.speakerMode = "fast";
-      if (!cfg.autoSegment) cfg.speakerMode = "fast";
+      cfg.autoSegment = true;
       cfg.diarize = cfg.speakerMode === "pyannote";
       if (cfg.numSpeakers === "auto") cfg.numSpeakers = null;
       return cfg;
@@ -374,7 +372,7 @@ export const UploadZone = {
       >
         <div class="upload-main" @click="onZoneClick">
           <div class="upload-icon">
-            <lucide-icon v-if="!isBusy" name="folder-up" :size="22" :stroke-width="1.7" />
+            <lucide-icon v-if="!isBusy" name="folder-up" :size="28" :stroke-width="1.7" />
             <div v-else class="spinner"></div>
           </div>
 
@@ -387,31 +385,30 @@ export const UploadZone = {
 
           <div v-if="!isBusy" class="upload-buttons" @click.stop>
             <button class="btn btn-primary" :disabled="isBusy" @click="triggerFiles">
-              <lucide-icon name="file-audio" :size="16" /> {{ t('upload.chooseFiles') }}
+              <lucide-icon name="file-audio" :size="18" /> {{ t('upload.chooseFiles') }}
             </button>
             <button class="btn" :disabled="isBusy" @click="triggerFolder">
-              <lucide-icon name="folder-open" :size="16" /> {{ t('upload.chooseFolder') }}
+              <lucide-icon name="folder-open" :size="18" /> {{ t('upload.chooseFolder') }}
             </button>
           </div>
         </div>
 
         <div class="config-row" @click.stop>
-          <span class="config-prefix">{{ t('upload.currentSettings') }}</span>
-          <div class="config-controls">
+          <div class="config-line">
+            <span class="config-prefix">{{ t('upload.currentSettings') }}</span>
             <div class="setting-pill setting-pill-radio">
               <span class="setting-label">{{ t('upload.cfgSpeakerMode') }}</span>
               <div class="compact-radio">
                 <label
                   v-for="mode in speakerModeOptions"
                   :key="mode.key"
-                  :class="{ active: speakerModeActive === mode.key, disabled: !config.autoSegment && mode.key !== 'fast' }"
-                  :title="!config.autoSegment && mode.key !== 'fast' ? t('upload.tipDiarizeBlocked') : mode.title"
+                  :class="{ active: speakerModeActive === mode.key }"
+                  :title="mode.title"
                 >
                   <input
                     type="radio"
                     :value="mode.key"
                     :checked="speakerModeActive === mode.key"
-                    :disabled="!config.autoSegment && mode.key !== 'fast'"
                     @change="selectSpeakerMode(mode.key)"
                   />
                   <span>{{ mode.label }}</span>
@@ -432,15 +429,18 @@ export const UploadZone = {
                 <option :value="5">{{ t('upload.speakersPlus', { n: 5 }) }}</option>
               </select>
             </div>
+          </div>
 
-            <button
-              class="setting-pill"
-              :class="config.autoSegment ? 'on' : ''"
-              @click="config.autoSegment = !config.autoSegment"
-            >
-              <lucide-icon name="list-tree" :size="14" />
-              {{ t('upload.cfgAutoSegment') }}
-            </button>
+          <div class="config-line">
+            <label class="setting-pill setting-pill-select">
+              <span class="setting-label">{{ t('upload.cfgLang') }}</span>
+              <select class="setting-inline-select" v-model="config.language">
+                <option value="English">{{ t('audioLang.English') }}</option>
+                <option value="Chinese">{{ t('audioLang.Chinese') }}</option>
+                <option value="Cantonese">{{ t('audioLang.Cantonese') }}</option>
+                <option value="auto">{{ t('audioLang.auto') }}</option>
+              </select>
+            </label>
 
             <button
               class="setting-pill"
@@ -451,30 +451,6 @@ export const UploadZone = {
               <lucide-icon name="sparkles" :size="14" />
               {{ summarySummary }}
             </button>
-
-            <div class="setting-pill setting-pill-radio">
-              <span class="setting-label">{{ t('upload.cfgASR') }}</span>
-              <div class="compact-radio">
-                <label>
-                  <input type="radio" value="Qwen/Qwen3-ASR-0.6B" v-model="config.asrModel" />
-                  <span>{{ t('upload.cfgASRQuick') }}</span>
-                </label>
-                <label class="disabled">
-                  <input type="radio" value="Qwen/Qwen3-ASR-1.7B" v-model="config.asrModel" disabled />
-                  <span>{{ t('upload.cfgASRHigh') }}</span>
-                </label>
-              </div>
-            </div>
-
-            <label class="setting-pill setting-pill-select">
-              <span class="setting-label">{{ t('upload.cfgLang') }}</span>
-              <select class="setting-inline-select" v-model="config.language">
-                <option value="English">{{ t('audioLang.English') }}</option>
-                <option value="Chinese">{{ t('audioLang.Chinese') }}</option>
-                <option value="Cantonese">{{ t('audioLang.Cantonese') }}</option>
-                <option value="auto">{{ t('audioLang.auto') }}</option>
-              </select>
-            </label>
           </div>
         </div>
 

@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 import sqlite3
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,8 +15,28 @@ from .memory_monitor import MemoryBudget, MemoryTier
 from .model_router import TaskKind, route
 from .models import TranscriptSegment
 from .ollama_lifecycle import unload_model
-from .transcript_chunker import chunk_interview
+from .transcript_chunker import Chunk, chunk_interview
 from .transcript_index import TranscriptIndex
+
+
+def _l1_concurrency(budget: MemoryBudget) -> int:
+    """根据内存档位决定 L1 并发度。
+
+    Ollama qwen3:4b 一个进程内能跑 KV-cache 切换；并发请求受限于:
+    - tight (<10GB total or <3GB free): 串行（1），避免内存峰值叠加
+    - comfortable: 3 并发 — Ollama queue 能稳定吞，单 chunk LLM 推理 KV cache 内
+      共享，吞吐基本翻 2-3 倍
+    env 覆盖：WHISPERQWEN_L1_CONCURRENCY="<int>" 强制设值（测试 / 调优用）。
+    """
+    override = os.environ.get("WHISPERQWEN_L1_CONCURRENCY")
+    if override:
+        try:
+            n = int(override)
+            if n >= 1:
+                return n
+        except ValueError:
+            pass
+    return 1 if budget.tier == MemoryTier.TIGHT else 3
 
 
 @dataclass
@@ -164,20 +187,44 @@ def analyze(
             current=len(existing), total=n,
         ))
 
-    for i, chunk in enumerate(chunks):
-        if chunk.index in l1_map:
-            continue
-        emit(ProgressEvent(
-            "l1",
-            f"L1 抽取 {i + 1}/{n}（{l1_choice.model}）",
-            0.05 + 0.60 * (i + 1) / n,
-            current=i + 1, total=n,
-        ))
+    pending_chunks = [c for c in chunks if c.index not in l1_map]
+    concurrency = _l1_concurrency(budget)
+    # 用 threading.Lock 保护 l1_map + 进度计数 + SQLite 写。SQLite 默认连接
+    # 不可跨线程共享，save_l1_result 每次自己 open/close 一次连接，所以线程
+    # 内独立没问题，但 print/emit 顺序需保护避免错乱。
+    write_lock = threading.Lock()
+    completed = [len(l1_map)]  # box trick: closure 写
+
+    def _run_one(chunk: Chunk) -> tuple[int, L1Result]:
         l1 = extract_l1(chunk, total_chunks=n,
                         budget=budget, user_pref=user_pref,
                         keep_alive="5m")
-        l1_map[chunk.index] = l1
-        save_l1_result(output_dir, task_id, l1, chunks_fingerprint=fingerprint)
+        with write_lock:
+            l1_map[chunk.index] = l1
+            save_l1_result(output_dir, task_id, l1, chunks_fingerprint=fingerprint)
+            completed[0] += 1
+            done = completed[0]
+            emit(ProgressEvent(
+                "l1",
+                f"L1 抽取 {done}/{n}（{l1_choice.model}，{concurrency}x 并发）",
+                0.05 + 0.60 * done / n,
+                current=done, total=n,
+            ))
+        return chunk.index, l1
+
+    if pending_chunks:
+        if concurrency == 1:
+            # tight 内存或显式 disable —— 串行跑，节省内存峰值
+            for chunk in pending_chunks:
+                _run_one(chunk)
+        else:
+            # comfortable 内存 —— ThreadPoolExecutor 并发调 Ollama。
+            # 顺序无关：每个 chunk 独立，结果按 chunk.index 写回 l1_map。
+            with ThreadPoolExecutor(max_workers=concurrency,
+                                     thread_name_prefix="l1") as ex:
+                futures = [ex.submit(_run_one, c) for c in pending_chunks]
+                for fut in as_completed(futures):
+                    fut.result()  # 触发异常向上传播
 
     # 若所有 L1 都从缓存取回（resume），仍需发一个 l1 phase 事件以保证 UI 看到该阶段
     if not any(c.index not in existing for c in chunks):
