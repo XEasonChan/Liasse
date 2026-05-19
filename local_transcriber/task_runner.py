@@ -257,9 +257,14 @@ def _worker_entry(
 
         if llm_speaker_enabled:
             try:
+                from .asr import unload_mlx_models
                 from .diarization import speaker_turns_from_segments
                 from .speaker_labeler import label_segments
 
+                # 在 8GB Air 上，MLX ASR (~1.2GB) + Ollama qwen3:4b (~4.5GB)
+                # 同时驻留就会触发 swap。ASR 已完成、segments 已落库，主动
+                # 释放 MLX 给 Ollama 让路。
+                unload_mlx_models()
                 progress_queue.put(
                     {
                         "type": "progress",
@@ -292,8 +297,13 @@ def _worker_entry(
         # 在 pipeline 之后调用分层分析（L1/L2/索引）生成摘要 + 检索索引。
         analysis_payload: Optional[Dict[str, Any]] = None
         if summarize_requested:
+            from .asr import unload_mlx_models
             from .memory_monitor import MemoryBudget
             from .summary_pipeline import ProgressEvent, analyze as analyze_transcript
+
+            # 同上：摘要要装 Ollama 4B/8B（4.5-8GB），ASR 模型已无用，先卸。
+            # 幂等：llm_speaker_enabled 路径里已经卸过了，这里也无害。
+            unload_mlx_models()
 
             def _bridge_progress(ev: "ProgressEvent") -> None:
                 # analyze() 的进度在 0~1 之间；把它映射到 pipeline 完成后的

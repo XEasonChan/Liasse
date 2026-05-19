@@ -219,6 +219,42 @@ class MLXQwenASRBackend(BaseASRBackend):
         return [TranscriptSegment(start=None, end=None, text=text, source=self.name)]
 
 
+def unload_mlx_models() -> None:
+    """显式释放 MLX/Metal GPU 缓存 + pyannote pipeline cache。
+
+    动机：ASR 完成后 MLX/Metal 仍持有 ~1.2GB 模型权重 + activation cache。
+    在 8GB Air 上接着加载 Ollama qwen3:4b (~4.5GB) 就会触发 swap。
+    speaker labeling / summary 阶段不再需要 ASR 模型，主动释放给 Ollama 让路。
+
+    幂等：可以多次调用；mlx_qwen3_asr 没装时静默跳过。
+    """
+    try:
+        from mlx_qwen3_asr.transcribe import _clear_mlx_cache
+        _clear_mlx_cache()
+    except Exception:
+        pass
+    try:
+        from mlx_qwen3_asr import diarization as _diar
+        cache = getattr(_diar, "_PYANNOTE_PIPELINE_CACHE", None)
+        if isinstance(cache, dict):
+            cache.clear()
+    except Exception:
+        pass
+    # mlx_qwen3_asr.audio 用 lru_cache(maxsize=4) 缓存 audio decode 结果（大）
+    try:
+        from mlx_qwen3_asr import audio as _audio
+
+        for attr in dir(_audio):
+            fn = getattr(_audio, attr, None)
+            clear = getattr(fn, "cache_clear", None)
+            if callable(clear):
+                clear()
+    except Exception:
+        pass
+    import gc
+    gc.collect()
+
+
 def _install_mlx_qwen_chunk_text_progress_patch() -> None:
     """Attach decoded chunk text to mlx-qwen3-asr chunk progress events.
 
