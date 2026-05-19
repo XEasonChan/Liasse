@@ -100,12 +100,26 @@ def session_scope() -> Session:
     return _SessionLocal()
 
 
+def get_db():
+    """FastAPI Depends() 用的 generator：yield 一个 Session，请求结束 close。
+
+    web_app.py 的 tasks routes 和 routers/qa.py 都用这个，保证它们共享同一个
+    工厂（而不是各自定义同名函数）。
+    """
+    db = session_scope()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 __all__ = [
     "Base",
     "TaskRow",
     "init_db",
     "get_engine",
     "session_scope",
+    "get_db",
     "new_task_id",
     "utc_now",
 ]

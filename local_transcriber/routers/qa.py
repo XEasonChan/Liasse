@@ -21,7 +21,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from ..db import TaskRow, session_scope
+from ..db import TaskRow, get_db, session_scope
 
 
 router = APIRouter()
@@ -29,14 +29,6 @@ router = APIRouter()
 
 class ChatRequest(BaseModel):
     message: str
-
-
-def get_db() -> Session:
-    db = session_scope()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 @router.post("/api/tasks/{task_id}/summary")

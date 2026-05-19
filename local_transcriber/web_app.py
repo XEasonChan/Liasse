@@ -72,12 +72,9 @@ if _env_file.exists():
                 os.environ.setdefault(_k.strip(), _v.strip())
 
 
-def get_db() -> Session:
-    db = session_scope()
-    try:
-        yield db
-    finally:
-        db.close()
+# get_db 在 .db 模块里定义，这里直接 re-import（不是重复定义）。tasks
+# routes 的 Depends(get_db) 用它，routers/qa.py 也从 ..db 引同一个。
+from .db import get_db  # noqa: E402, F401
 
 
 @asynccontextmanager
