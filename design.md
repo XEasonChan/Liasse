@@ -482,7 +482,7 @@ em, .italic, .accent-italic {
 ```tsx
 const iconProps = {
   size: 18,
-  strokeWidth: 1.75,
+  strokeWidth: 1.5,           // System D: 1.5 harmonizes with serif body
   absoluteStrokeWidth: true,
 };
 ```
@@ -492,13 +492,13 @@ const iconProps = {
 
 | 场景          | 尺寸   | 线宽   | 颜色                                               |
 | ----------- | ---- | ---- | ------------------------------------------------ |
-| Sidebar nav | 18px | 1.75 | inactive: `--text-secondary`; active: `--accent` |
-| 主按钮         | 18px | 1.75 | `--text-inverse`                                 |
-| 次按钮         | 18px | 1.75 | `--text-primary`                                 |
-| 上传区主图标      | 42px | 1.5  | 白色或紫色渐变容器内白色                                     |
-| 表格文件图标      | 20px | 1.75 | `--accent`                                       |
-| 操作按钮        | 18px | 1.75 | `--text-secondary` 或状态色                          |
-| 模型状态        | 14px | 1.75 | success/warning/danger 状态色                       |
+| Sidebar nav | 18px | 1.5  | inactive: `--text-secondary`; active: `--cobalt` |
+| 主按钮         | 18px | 1.5  | `--text-inverse`                                 |
+| 次按钮         | 18px | 1.5  | `--text-primary`                                 |
+| 上传区主图标      | 42px | 1.5  | `--cobalt` on `--cream` square container         |
+| 表格文件图标      | 20px | 1.5  | `--lavender-deep`                                |
+| 操作按钮        | 18px | 1.5  | `--text-secondary` 或状态色                          |
+| 模型状态        | 14px | 1.5  | archive-green / brass / oxblood 状态色             |
 
 
 ### 8.4 图标映射

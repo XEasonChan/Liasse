@@ -176,7 +176,7 @@ def main():
     print(f"SYSTEM: {sys_info}")
 
     runs = []
-    for mode in ["fast", "llm"]:
+    for mode in ["fast", "llm", "pyannote"]:
         try:
             runs.append(run_one(mode))
         except Exception as exc:

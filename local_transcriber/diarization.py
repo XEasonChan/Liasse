@@ -23,10 +23,19 @@ class PyannoteDiarizer:
                 "缺少 pyannote.audio。请安装 requirements-qwen.txt 或 requirements-whisper.txt。"
             ) from exc
 
-        kwargs = {}
+        # pyannote.audio 4.x: Pipeline.from_pretrained 用 `token`，不再接受
+        # `use_auth_token`（3.x 旧名）。为兼容两个版本，先试新 API。
+        kwargs: dict = {}
         if self.hf_token:
-            kwargs["use_auth_token"] = self.hf_token
-        pipeline = Pipeline.from_pretrained(self.model_name_or_path, **kwargs)
+            kwargs["token"] = self.hf_token
+        try:
+            pipeline = Pipeline.from_pretrained(self.model_name_or_path, **kwargs)
+        except TypeError:
+            # 落回 3.x API
+            kwargs = {}
+            if self.hf_token:
+                kwargs["use_auth_token"] = self.hf_token
+            pipeline = Pipeline.from_pretrained(self.model_name_or_path, **kwargs)
 
         # Apple Silicon: 把 pipeline 切到 Metal/MPS，3-5x 加速。
         # 失败静默落回 CPU。
@@ -45,8 +54,13 @@ class PyannoteDiarizer:
 
         diarization = pipeline(str(audio_path))
 
+        # pyannote.audio 4.x: pipeline() 返回 DiarizeOutput（含
+        # speaker_diarization: Annotation），不再直接是 Annotation。
+        # 3.x: 直接返回 Annotation，自带 itertracks。
+        annotation = getattr(diarization, "speaker_diarization", diarization)
+
         turns: List[SpeakerTurn] = []
-        for turn, _track, speaker in diarization.itertracks(yield_label=True):
+        for turn, _track, speaker in annotation.itertracks(yield_label=True):
             turns.append(
                 SpeakerTurn(
                     start=float(turn.start),

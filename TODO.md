@@ -4,6 +4,28 @@
 
 ---
 
+## 已知 bug
+
+### Speaker alignment：长 ASR segment + 细粒度 pyannote turn 不匹配
+
+**现象**：`pyannote` 精细模式下，pyannote 正确识别出 2 个 speaker（36 + 16 turns），但
+`alignment.assign_speakers` 把所有 ASR segments 都套成了 SPEAKER_00。
+
+**根因**：ASR 给的 segments 通常 8-30 秒长，一段会跨越 5-10 个 pyannote 细 turn
+(0.3-5 秒/个)。`assign_speakers` 的算法是「找单个 overlap 最长的 turn」，因为
+SPEAKER_00 占总时长多，长 segment 跟它的最大单 turn 重叠总是赢。
+
+**修复方向**：改 `alignment.py` 算法，按时间总量加权而不是单 turn 最长：
+对每个 segment，遍历所有有 overlap 的 turn，按 speaker 累计 overlap 时长，
+选累计最长的那个 speaker。或者：把长 ASR segment 按 pyannote turn 边界**拆细**，
+再每小段独立分配 speaker（这条更优但要改 schema）。
+
+**测试**：用 2 分钟双人样本（test_audio/cut-2min-mid.m4a，pyannote 输出
+SPEAKER_00×36 + SPEAKER_01×16 turns）当 fixture，期望 alignment 后 segment
+里也出现两个 speaker。
+
+---
+
 ## 功能
 
 ### 翻译 + 专业词库（Qwen3 4B）
