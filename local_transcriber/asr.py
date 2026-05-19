@@ -3,7 +3,9 @@ from __future__ import annotations
 import os
 import re
 import sys
+from collections import deque
 from collections.abc import Sequence
+from importlib import import_module
 from pathlib import Path
 from typing import Any, Callable, Iterable, List, Optional
 
@@ -149,6 +151,7 @@ class MLXQwenASRBackend(BaseASRBackend):
     ) -> List[TranscriptSegment]:
         _add_vendored_mlx_qwen_to_path()
         try:
+            _install_mlx_qwen_chunk_text_progress_patch()
             from mlx_qwen3_asr import transcribe
         except ImportError as exc:
             raise ASRError(
@@ -214,6 +217,41 @@ class MLXQwenASRBackend(BaseASRBackend):
         if not text:
             return []
         return [TranscriptSegment(start=None, end=None, text=text, source=self.name)]
+
+
+def _install_mlx_qwen_chunk_text_progress_patch() -> None:
+    """Attach decoded chunk text to mlx-qwen3-asr chunk progress events.
+
+    mlx-qwen3-asr keeps per-chunk text in memory until the whole ASR +
+    diarization call returns. For long files this means the app cannot expose a
+    raw transcript fallback if diarization stalls. The package already emits
+    `chunk_completed`; we enrich that event with the just-decoded text so the
+    task runner can persist partial raw transcript data.
+    """
+    module = import_module("mlx_qwen3_asr.transcribe")
+    if getattr(module, "_qwensper_chunk_text_progress_patched", False):
+        return
+
+    original_parse = module.parse_asr_output
+    original_emit = module._emit_progress
+    pending: deque[dict[str, str]] = deque()
+
+    def _parse_with_capture(raw_text: str, user_language: Optional[str] = None):
+        lang, text = original_parse(raw_text, user_language=user_language)
+        pending.append({"language": str(lang or ""), "text": str(text or "")})
+        return lang, text
+
+    def _emit_with_chunk_text(on_progress, payload):
+        enriched = dict(payload)
+        if enriched.get("event") == "chunk_completed" and pending:
+            captured = pending.popleft()
+            enriched.setdefault("text", captured["text"])
+            enriched.setdefault("language", captured["language"])
+        return original_emit(on_progress, enriched)
+
+    module.parse_asr_output = _parse_with_capture
+    module._emit_progress = _emit_with_chunk_text
+    module._qwensper_chunk_text_progress_patched = True
 
 
 class QwenASRBackend(BaseASRBackend):
