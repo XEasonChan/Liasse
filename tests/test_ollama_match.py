@@ -11,14 +11,14 @@ def test_check_ollama_model_exact_match(monkeypatch):
         ]
     }).encode()
 
-    from local_transcriber import web_app
-    monkeypatch.setattr(web_app, "_check_ollama", lambda: True)
+    from local_transcriber.services import ollama_health
+    monkeypatch.setattr(ollama_health, "check_ollama", lambda: True)
 
     with patch("urllib.request.build_opener") as mock_opener:
         opener = MagicMock()
         opener.open.return_value.__enter__.return_value.read.return_value = fake_response
         mock_opener.return_value = opener
-        assert web_app._check_ollama_model("qwen3:4b") is False
+        assert ollama_health.check_ollama_model("qwen3:4b") is False
 
 
 def test_check_ollama_model_exact_present(monkeypatch):
@@ -28,14 +28,14 @@ def test_check_ollama_model_exact_present(monkeypatch):
         ]
     }).encode()
 
-    from local_transcriber import web_app
-    monkeypatch.setattr(web_app, "_check_ollama", lambda: True)
+    from local_transcriber.services import ollama_health
+    monkeypatch.setattr(ollama_health, "check_ollama", lambda: True)
 
     with patch("urllib.request.build_opener") as mock_opener:
         opener = MagicMock()
         opener.open.return_value.__enter__.return_value.read.return_value = fake_response
         mock_opener.return_value = opener
-        assert web_app._check_ollama_model("qwen3:4b") is True
+        assert ollama_health.check_ollama_model("qwen3:4b") is True
 
 
 def test_check_ollama_model_with_digest(monkeypatch):
@@ -46,11 +46,11 @@ def test_check_ollama_model_with_digest(monkeypatch):
         ]
     }).encode()
 
-    from local_transcriber import web_app
-    monkeypatch.setattr(web_app, "_check_ollama", lambda: True)
+    from local_transcriber.services import ollama_health
+    monkeypatch.setattr(ollama_health, "check_ollama", lambda: True)
 
     with patch("urllib.request.build_opener") as mock_opener:
         opener = MagicMock()
         opener.open.return_value.__enter__.return_value.read.return_value = fake_response
         mock_opener.return_value = opener
-        assert web_app._check_ollama_model("qwen3:4b") is True
+        assert ollama_health.check_ollama_model("qwen3:4b") is True

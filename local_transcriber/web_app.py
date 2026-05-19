@@ -19,6 +19,15 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from . import downloader as downloader_module
+from .services import (
+    check_model_cache,
+    check_ollama,
+    check_ollama_model,
+    check_runtime_ready,
+    probe_audio_duration,
+    read_install_progress,
+    unique_path,
+)
 from .settings_store import default_settings, load_settings, save_settings
 from .db import TaskRow, init_db, session_scope, utc_now
 from .schemas import (
@@ -116,9 +125,9 @@ def create_app() -> FastAPI:
         asr_ok = is_downloaded("Qwen/Qwen3-ASR-0.6B")
         aligner_ok = is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B")
         pyannote_ok = is_downloaded("pyannote/speaker-diarization-community-1")
-        ollama_up = _check_ollama()
-        qwen4b_ok = _check_ollama_model("qwen3:4b") if ollama_up else False
-        runtime_ready = _check_runtime_ready()
+        ollama_up = check_ollama()
+        qwen4b_ok = check_ollama_model("qwen3:4b") if ollama_up else False
+        runtime_ready = check_runtime_ready()
         hf_token_set = bool(
             os.environ.get("HF_TOKEN")
             or os.environ.get("PYANNOTE_AUTH_TOKEN")
@@ -153,13 +162,13 @@ def create_app() -> FastAPI:
                 "qwen3_4b_model": qwen4b_ok,
                 "runtime_ready": runtime_ready,
                 "disk_free_gb": disk_free_gb,
-                "models": _check_model_cache(),
+                "models": check_model_cache(),
             },
         }
 
     @app.get("/api/install/progress")
     def install_progress() -> dict:
-        return _read_install_progress()
+        return read_install_progress()
 
     @app.get("/api/models")
     def models() -> dict:
@@ -226,7 +235,7 @@ def create_app() -> FastAPI:
             {
                 "id": "qwen3:4b",
                 "kind": "llm",
-                "downloaded": _check_ollama_model("qwen3:4b"),
+                "downloaded": check_ollama_model("qwen3:4b"),
                 "label": "Qwen3 4B（总结 / AI Chat）",
                 "sizeBytes": 2_500_000_000,
                 "required": False,
@@ -237,7 +246,7 @@ def create_app() -> FastAPI:
             {
                 "id": "qwen3:8b",
                 "kind": "llm",
-                "downloaded": _check_ollama_model("qwen3:8b"),
+                "downloaded": check_ollama_model("qwen3:8b"),
                 "label": "Qwen3 8B（更高质量，可选）",
                 "sizeBytes": 5_200_000_000,
                 "required": False,
@@ -272,10 +281,10 @@ def create_app() -> FastAPI:
             if not data:
                 continue
             safe_name = Path(file.filename or "audio").name
-            target = _unique_path(upload_dir / safe_name)
+            target = unique_path(upload_dir / safe_name)
             target.write_bytes(data)
 
-            duration = _probe_duration(target)
+            duration = probe_audio_duration(target)
             task = TaskRow(
                 audio_path=str(target),
                 file_name=safe_name,
@@ -320,7 +329,7 @@ def create_app() -> FastAPI:
                 skipped.append({"path": raw_path, "reason": f"读取大小失败：{exc}"})
                 continue
 
-            duration = _probe_duration(path)
+            duration = probe_audio_duration(path)
             task = TaskRow(
                 audio_path=str(path),
                 file_name=path.name,
@@ -677,7 +686,7 @@ def create_app() -> FastAPI:
 
     @app.post("/api/ollama/start")
     def start_ollama() -> dict:
-        if _check_ollama():
+        if check_ollama():
             return {"started": True, "alreadyRunning": True, "message": "Ollama 已在运行"}
 
         if not shutil.which("ollama"):
@@ -704,7 +713,7 @@ def create_app() -> FastAPI:
 
         deadline = _time.time() + 8.0
         while _time.time() < deadline:
-            if _check_ollama():
+            if check_ollama():
                 return {
                     "started": True,
                     "alreadyRunning": False,
@@ -727,135 +736,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-
-def _check_ollama() -> bool:
-    try:
-        with socket.create_connection(("127.0.0.1", 11434), timeout=0.5):
-            return True
-    except OSError:
-        return False
-
-
-def _check_ollama_model(name: str) -> bool:
-    if not _check_ollama():
-        return False
-    try:
-        import urllib.request
-
-        proxy_handler = urllib.request.ProxyHandler({})
-        opener = urllib.request.build_opener(proxy_handler)
-        with opener.open("http://127.0.0.1:11434/api/tags", timeout=1.0) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        for m in data.get("models", []):
-            mname = m.get("name", "")
-            if mname == name or mname.startswith(f"{name}@"):
-                return True
-        return False
-    except Exception:
-        return False
-
-
-def _check_model_cache() -> dict:
-    from .hf_paths import is_downloaded
-    return {
-        "qwen3_asr_06b": is_downloaded("Qwen/Qwen3-ASR-0.6B"),
-        "qwen3_asr_17b": is_downloaded("Qwen/Qwen3-ASR-1.7B"),
-        "qwen3_aligner_06b": is_downloaded("Qwen/Qwen3-ForcedAligner-0.6B"),
-        "pyannote_community1": is_downloaded("pyannote/speaker-diarization-community-1"),
-    }
-
-
-def _check_runtime_ready() -> bool:
-    """重依赖（mlx-qwen3-asr 链）是否装好。装好 = 可以上传任务跑转录。"""
-    import importlib.util
-    return importlib.util.find_spec("mlx_qwen3_asr") is not None
-
-
-_INSTALL_LOG_PATH = Path.home() / "Library" / "Logs" / "WhisperQwen" / "install.log"
-
-
-def _read_install_progress() -> dict:
-    """解析 install.log，给前端展示后台 pip 进度。
-
-    返回字段:
-      ready: bool — runtime 已就绪（重依赖装完）
-      running: bool — install.log 还在被更新（最近 60 秒有新内容）
-      installed: int — 已 "Successfully installed" 的批次
-      currently: str — 当前 collecting / downloading 的包名（最近一行抽出）
-      tail: list[str] — 日志最后若干行，前端可直接展示
-      log_path: str
-    """
-    ready = _check_runtime_ready()
-    info: Dict[str, Any] = {
-        "ready": ready,
-        "running": False,
-        "installed": 0,
-        "currently": "",
-        "tail": [],
-        "log_path": str(_INSTALL_LOG_PATH),
-    }
-    if not _INSTALL_LOG_PATH.exists():
-        return info
-
-    try:
-        stat = _INSTALL_LOG_PATH.stat()
-        info["running"] = (time.time() - stat.st_mtime) < 60 and not ready
-        with _INSTALL_LOG_PATH.open("rb") as fp:
-            try:
-                fp.seek(-8192, os.SEEK_END)
-            except OSError:
-                fp.seek(0)
-            data = fp.read().decode("utf-8", errors="replace")
-    except OSError:
-        return info
-
-    lines = [ln for ln in data.splitlines() if ln.strip()]
-    info["tail"] = lines[-12:]
-    info["installed"] = sum(1 for ln in lines if ln.startswith("Successfully installed"))
-    for ln in reversed(lines):
-        if ln.startswith("Collecting ") or ln.startswith("Downloading ") or ln.startswith("  Downloading "):
-            # 抽出包名/文件名
-            token = ln.strip().split(" ", 2)
-            info["currently"] = token[1] if len(token) > 1 else ln.strip()
-            break
-    return info
-
-
-def _unique_path(target: Path) -> Path:
-    if not target.exists():
-        return target
-    stem, suffix = target.stem, target.suffix
-    n = 1
-    while True:
-        candidate = target.with_name(f"{stem}-{n}{suffix}")
-        if not candidate.exists():
-            return candidate
-        n += 1
-
-
-def _probe_duration(path: Path) -> Optional[float]:
-    if not shutil.which("ffprobe"):
-        return None
-    try:
-        completed = subprocess.run(
-            [
-                "ffprobe",
-                "-v",
-                "error",
-                "-show_entries",
-                "format=duration",
-                "-of",
-                "default=noprint_wrappers=1:nokey=1",
-                str(path),
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if completed.returncode != 0:
-            return None
-        return float(completed.stdout.strip())
-    except Exception:
-        return None
