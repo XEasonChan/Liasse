@@ -101,6 +101,15 @@ async def lifespan(app: FastAPI):
 def create_app() -> FastAPI:
     app = FastAPI(title="WhisperQwen", version="0.2.0", lifespan=lifespan)
 
+    @app.middleware("http")
+    async def _no_cache_for_static(request, call_next):
+        response = await call_next(request)
+        # 前端是本地静态文件，全程毫秒级响应；强制不缓存，避免 WebKit
+        # 在我们改完 JS/CSS 后还吃老版本。
+        if request.url.path.startswith("/static/"):
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
