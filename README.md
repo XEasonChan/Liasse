@@ -4,6 +4,12 @@
   <img src="docs/assets/qwensper-hero.svg" alt="Qwensper: local-first interview transcription and AI analysis" width="100%">
 </p>
 
+<p align="center">
+  <a href="#中文">中文</a> · <a href="#english">English</a>
+</p>
+
+## 中文
+
 Qwensper 是一个面向访谈研究、法律实务、口述史和高敏感资料整理的本地转录桌面应用。它把长音频转成带时间戳和发言人的逐字稿，并用本地 Qwen 模型完成总结、对话问答和轻量 RAG 检索。核心目标很朴素：敏感音频、逐字稿、摘要和问答上下文都不上传云端。
 
 > 当前状态：alpha / research tool。后端管线已经跑通，桌面 UI MVP 可用。默认 ASR 使用 Qwen3-ASR-0.6B，Apple Silicon 上通过 MLX/Metal 本地推理。
@@ -167,3 +173,165 @@ venv/bin/python scripts/run_test_audio.py --seconds 60 --diarize --num-speakers 
 ## 许可
 
 暂未选择开源许可证。请先不要把它当作可自由再分发的软件使用。
+
+---
+
+## English
+
+Qwensper is a local-first desktop app for interview transcription and private AI analysis. It is designed for academic research, legal work, oral history, internal research, and other workflows where audio recordings and transcripts are too sensitive to send to a cloud transcription service.
+
+It turns long recordings into timestamped, speaker-aware transcripts, then uses local Qwen models for summaries, interview Q&A, and lightweight local retrieval. The core promise is simple: sensitive recordings, transcripts, summaries, and chat context stay on your own machine.
+
+> Status: alpha / research tool. The backend pipeline is already working, and the desktop UI MVP is usable. The default ASR model is Qwen3-ASR-0.6B running locally on Apple Silicon through MLX / Metal.
+
+## Why This Exists
+
+Researchers, lawyers, compliance teams, and fieldworkers often handle recordings that should not be uploaded to third-party services. Qwensper brings the full workflow back onto the user’s Mac:
+
+- **Local-first**: ASR, diarization, summaries, and Q&A all run locally. No cloud API is used for core processing.
+- **Built for long interviews**: Handles 30-minute to 4-hour recordings through a serial task queue that is friendly to M1 16GB machines.
+- **Traceable exports**: Exports Markdown, JSON, and SRT with timestamps, speaker labels, and edited text.
+- **Local AI analysis**: Uses Ollama-hosted Qwen models to generate summaries, structured digests, and task-specific Q&A.
+- **Privacy controls**: Includes a fully offline mode that forces Hugging Face / Transformers to use local cache only.
+
+## Current Capabilities
+
+| Area | Current implementation |
+|---|---|
+| Desktop shell | `pywebview` running a local FastAPI + Vue 3 app |
+| ASR | Qwen3-ASR-0.6B by default, with Qwen3-ASR-1.7B planned as a higher-quality option |
+| Speaker diarization | pyannote 4.x `speaker-diarization-community-1` |
+| Task system | SQLite persistence, serial queue, retry after failure or interruption |
+| Frontend | Vue 3 via CDN, no npm build step; English / Chinese / Spanish UI |
+| Summary | Local Qwen through Ollama generates Markdown summaries |
+| Q&A / RAG | First question builds an interview digest; later answers use the digest plus locally retrieved transcript snippets |
+| Export | Markdown / JSON / SRT |
+| Offline mode | No telemetry, no update checks, local-cache-only option |
+
+## Who It Is For
+
+- Academic researchers: interview transcripts, theme extraction, and material preparation before coding.
+- Legal and compliance teams: local transcription of sensitive recordings with timestamped references.
+- Oral history and fieldwork: long recordings, multiple speakers, speaker labels, and archival exports.
+- Internal research teams: user interviews, internal meetings, and non-shareable research material.
+
+## Quick Start
+
+Qwensper currently targets Apple Silicon macOS.
+
+```bash
+brew install python@3.12 ffmpeg ollama
+```
+
+Create a Hugging Face token for the first pyannote diarization model download:
+
+```dotenv
+HF_TOKEN=hf_xxx
+PYANNOTE_AUTH_TOKEN=hf_xxx
+```
+
+Install the Python environment and dependencies:
+
+```bash
+./Setup\ MLX\ Test\ Env.command
+```
+
+Download a local model for summaries and Q&A:
+
+```bash
+ollama pull qwen3:4b
+# Optional: higher quality, more memory
+ollama pull qwen3:8b
+```
+
+Start Ollama, then open the desktop app:
+
+```bash
+ollama serve
+./Start\ WhisperQwen.command
+```
+
+`Start WhisperQwen.command` only checks whether Ollama is already running. It does not start the daemon automatically.
+
+## Workflow
+
+1. Select audio files or a folder. Supported formats: `mp3 / wav / m4a / flac / aac / ogg / wma / mp4`.
+2. Choose task options: speaker diarization, number of speakers, summary generation, ASR model, and audio language.
+3. The task enters a local serial queue and runs in the background.
+4. Open the task detail view to edit transcripts, rename speakers, and read the summary.
+5. Ask questions about the current interview in the right-side Q&A panel.
+6. Export Markdown, JSON, or SRT.
+
+## Privacy Model
+
+Qwensper’s privacy boundary is your own machine:
+
+- Audio files are not uploaded to a cloud transcription API.
+- Transcripts, summaries, digests, and chat history are stored locally under `outputs/` and SQLite.
+- The first model download requires network access; after that, fully offline mode can be enabled.
+- No telemetry, no automatic update checks, and no third-party processing service.
+
+## Performance Reference
+
+M1 16GB, Qwen3-ASR-0.6B + speaker diarization:
+
+| Audio length | Estimated runtime |
+|---|---|
+| 60 seconds | About 90 seconds |
+| 5 minutes | About 7-8 minutes |
+| 30 minutes | About 45 minutes |
+| 3 hours 50 minutes | About 5-6 hours |
+
+Long recordings currently retry from the beginning rather than resuming from a chunk checkpoint. A future chunking layer should enable finer progress, partial recovery, and stronger retrieval.
+
+## Project Structure
+
+```text
+launch_app.py                     # pywebview entry: starts FastAPI and opens the desktop window
+Start WhisperQwen.command         # double-click launcher
+local_transcriber/
+├── web_app.py                    # FastAPI REST + SSE
+├── task_runner.py                # background task queue
+├── web_models.py                 # SQLite / SQLAlchemy / Pydantic models
+├── chat.py                       # summary, digest, Q&A / RAG
+├── pipeline.py                   # ASR → diarization → summary → export orchestration
+├── asr.py / diarization.py / alignment.py
+├── exporters.py                  # Markdown / JSON / SRT
+└── web_static/                   # Vue 3 frontend, no build step
+docs/
+├── frontend-spec.md
+├── dev-plan.md
+└── assets/                       # README visuals
+tests/
+```
+
+## Development
+
+Runtime check:
+
+```bash
+./Check\ Runtime.command
+```
+
+Unit tests:
+
+```bash
+venv/bin/python -m pytest tests/ -v
+```
+
+60-second end-to-end smoke test:
+
+```bash
+venv/bin/python scripts/run_test_audio.py --seconds 60 --diarize --num-speakers 2
+```
+
+## Roadmap
+
+- Long-audio chunking for finer progress, partial recovery, and chunk-level RAG.
+- 0.6B / 1.7B ASR quality evaluation on Chinese, English, and Cantonese interview samples.
+- Richer local retrieval by timestamp, speaker, topic, and keyword.
+- More robust macOS packaging: app bundle, DMG, and first-run setup wizard.
+
+## License
+
+No open-source license has been selected yet. Please do not treat this as freely redistributable software for now.
