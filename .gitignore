@@ -40,5 +40,9 @@ test_audio/
 # Historical local vendor snapshot; PyPI packages are used instead.
 vendor/
 
+# Local research reference repos (open-source projects we read for inspiration,
+# never bundled into Qwensper). Can be large (100MB+). Cloned ad-hoc per machine.
+reference/
+
 # Local agent planning notes.
 docs/superpowers/
