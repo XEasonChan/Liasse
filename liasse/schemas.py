@@ -71,6 +71,52 @@ class DeleteResponse(BaseModel):
     deletedOutputs: bool
 
 
+TranslationLang = Literal["Chinese", "English", "Cantonese", "Spanish"]
+
+
+class GlossaryEntry(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    source: str = Field(..., min_length=1, max_length=120, description="源语言术语")
+    target: str = Field(..., min_length=1, max_length=200, description="首选译法")
+    domain: Optional[str] = Field(None, max_length=60, description="可选领域标签:法律/医学/学术/...")
+    note: Optional[str] = Field(None, max_length=400, description="可选备注")
+
+
+class Glossary(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    name: str = Field(..., min_length=1, max_length=60, pattern=r"^[\w一-鿿\-]+$")
+    sourceLang: Literal["Chinese", "English", "Cantonese", "Spanish", "auto"] = "Chinese"
+    targetLang: TranslationLang = "English"
+    entries: list[GlossaryEntry] = Field(default_factory=list)
+    note: Optional[str] = Field(None, max_length=400)
+
+
+class TranslationRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    target: TranslationLang
+    glossaryName: Optional[str] = None
+    model: str = "qwen3:4b"
+
+
+class TranslatedSegment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: int
+    start: Optional[float] = None
+    end: Optional[float] = None
+    speaker: Optional[str] = None
+    text: str
+    translation: str
+
+
+class TranslationResult(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    target: str
+    model: str
+    glossaryName: Optional[str] = None
+    segments: list[TranslatedSegment]
+    generatedAt: str
+
+
 __all__ = [
     "SpeakerMode",
     "normalize_speaker_mode",
@@ -79,4 +125,10 @@ __all__ = [
     "SpeakerEditRequest",
     "SegmentEditRequest",
     "DeleteResponse",
+    "TranslationLang",
+    "Glossary",
+    "GlossaryEntry",
+    "TranslationRequest",
+    "TranslatedSegment",
+    "TranslationResult",
 ]

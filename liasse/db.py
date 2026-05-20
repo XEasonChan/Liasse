@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, Text, create_engine
+from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, Text, create_engine, inspect, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -43,6 +43,7 @@ class TaskRow(Base):
     chat_messages = Column(JSON, nullable=False, default=list)
     chat_context_digest = Column(Text, nullable=True)
     summary_text = Column(Text, nullable=True)
+    translations = Column(JSON, nullable=True, default=None)
 
     created_at = Column(DateTime, nullable=False, default=utc_now)
     started_at = Column(DateTime, nullable=True)
@@ -67,6 +68,7 @@ class TaskRow(Base):
             "chatMessages": self.chat_messages or [],
             "chatContextDigest": self.chat_context_digest,
             "summaryText": self.summary_text,
+            "translations": self.translations or {},
             "createdAt": self.created_at.isoformat() if self.created_at else None,
             "startedAt": self.started_at.isoformat() if self.started_at else None,
             "completedAt": self.completed_at.isoformat() if self.completed_at else None,
@@ -78,6 +80,23 @@ _engine: Optional[Engine] = None
 _SessionLocal: Optional[sessionmaker] = None
 
 
+def _ensure_added_columns(engine: Engine) -> None:
+    """SQLite 不支持 Base.metadata.create_all 往已存在的表加新列。
+    手动 ALTER 检测 + 兼容老库。新增列必须先在这里登记。
+    """
+    insp = inspect(engine)
+    if "tasks" not in insp.get_table_names():
+        return
+    existing = {c["name"] for c in insp.get_columns("tasks")}
+    additions: list[tuple[str, str]] = [
+        ("translations", "ALTER TABLE tasks ADD COLUMN translations JSON"),
+    ]
+    with engine.begin() as conn:
+        for col, ddl in additions:
+            if col not in existing:
+                conn.execute(text(ddl))
+
+
 def init_db(db_path: Path) -> Engine:
     global _engine, _SessionLocal
     db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -85,6 +104,7 @@ def init_db(db_path: Path) -> Engine:
     _engine = create_engine(url, future=True, connect_args={"check_same_thread": False})
     _SessionLocal = sessionmaker(bind=_engine, autoflush=False, autocommit=False, future=True)
     Base.metadata.create_all(_engine)
+    _ensure_added_columns(_engine)
     return _engine
 
 

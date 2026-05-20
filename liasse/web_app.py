@@ -118,10 +118,11 @@ def create_app() -> FastAPI:
 
     # 路由注册：domain-specific routes 拆到 routers/ 子模块，web_app.py 自己
     # 只装配。每个 router 自带 prefix（声明在装饰器里），include 时不再加。
-    from .routers import health_router, models_router, qa_router
+    from .routers import health_router, models_router, qa_router, translation_router
     app.include_router(health_router)
     app.include_router(models_router)
     app.include_router(qa_router)
+    app.include_router(translation_router)
 
 
     @app.post("/api/tasks/upload")

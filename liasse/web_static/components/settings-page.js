@@ -1,9 +1,15 @@
 import { LucideIcon } from "./icons.js";
+import { GlossaryEditor } from "./glossary-editor.js";
 import { t, i18n, setLocale, LOCALES } from "../i18n.js";
+
+const ASR_MODEL_OPTIONS = [
+  { id: "Qwen/Qwen3-ASR-0.6B", labelKey: "settings.asrQuick" },
+  { id: "Qwen/Qwen3-ASR-1.7B", labelKey: "settings.asrHigh" },
+];
 
 export const SettingsPage = {
   name: "SettingsPage",
-  components: { LucideIcon },
+  components: { LucideIcon, GlossaryEditor },
   props: {
     models: { type: Array, default: () => [] },
   },
@@ -20,6 +26,9 @@ export const SettingsPage = {
   },
   async mounted() {
     await this.load();
+  },
+  computed: {
+    asrModelOptions() { return ASR_MODEL_OPTIONS; },
   },
   methods: {
     t,
@@ -69,13 +78,28 @@ export const SettingsPage = {
       }
     },
     changeLocale(code) { setLocale(code); },
+    modelInfo(id) {
+      return this.models.find((mm) => mm.id === id) || null;
+    },
     modelLabel(id) {
-      const m = this.models.find((mm) => mm.id === id);
-      if (!m) return id;
+      const m = this.modelInfo(id);
+      if (!m) return `${id} (${t("settings.checking")})`;
       return m.label + (m.downloaded ? ` (${t("settings.loaded")})` : ` (${t("settings.notLoaded")})`);
     },
+    modelStatusLabel(id) {
+      const m = this.modelInfo(id);
+      if (!m) return t("settings.checking");
+      return m.downloaded ? t("settings.loaded") : t("settings.notLoaded");
+    },
+    asrOptionLabel(option) {
+      return `${t(option.labelKey)} (${this.modelStatusLabel(option.id)})`;
+    },
+    isModelSelectable(id) {
+      const m = this.modelInfo(id);
+      return !m || m.downloaded;
+    },
     statusOf(id) {
-      const m = this.models.find((mm) => mm.id === id);
+      const m = this.modelInfo(id);
       return m && m.downloaded ? "loaded" : "missing";
     },
   },
@@ -131,11 +155,15 @@ export const SettingsPage = {
           <div class="settings-row">
             <div>
               <div class="settings-row-label">{{ t('settings.asrModel') }}</div>
-              <div class="settings-row-hint">{{ modelLabel('Qwen/Qwen3-ASR-0.6B') }}</div>
+              <div class="settings-row-hint">{{ modelLabel(settings.defaultASRModel) }}</div>
             </div>
             <select v-model="settings.defaultASRModel">
-              <option value="Qwen/Qwen3-ASR-0.6B">{{ t('settings.asrQuick') }}</option>
-              <option value="Qwen/Qwen3-ASR-1.7B" disabled>{{ t('settings.asrHigh') }}</option>
+              <option
+                v-for="option in asrModelOptions"
+                :key="option.id"
+                :value="option.id"
+                :disabled="!isModelSelectable(option.id)"
+              >{{ asrOptionLabel(option) }}</option>
             </select>
           </div>
 
@@ -225,6 +253,11 @@ export const SettingsPage = {
               <span class="muted">{{ m.downloaded ? t('settings.loaded') : t('settings.notLoaded') }}</span>
             </div>
           </div>
+        </div>
+
+        <div class="settings-card">
+          <div class="section-head"><h2 class="section-title">{{ t('glossary.title') }}</h2></div>
+          <glossary-editor />
         </div>
 
         <div class="row" style="gap: 12px">

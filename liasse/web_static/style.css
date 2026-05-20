@@ -1338,3 +1338,97 @@ input, select, textarea { font-family: inherit; }
 
   a { color: black; text-decoration: none; }
 }
+
+/* ====== Glossary editor (settings) + translate toolbar (task detail) ====== */
+.glossary-editor { display: flex; flex-direction: column; gap: 14px; }
+.glossary-body {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 16px;
+  margin-top: 8px;
+}
+@media (max-width: 720px) {
+  .glossary-body { grid-template-columns: 1fr; }
+}
+.glossary-list { border-right: 1px solid var(--border-subtle); padding-right: 12px; min-height: 80px; }
+.glossary-list.empty { border-right: none; }
+.glossary-list ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+.glossary-list-btn {
+  width: 100%; text-align: left;
+  background: transparent; border: 1px solid transparent;
+  padding: 6px 10px; border-radius: 6px; cursor: pointer;
+  color: var(--text-primary); font: inherit;
+}
+.glossary-list-btn:hover { background: var(--surface-elev-1); }
+.glossary-list-btn.active {
+  background: var(--accent-soft, rgba(99, 102, 241, .12));
+  color: var(--accent, #6366f1);
+  border-color: var(--accent-border, rgba(99,102,241,.25));
+}
+.glossary-empty { padding: 8px; font-size: 12px; }
+
+.glossary-editor-panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.glossary-editor-panel.placeholder { align-items: center; justify-content: center; min-height: 100px; }
+.field { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 120px; }
+.field-label { font-size: 12px; color: var(--text-secondary); }
+.field input, .field select {
+  padding: 6px 8px; border: 1px solid var(--border-subtle); border-radius: 6px;
+  background: var(--surface-elev-1); color: var(--text-primary); font: inherit;
+}
+
+.glossary-entries-head { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+.glossary-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13px;
+}
+.glossary-table th, .glossary-table td {
+  padding: 4px 6px; border-bottom: 1px solid var(--border-subtle);
+  text-align: left;
+}
+.glossary-table th { color: var(--text-secondary); font-weight: 500; font-size: 12px; }
+.glossary-table input {
+  width: 100%; padding: 4px 6px; border: 1px solid transparent; border-radius: 4px;
+  background: transparent; color: var(--text-primary); font: inherit;
+}
+.glossary-table input:focus {
+  outline: none;
+  border-color: var(--accent-border, rgba(99,102,241,.4));
+  background: var(--surface-elev-1);
+}
+.glossary-table .col-x { width: 28px; text-align: right; }
+
+/* ===== task-detail 翻译 toolbar + 译文行 ===== */
+.translate-toolbar {
+  display: flex; gap: 8px; align-items: center;
+  padding: 8px 0; flex-wrap: wrap;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 10px;
+}
+.translate-toolbar select {
+  height: 28px; padding: 0 8px;
+  border: 1px solid var(--border-subtle); border-radius: 6px;
+  background: var(--surface-elev-1); color: var(--text-primary); font: inherit;
+}
+.view-toggle {
+  display: inline-flex;
+  border: 1px solid var(--border-subtle); border-radius: 6px; overflow: hidden;
+}
+.view-toggle button {
+  padding: 4px 10px; border: none;
+  background: transparent; color: var(--text-secondary); cursor: pointer; font: inherit;
+}
+.view-toggle button:not(:last-child) { border-right: 1px solid var(--border-subtle); }
+.view-toggle button.on {
+  background: var(--accent-soft, rgba(99,102,241,.12));
+  color: var(--accent, #6366f1);
+}
+
+.segment-translation {
+  color: var(--text-secondary);
+  font-style: italic;
+  padding-left: 12px;
+  border-left: 2px solid var(--accent-border, rgba(99,102,241,.35));
+  margin: 6px 0 6px 12px;
+  line-height: 1.5;
+}
+.segment-translation.faded { opacity: .5; }

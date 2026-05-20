@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from .models import SpeakerTurn, SummaryResult, TranscriptSegment
 from .timefmt import format_clock, format_srt_time
@@ -62,6 +62,63 @@ def export_json(
         "summary": summary.to_dict() if summary else None,
     }
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def export_markdown_bilingual(
+    path: Path,
+    audio_path: Path,
+    segments: Iterable[TranscriptSegment],
+    translation: Dict[str, Any],
+) -> None:
+    """双语对照 Markdown:每段 timecode + speaker + 原文 + 译文。
+
+    translation: 形如 {"target": "English", "segments": [{"id":1, "translation":"..."}, ...]}
+    通过 segment 在 segments 里的位置序号 (1-indexed) 匹配 translation.segments.id;
+    如果 id 是 segment.id 字符串(走 segmentOverrides 同一 id 字段)也兼容。
+    """
+    segment_list = list(segments)
+    target = translation.get("target", "?")
+    tr_segs = translation.get("segments", []) or []
+    by_int_id: Dict[int, str] = {}
+    by_str_id: Dict[str, str] = {}
+    for t in tr_segs:
+        try:
+            by_int_id[int(t["id"])] = str(t.get("translation", ""))
+        except (KeyError, ValueError, TypeError):
+            pass
+        if "id" in t:
+            by_str_id[str(t["id"])] = str(t.get("translation", ""))
+
+    def _tr_for(seg: TranscriptSegment, idx: int) -> str:
+        sid = getattr(seg, "id", None)
+        if sid is not None and str(sid) in by_str_id:
+            return by_str_id[str(sid)]
+        return by_int_id.get(idx, "")
+
+    lines: List[str] = [
+        f"# {audio_path.stem} 双语对照",
+        "",
+        f"- 音频文件:`{audio_path}`",
+        f"- 译入语言:{target}",
+        f"- 生成时间:{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        f"- 分段数:{len(segment_list)}",
+        "",
+        "## 对照逐字稿",
+        "",
+    ]
+    for idx, seg in enumerate(segment_list, start=1):
+        ts = format_clock(seg.start) if seg.start is not None else "??:??"
+        te = format_clock(seg.end) if seg.end is not None else "??:??"
+        speaker = seg.speaker or "?"
+        lines.append(f"### {ts} – {te} · {speaker}")
+        lines.append("")
+        lines.append(f"**原文**：{seg.text.strip() if seg.text else ''}")
+        lines.append("")
+        tr = _tr_for(seg, idx)
+        if tr:
+            lines.append(f"**{target}**:{tr.strip()}")
+            lines.append("")
+    path.write_text("\n".join(lines).strip() + "\n", encoding="utf-8")
 
 
 def export_srt(path: Path, segments: Iterable[TranscriptSegment]) -> None:

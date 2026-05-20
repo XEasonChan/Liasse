@@ -1,6 +1,7 @@
 import { LucideIcon } from "./icons.js";
 import { ChatPanel } from "./chat-panel.js";
 import { dialog } from "./dialog.js";
+import { toast } from "./toast.js";
 import { t, i18n, fmtDurI18n } from "../i18n.js";
 
 export const TaskDetail = {
@@ -22,6 +23,12 @@ export const TaskDetail = {
       summaryError: null,
       pollHandle: null,
       saving: false,
+      // 翻译状态
+      selectedTargetLang: "English",
+      selectedGlossary: "",
+      availableGlossaries: [],
+      translating: false,
+      showTranslation: "both",   // "original" | "translation" | "both"
     };
   },
   computed: {
@@ -42,6 +49,21 @@ export const TaskDetail = {
     },
     transcriptReady() {
       return this.segments.length > 0;
+    },
+    translations() {
+      return (this.task && this.task.translations) || {};
+    },
+    activeTranslation() {
+      return this.translations[this.selectedTargetLang] || null;
+    },
+    translationById() {
+      const tr = this.activeTranslation;
+      if (!tr || !Array.isArray(tr.segments)) return {};
+      const out = {};
+      for (const s of tr.segments) {
+        out[s.id] = s.translation || "";
+      }
+      return out;
     },
     /** 推断当前后端在跑哪个阶段，用 progressStage 字符串匹配。
      *  返回 "asr-only" | "diarizing" | "aligning" | null。 */
@@ -278,9 +300,53 @@ export const TaskDetail = {
       if (inUl) html += "</ul>";
       return html;
     },
+    segmentTranslation(seg) {
+      return this.translationById[seg.id] || "";
+    },
+    async loadGlossaries() {
+      try {
+        const r = await fetch("/api/glossaries");
+        if (!r.ok) return;
+        const data = await r.json();
+        this.availableGlossaries = data.names || [];
+      } catch (e) { /* offline-tolerant */ }
+    },
+    async runTranslate() {
+      if (this.translating || !this.task) return;
+      this.translating = true;
+      try {
+        const body = { target: this.selectedTargetLang };
+        if (this.selectedGlossary) body.glossaryName = this.selectedGlossary;
+        const r = await fetch(`/api/tasks/${this.task.id}/translate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) {
+          const txt = await r.text();
+          throw new Error(txt || `HTTP ${r.status}`);
+        }
+        const data = await r.json();
+        // 写回本地以便重新渲染 (避免等下次 poll)
+        if (!this.task.translations) this.task.translations = {};
+        this.task.translations[this.selectedTargetLang] = data;
+        this.showTranslation = "both";
+        toast.success(t("translate.action"), t("translate.done"));
+      } catch (err) {
+        toast.error(t("translate.action"), t("translate.failed", { msg: err.message || String(err) }));
+      } finally {
+        this.translating = false;
+      }
+    },
+    exportBilingual() {
+      if (!this.task || !this.activeTranslation) return;
+      const url = `/api/tasks/${this.task.id}/export-bilingual?target=${encodeURIComponent(this.selectedTargetLang)}`;
+      window.location.href = url;
+    },
   },
   async mounted() {
     await this.load();
+    await this.loadGlossaries();
     this.pollHandle = setInterval(() => {
       if (this.task && (this.task.status === "running" || this.task.status === "queued")) {
         this.load();
@@ -374,6 +440,36 @@ export const TaskDetail = {
               <lucide-icon name="alert-triangle" :size="14" />
               <span>{{ transcriptWarnings.join('；') }}</span>
             </div>
+
+            <!-- 翻译 toolbar：done 任务才显示 -->
+            <div v-if="segments.length && task && task.status === 'done'" class="translate-toolbar">
+              <label class="muted" style="font-size:12px">{{ t('translate.targetLang') }}</label>
+              <select v-model="selectedTargetLang" :disabled="translating">
+                <option value="English">English</option>
+                <option value="Chinese">中文</option>
+                <option value="Cantonese">粤语</option>
+                <option value="Spanish">Español</option>
+              </select>
+              <label class="muted" style="font-size:12px">{{ t('translate.glossary') }}</label>
+              <select v-model="selectedGlossary" :disabled="translating">
+                <option value="">{{ t('translate.none') }}</option>
+                <option v-for="g in availableGlossaries" :key="g" :value="g">{{ g }}</option>
+              </select>
+              <button class="btn btn-sm btn-primary" :disabled="translating" @click="runTranslate">
+                <lucide-icon name="languages" :size="14" />
+                {{ translating ? t('translate.translating') : t('translate.action') }}
+              </button>
+              <div v-if="activeTranslation" class="view-toggle">
+                <button :class="{ on: showTranslation === 'original' }" @click="showTranslation = 'original'">{{ t('translate.showOriginal') }}</button>
+                <button :class="{ on: showTranslation === 'both' }" @click="showTranslation = 'both'">{{ t('translate.showBoth') }}</button>
+                <button :class="{ on: showTranslation === 'translation' }" @click="showTranslation = 'translation'">{{ t('translate.showTranslation') }}</button>
+              </div>
+              <button v-if="activeTranslation" class="btn btn-sm" @click="exportBilingual">
+                <lucide-icon name="download" :size="14" />
+                {{ t('translate.exportBilingual') }}
+              </button>
+            </div>
+
             <div v-for="seg in segments" :key="seg.id" class="segment-block">
               <div class="segment-head">
                 <span class="segment-speaker" :title="t('detail.speakerTooltip')" @click="renameSpeaker(seg.speaker)">
@@ -384,11 +480,16 @@ export const TaskDetail = {
                 <span v-if="isEdited(seg)" class="muted" style="font-size:11px;color:var(--accent)">{{ t('detail.edited') }}</span>
               </div>
               <div
+                v-if="showTranslation !== 'translation'"
                 class="segment-text"
                 contenteditable="true"
                 :data-seg-id="seg.id"
                 @blur="saveSegmentEdit(seg, $event)"
               >{{ segmentText(seg) }}</div>
+              <div v-if="showTranslation !== 'original' && activeTranslation && segmentTranslation(seg)" class="segment-translation">
+                {{ segmentTranslation(seg) }}
+              </div>
+              <div v-else-if="showTranslation === 'translation' && activeTranslation && !segmentTranslation(seg)" class="segment-translation faded">—</div>
             </div>
           </div>
 
