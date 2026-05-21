@@ -84,16 +84,27 @@ _PYANNOTE_HOOK_LABEL_MAP = {
 
 
 def _resolve_speaker_execution(config: Dict[str, Any]) -> tuple[Dict[str, Any], str, bool, bool]:
+    """决定 pyannote 和 LLM 区分发言人两步是否要跑。
+
+    模式语义（v0.2.3 起）:
+      fast      → 不分发言人，全部归 SPEAKER_00
+      pyannote  → 只跑 pyannote 声学聚类，输出 SPEAKER_00/01/...
+      llm       → pyannote 声学聚类 + LLM 在已分好的簇上贴语义标签
+                  （采访者/受访者）。LLM **不再独立做声纹分离**，因为
+                  声纹本质是声学问题，文本分类做不到。
+    """
     normalized = normalize_task_config(config)
     auto_segment = normalized.get("autoSegment")
     auto_segment = True if auto_segment is None else bool(auto_segment)
     speaker_mode = str(normalized.get("speakerMode") or "llm")
     effective_mode = speaker_mode if auto_segment else "fast"
+    pyannote_enabled = effective_mode in ("pyannote", "llm")
+    llm_speaker_enabled = effective_mode == "llm"
     return (
         normalized,
         effective_mode,
-        effective_mode == "pyannote",
-        effective_mode == "llm",
+        pyannote_enabled,
+        llm_speaker_enabled,
     )
 
 
@@ -256,43 +267,59 @@ def _worker_entry(
         needs_export_refresh = False
 
         if llm_speaker_enabled:
-            try:
-                from .asr import unload_mlx_models
-                from .diarization import speaker_turns_from_segments
-                from .speaker_labeler import label_segments
-
-                # 在 8GB Air 上，MLX ASR (~1.2GB) + Ollama qwen3:4b (~4.5GB)
-                # 同时驻留就会触发 swap。ASR 已完成、segments 已落库，主动
-                # 释放 MLX 给 Ollama 让路。
-                unload_mlx_models()
+            # 如果 pyannote 实际只分出 1 簇 (常见于单人独白 / 双人但音色相近),
+            # LLM 命名一步就没意义了——任务唯一解，LLM 经常返回空 JSON 触发
+            # SpeakerLabelingError → UI 弹「智能分离失败」横幅。直接保留
+            # pyannote 的原始输出，跳过 LLM。
+            distinct_pyannote_speakers = {
+                s.speaker for s in result.segments if s.speaker
+            }
+            if pyannote_enabled and len(distinct_pyannote_speakers) <= 1:
                 progress_queue.put(
                     {
                         "type": "progress",
-                        "stage": "正在智能区分发言人",
-                        "value": 0.885,
-                    }
-                )
-                labeling = label_segments(
-                    result.segments,
-                    model=config.get("summaryModel") or "qwen3:4b",
-                    num_speakers=config.get("numSpeakers"),
-                )
-                result.segments = labeling.segments
-                result.speaker_turns = speaker_turns_from_segments(result.segments)
-                suggested_speaker_labels = labeling.speaker_labels
-                needs_export_refresh = True
-            except InterruptedError:
-                raise
-            except Exception as exc:
-                warning = "智能分离失败，已保留未分离逐字稿"
-                warnings.append(warning)
-                progress_queue.put(
-                    {
-                        "type": "progress",
-                        "stage": f"{warning}（{exc}）",
+                        "stage": "只有 1 个发言人，跳过 LLM 语义命名",
                         "value": 0.89,
                     }
                 )
+            else:
+                try:
+                    from .asr import unload_mlx_models
+                    from .diarization import speaker_turns_from_segments
+                    from .speaker_labeler import label_segments
+
+                    # 在 8GB Air 上，MLX ASR (~1.2GB) + Ollama qwen3:4b (~4.5GB)
+                    # 同时驻留就会触发 swap。ASR 已完成、segments 已落库，主动
+                    # 释放 MLX 给 Ollama 让路。
+                    unload_mlx_models()
+                    progress_queue.put(
+                        {
+                            "type": "progress",
+                            "stage": "正在用 LLM 给发言人命名",
+                            "value": 0.885,
+                        }
+                    )
+                    labeling = label_segments(
+                        result.segments,
+                        model=config.get("summaryModel") or "qwen3:4b",
+                        num_speakers=config.get("numSpeakers"),
+                    )
+                    result.segments = labeling.segments
+                    result.speaker_turns = speaker_turns_from_segments(result.segments)
+                    suggested_speaker_labels = labeling.speaker_labels
+                    needs_export_refresh = True
+                except InterruptedError:
+                    raise
+                except Exception as exc:
+                    warning = "LLM 语义命名失败，已保留 pyannote 原始发言人编号"
+                    warnings.append(warning)
+                    progress_queue.put(
+                        {
+                            "type": "progress",
+                            "stage": f"{warning}（{exc}）",
+                            "value": 0.89,
+                        }
+                    )
 
         # 在 pipeline 之后调用分层分析（L1/L2/索引）生成摘要 + 检索索引。
         analysis_payload: Optional[Dict[str, Any]] = None

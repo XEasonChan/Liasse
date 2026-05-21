@@ -53,7 +53,10 @@ def test_settings_migrates_old_default_diarize_false_to_fast():
     assert settings["defaultDiarize"] is False
 
 
-def test_runner_speaker_execution_only_pyannote_runs_diarization():
+def test_runner_speaker_execution_llm_mode_runs_pyannote_plus_llm():
+    """v0.2.3 起：llm (Smart) 模式 = pyannote + LLM 双跑。
+    声纹分离是声学问题，LLM 不该单独承担；它只在 pyannote 已经分好的
+    簇上贴语义标签（采访者/受访者）。"""
     llm_cfg, llm_mode, llm_pyannote, llm_label = _resolve_speaker_execution(
         {"speakerMode": "llm"}
     )
@@ -64,10 +67,12 @@ def test_runner_speaker_execution_only_pyannote_runs_diarization():
         {"speakerMode": "fast"}
     )
 
-    assert llm_cfg["diarize"] is False
-    assert (llm_mode, llm_pyannote, llm_label) == ("llm", False, True)
+    # llm 模式：pyannote 启用、LLM 启用
+    assert (llm_mode, llm_pyannote, llm_label) == ("llm", True, True)
+    # pyannote 模式：pyannote 启用、LLM 不启用
     assert py_cfg["diarize"] is True
     assert (py_mode, py_pyannote, py_label) == ("pyannote", True, False)
+    # fast 模式：都不跑
     assert fast_cfg["diarize"] is False
     assert (fast_mode, fast_pyannote, fast_label) == ("fast", False, False)
 

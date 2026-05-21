@@ -9,7 +9,7 @@ PKG="$ROOT/packaging"
 BUILD="$ROOT/build"
 DIST="$ROOT/dist"
 APP_NAME="Liasse"
-VERSION="0.2.2"
+VERSION="0.2.3"
 APP_BUNDLE="$BUILD/$APP_NAME.app"
 
 INCLUDE_ASR_06B="${INCLUDE_ASR_06B:-1}"        # 1=默认捆绑 0.6B；0=跳过（更小的 .dmg）

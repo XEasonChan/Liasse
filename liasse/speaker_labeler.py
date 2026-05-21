@@ -40,6 +40,9 @@ def label_segments(
 
     # 单说话人短路：调 LLM 没意义（任务唯一解），还经常返回空 JSON 导致整个
     # 流程报「智能分离失败」。直接给所有片段贴 SPEAKER_00。
+    # （pyannote 只分出一簇的场景由调用方在 task_runner 里短路，不再依赖
+    # input segments 已有的 speaker 字段——因为 TranscriptSegment.speaker
+    # 默认就是 "SPEAKER_00"，无法区分"pyannote 输出了一簇"和"根本没分"。）
     if speaker_count <= 1:
         single = allowed[0]
         labeled = [
