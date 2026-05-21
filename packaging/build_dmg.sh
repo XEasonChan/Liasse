@@ -9,7 +9,7 @@ PKG="$ROOT/packaging"
 BUILD="$ROOT/build"
 DIST="$ROOT/dist"
 APP_NAME="Liasse"
-VERSION="0.2.1"
+VERSION="0.2.2"
 APP_BUNDLE="$BUILD/$APP_NAME.app"
 
 INCLUDE_ASR_06B="${INCLUDE_ASR_06B:-1}"        # 1=默认捆绑 0.6B；0=跳过（更小的 .dmg）
@@ -105,10 +105,36 @@ DMG_STAGE="$BUILD/dmg_stage"
 mkdir -p "$DMG_STAGE"
 cp -R "$APP_BUNDLE" "$DMG_STAGE/"
 ln -s /Applications "$DMG_STAGE/Applications"
+# 助手脚本：双击就完成 复制 + xattr 去 quarantine + 启动 三件套
+# macOS 15 Sequoia 起，未签名 .app 不能再右键→打开绕过 Gatekeeper
+cp "$PKG/install.command" "$DMG_STAGE/双击安装 Liasse.command"
+chmod +x "$DMG_STAGE/双击安装 Liasse.command"
+
+# DMG 根目录的 README（解释为什么要点助手脚本）
+cat > "$DMG_STAGE/README.txt" <<'EOF'
+Liasse — 本地访谈转录工具
+==========================
+
+【推荐】双击 "双击安装 Liasse.command"
+   会自动把 Liasse 拷到 Applications/、绕过 macOS Gatekeeper、启动。
+
+【手动方式】
+   1. 拖 Liasse.app 到 Applications/
+   2. 打开 Terminal，运行：
+        xattr -dr com.apple.quarantine /Applications/Liasse.app
+   3. 双击 /Applications/Liasse.app 启动
+
+为什么需要这一步？
+   Liasse 是开源项目，没有支付 Apple Developer Program 的 $99/年签名费用。
+   macOS Sequoia (15+) 默认会拦下所有未签名 App，且不再允许"右键→打开"绕过。
+   xattr 命令把 macOS 给下载文件加的 quarantine 标记拆掉，就能正常启动。
+
+启动日志：~/Library/Logs/Liasse/launch.log
+EOF
 
 rm -f "$DMG_PATH"
 hdiutil create \
-  -volname "$APP_NAME $VERSION" \
+  -volname "Liasse $VERSION — 双击安装" \
   -srcfolder "$DMG_STAGE" \
   -ov \
   -format UDZO \
@@ -119,7 +145,7 @@ echo "[6/6] 完成"
 echo "  -> $DMG_PATH ($(du -sh "$DMG_PATH" | awk '{print $1}'))"
 echo ""
 echo "下一步："
-echo "  - 用户双击 .dmg 后，把 Liasse.app 拖进 Applications"
-echo "  - 第一次右键 → 打开（绕过 Gatekeeper，因为没签名）"
+echo "  - 用户双击 .dmg，看到「双击安装 Liasse.command」"
+echo "  - 双击该脚本 → Terminal 弹安全确认 → 点「打开」"
+echo "  - 脚本自动拷贝 + xattr + 启动"
 echo "  - 首次启动 launcher.sh 会用 Python 3.12 建 venv，约 3-5 分钟"
-echo "  - 之后 pyannote / qwen3:4b 在 App 里通过「需要下载模型」对话框引导用户安装"
