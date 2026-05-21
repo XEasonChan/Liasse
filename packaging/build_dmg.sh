@@ -1,5 +1,5 @@
 #!/bin/zsh
-# 从源码构建 WhisperQwen.app 和 WhisperQwen-<version>.dmg
+# 从源码构建 Liasse.app 和 Liasse-<version>.dmg
 # 默认会把 Qwen3-ASR-0.6B 模型一起塞进 .app（约 1.2 GB），
 # pyannote / qwen3:4b 在 App 内通过弹窗指引用户首次启动后再下。
 set -euo pipefail
@@ -8,7 +8,7 @@ ROOT="$(cd "$(dirname "$0")/.."; pwd)"
 PKG="$ROOT/packaging"
 BUILD="$ROOT/build"
 DIST="$ROOT/dist"
-APP_NAME="WhisperQwen"
+APP_NAME="Liasse"
 VERSION="0.2.0"
 APP_BUNDLE="$BUILD/$APP_NAME.app"
 
@@ -57,6 +57,12 @@ rsync -a \
   --exclude 'Run Test Audio.command' \
   --exclude 'Setup MLX Test Env.command' \
   --exclude 'Check Runtime.command' \
+  --exclude 'TODO.md' \
+  --exclude 'TODO_*.md' \
+  --exclude 'AGENTS.md' \
+  --exclude 'ARCHITECTURE.md' \
+  --exclude '*.egg-info/' \
+  --exclude 'reference/' \
   "$ROOT/" "$RES_APP/"
 
 echo "[4/6] 内置 Qwen3-ASR-0.6B 模型（用户机器 ~/.cache/huggingface/hub 已存在的话）"
@@ -113,7 +119,7 @@ echo "[6/6] 完成"
 echo "  -> $DMG_PATH ($(du -sh "$DMG_PATH" | awk '{print $1}'))"
 echo ""
 echo "下一步："
-echo "  - 用户双击 .dmg 后，把 WhisperQwen.app 拖进 Applications"
+echo "  - 用户双击 .dmg 后，把 Liasse.app 拖进 Applications"
 echo "  - 第一次右键 → 打开（绕过 Gatekeeper，因为没签名）"
 echo "  - 首次启动 launcher.sh 会用 Python 3.12 建 venv，约 3-5 分钟"
 echo "  - 之后 pyannote / qwen3:4b 在 App 里通过「需要下载模型」对话框引导用户安装"

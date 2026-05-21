@@ -56,6 +56,14 @@ const PATHS = {
     '<polygon points="6 3 20 12 6 21 6 3"/>',
   "loader":
     '<line x1="12" x2="12" y1="2" y2="6"/><line x1="12" x2="12" y1="18" y2="22"/><line x1="4.93" x2="7.76" y1="4.93" y2="7.76"/><line x1="16.24" x2="19.07" y1="16.24" y2="19.07"/><line x1="2" x2="6" y1="12" y2="12"/><line x1="18" x2="22" y1="12" y2="12"/><line x1="4.93" x2="7.76" y1="19.07" y2="16.24"/><line x1="16.24" x2="19.07" y1="7.76" y2="4.93"/>',
+  "alert-triangle":
+    '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/>',
+  "check":
+    '<polyline points="20 6 9 17 4 12"/>',
+  "plus":
+    '<line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/>',
+  "languages":
+    '<path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>',
 };
 
 export const LucideIcon = {
@@ -69,7 +77,11 @@ export const LucideIcon = {
     return () => {
       const svg = PATHS[props.name];
       if (!svg) {
-        return window.Vue.h("span", { class: "muted", style: "font-size:11px" }, `[${props.name}?]`);
+        // 缺图标不再 leak 占位文字给用户；同时 dev console 留个警告。
+        if (typeof console !== "undefined") {
+          console.warn(`[LucideIcon] missing path for "${props.name}" — add it to PATHS in components/icons.js`);
+        }
+        return window.Vue.h("span", { "aria-hidden": "true" });
       }
       return window.Vue.h("svg", {
         innerHTML: svg,

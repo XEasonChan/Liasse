@@ -1,11 +1,35 @@
 from __future__ import annotations
 
+import logging
 import os
 import socket
 import subprocess
+import sys
 import threading
 import time
+import traceback
 from pathlib import Path
+
+# 全局未捕获异常 → 打到 stderr + 日志文件（Start Liasse.command 已经把 stderr 重定向到 ~/Library/Logs/Liasse/launch.log）
+def _install_crash_handler() -> None:
+    log_dir = Path.home() / "Library" / "Logs" / "Liasse"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    crash_log = log_dir / "crash.log"
+
+    def _handle(exc_type, exc, tb):
+        msg = "".join(traceback.format_exception(exc_type, exc, tb))
+        sys.stderr.write(f"\n[Liasse CRASH] {time.strftime('%Y-%m-%d %H:%M:%S')}\n{msg}\n")
+        sys.stderr.flush()
+        try:
+            with crash_log.open("a", encoding="utf-8") as f:
+                f.write(f"\n==== {time.strftime('%Y-%m-%d %H:%M:%S')} ====\n{msg}\n")
+        except OSError:
+            pass
+
+    sys.excepthook = _handle
+
+
+_install_crash_handler()
 
 # 必须在 import webview / uvicorn 之前清掉 proxy env，否则用户开了 Clash/SS
 # 等系统代理时，pywebview WKWebView 内 fetch 走 proxy 失败 → 前端弹
@@ -113,7 +137,14 @@ class JSApi:
 
 
 def main() -> None:
-    config = uvicorn.Config(app, host=HOST, port=PORT, log_level="warning")
+    log_level = "info" if os.environ.get("LIASSE_VERBOSE") == "1" else "warning"
+    logging.basicConfig(
+        level=logging.INFO if log_level == "info" else logging.WARNING,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+    print(f"[liasse] starting uvicorn on http://{HOST}:{PORT} (log_level={log_level})", flush=True)
+
+    config = uvicorn.Config(app, host=HOST, port=PORT, log_level=log_level)
     server = uvicorn.Server(config)
 
     thread = threading.Thread(target=server.run, daemon=True)
@@ -132,8 +163,16 @@ def main() -> None:
         min_size=(1024, 640),
         js_api=JSApi(),
     )
-    webview.start()
+    print("[liasse] opening pywebview window", flush=True)
+    webview.start(debug=os.environ.get("LIASSE_VERBOSE") == "1")
+    print("[liasse] webview returned (user closed window or process killed)", flush=True)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        # _install_crash_handler 已经处理 sys.excepthook 了，但 main() 内部
+        # 异常可能在线程里抓不到，所以这里再兜一次
+        traceback.print_exc()
+        sys.exit(1)

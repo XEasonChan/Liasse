@@ -111,13 +111,14 @@
     'Source Han Serif SC', '思源宋体', 'Songti SC', '宋体',
     Georgia, 'Times New Roman', serif;
 
-  /* UI / body — SF Pro via the macOS system stack. Native rendering,
-     no webfont download, perfect at every size. PingFang fallback gives
-     clean CJK at matching x-height. */
+  /* UI / body — SF Pro via the macOS system stack for Latin; PingFang SC /
+     Hiragino Sans GB for CJK. Hiragino has heavier strokes and gives
+     better readability at body size; if missing, falls back to PingFang. */
   --font-ui:
     -apple-system, BlinkMacSystemFont,
     'SF Pro Text', 'SF Pro Display', system-ui,
-    'PingFang SC', 'Microsoft YaHei',
+    'PingFang SC', 'Hiragino Sans GB', 'Source Han Sans SC',
+    'Noto Sans CJK SC', 'Microsoft YaHei',
     'Helvetica Neue', 'Segoe UI', sans-serif;
   --font-text: var(--font-ui);
   --font-meta: var(--font-ui);
@@ -128,11 +129,24 @@ html, body {
   margin: 0;
   font-family: var(--font-text);
   font-size: var(--font-body);
-  font-feature-settings: "kern" 1, "liga" 1, "onum" 1, "calt" 1;
+  /* 注意：CJK 段落里不要开 `calt`/`onum`，会让标点字距错位。Latin 只留 kern + liga。 */
+  font-feature-settings: "kern" 1, "liga" 1;
   color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* 中文字体不强制 antialiased — 默认（subpixel-antialiased）让 PingFang/Hiragino
+     的笔画更饱满，避免在浅底色 + paper-grain 上看到锯齿感。 */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  text-rendering: optimizeLegibility;
   background: var(--bg-app);
+}
+
+/* CJK 段落（转写正文、对话气泡）单独再加权重 + 行高 + 字距优化，
+   让中文笔画在 1440×900 的 pywebview 下不发虚。 */
+.segment-text,
+.summary-body,
+.chat-msg {
+  font-weight: 400;
+  letter-spacing: 0.01em;
 }
 
 /* very subtle paper grain — like brand_consulting_report.html */

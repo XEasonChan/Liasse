@@ -5,17 +5,17 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>zh_CN</string>
     <key>CFBundleDisplayName</key>
-    <string>WhisperQwen</string>
+    <string>Liasse</string>
     <key>CFBundleExecutable</key>
-    <string>WhisperQwen</string>
+    <string>Liasse</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
-    <string>ai.local.whisperqwen</string>
+    <string>ai.local.liasse</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>WhisperQwen</string>
+    <string>Liasse</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -36,6 +36,6 @@
         <true/>
     </dict>
     <key>NSMicrophoneUsageDescription</key>
-    <string>WhisperQwen 仅在本地处理你选择的音频文件，不录制、不上传。</string>
+    <string>Liasse 仅在本地处理你选择的音频文件，不录制、不上传。</string>
 </dict>
 </plist>

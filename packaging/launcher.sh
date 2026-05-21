@@ -1,5 +1,5 @@
 #!/bin/zsh
-# WhisperQwen launcher — runs inside Contents/MacOS/ of the .app bundle.
+# Liasse launcher — runs inside Contents/MacOS/ of the .app bundle.
 # 流程（v0.2.x）:
 #   1. 找 Python 3.12 / 建 venv（首次启动 5-10 秒）
 #   2. 装 requirements-bootstrap.txt（轻量集，30-60 秒）→ UI 能起来
@@ -11,7 +11,7 @@ set -e
 APP_BUNDLE="$(cd "$(dirname "$0")/.."; pwd)"
 RESOURCES="$APP_BUNDLE/Resources"
 APP_DIR="$RESOURCES/app"
-LOG_DIR="$HOME/Library/Logs/WhisperQwen"
+LOG_DIR="$HOME/Library/Logs/Liasse"
 mkdir -p "$LOG_DIR"
 LOG="$LOG_DIR/launcher.log"
 INSTALL_LOG="$LOG_DIR/install.log"
@@ -21,7 +21,7 @@ echo "==== launch $(date -u +'%Y-%m-%dT%H:%M:%SZ') ===="
 echo "APP_DIR=$APP_DIR"
 
 if [ ! -d "$APP_DIR" ]; then
-  /usr/bin/osascript -e 'display alert "WhisperQwen 安装文件损坏" message "找不到内置的 app 目录，请重新下载 .dmg。" as critical buttons {"好"} default button "好"'
+  /usr/bin/osascript -e 'display alert "Liasse 安装文件损坏" message "找不到内置的 app 目录，请重新下载 .dmg。" as critical buttons {"好"} default button "好"'
   exit 1
 fi
 
@@ -56,16 +56,16 @@ if [ ! -x "$APP_DIR/venv/bin/python" ]; then
   PYTHON_BIN="$(choose_python)"
   if [ -z "$PYTHON_BIN" ]; then
     /usr/bin/osascript <<'OSA'
-display alert "需要 Python 3.12" message "WhisperQwen 第一次启动需要 Python 3.12 来安装依赖。请先在终端运行：
+display alert "需要 Python 3.12" message "Liasse 第一次启动需要 Python 3.12 来安装依赖。请先在终端运行：
 
   brew install python@3.12
 
-装好后重新打开 WhisperQwen。" as critical buttons {"好"} default button "好"
+装好后重新打开 Liasse。" as critical buttons {"好"} default button "好"
 OSA
     exit 1
   fi
   echo "首次启动：用 $PYTHON_BIN 建 venv"
-  /usr/bin/osascript -e 'display notification "正在准备运行环境（约 1 分钟），完成后界面会自动打开…" with title "WhisperQwen"' || true
+  /usr/bin/osascript -e 'display notification "正在准备运行环境（约 1 分钟），完成后界面会自动打开…" with title "Liasse"' || true
   "$PYTHON_BIN" -m venv "$APP_DIR/venv"
   "$APP_DIR/venv/bin/python" -m pip install --upgrade pip wheel
   NEEDS_BOOTSTRAP=1
@@ -96,7 +96,7 @@ fi
 
 # 提示 ollama
 if ! curl -s --max-time 1 --noproxy '*' http://127.0.0.1:11434/api/tags > /dev/null 2>&1; then
-  /usr/bin/osascript -e 'display notification "Ollama 没在运行。总结和 AI Chat 需要它。可以在终端运行 ollama serve 或 brew services start ollama。" with title "WhisperQwen"' || true
+  /usr/bin/osascript -e 'display notification "Ollama 没在运行。总结和 AI Chat 需要它。可以在终端运行 ollama serve 或 brew services start ollama。" with title "Liasse"' || true
 fi
 
 exec "$APP_DIR/venv/bin/python" "$APP_DIR/launch_app.py"

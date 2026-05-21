@@ -456,7 +456,6 @@ export const TaskDetail = {
                 <option v-for="g in availableGlossaries" :key="g" :value="g">{{ g }}</option>
               </select>
               <button class="btn btn-sm btn-primary" :disabled="translating" @click="runTranslate">
-                <lucide-icon name="languages" :size="14" />
                 {{ translating ? t('translate.translating') : t('translate.action') }}
               </button>
               <div v-if="activeTranslation" class="view-toggle">
