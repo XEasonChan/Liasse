@@ -31,73 +31,76 @@ def label_segments(
     model: str = "qwen3:4b",
     num_speakers: Optional[int] = 2,
 ) -> SpeakerLabelingResult:
+    """v0.2.4 起改为 **cluster-mapping** 模式。
+
+    pyannote 已经按声纹把 segment 分好簇（SPEAKER_00 / 01 / ...）。
+    这里 LLM 的工作不是「per-segment 重分类」（会覆盖 pyannote 的声学判断），
+    而是「per-cluster 贴角色标签」：
+
+        输入  segments[speaker]:  [SPEAKER_00, SPEAKER_00, SPEAKER_01, ...]   (来自 pyannote)
+        LLM 看每簇的代表性文本样本
+        输出  speaker_labels:    {SPEAKER_00: "采访者", SPEAKER_01: "受访者"}
+
+    segments 的 speaker 字段**保持不变**，永远是 pyannote 的输出。
+    """
     source_segments = list(segments)
     if not source_segments:
         return SpeakerLabelingResult(segments=[], speaker_labels={})
 
     speaker_count = _speaker_count(num_speakers)
-    allowed = [f"SPEAKER_{i:02d}" for i in range(speaker_count)]
 
-    # 单说话人短路：调 LLM 没意义（任务唯一解），还经常返回空 JSON 导致整个
-    # 流程报「智能分离失败」。直接给所有片段贴 SPEAKER_00。
-    # （pyannote 只分出一簇的场景由调用方在 task_runner 里短路，不再依赖
-    # input segments 已有的 speaker 字段——因为 TranscriptSegment.speaker
-    # 默认就是 "SPEAKER_00"，无法区分"pyannote 输出了一簇"和"根本没分"。）
-    if speaker_count <= 1:
-        single = allowed[0]
+    # 按 pyannote 的 speaker 字段分簇
+    cluster_texts: Dict[str, List[str]] = {}
+    for seg in source_segments:
+        spk = seg.speaker or "SPEAKER_00"
+        if seg.text:
+            cluster_texts.setdefault(spk, []).append(seg.text)
+        else:
+            cluster_texts.setdefault(spk, [])
+
+    present_clusters = sorted(cluster_texts.keys())
+
+    # 单簇短路：调 LLM 没意义（唯一解），过去会返回空 JSON 触发
+    # SpeakerLabelingError → UI 弹「智能分离失败」横幅。
+    if len(present_clusters) <= 1 or speaker_count <= 1:
+        single = present_clusters[0] if present_clusters else "SPEAKER_00"
+        # segments 原样透传（不改 speaker）
         labeled = [
             TranscriptSegment(
-                start=segment.start,
-                end=segment.end,
-                text=segment.text,
-                speaker=single,
-                confidence=segment.confidence,
-                source=segment.source,
+                start=s.start, end=s.end, text=s.text,
+                speaker=s.speaker or single,
+                confidence=s.confidence, source=s.source,
             )
-            for segment in source_segments
+            for s in source_segments
         ]
         return SpeakerLabelingResult(
             segments=labeled,
             speaker_labels={single: _default_label(single)},
         )
 
-    assignments: Dict[int, str] = {}
+    # 多簇 → LLM 只产出 cluster→role 映射，不改 segment.speaker
+    prompt = _build_cluster_mapping_prompt(present_clusters, cluster_texts)
+    raw = _generate(prompt, model=model)
+    role_mapping = _parse_cluster_mapping(raw, present_clusters)
 
-    for chunk in _chunks(source_segments):
-        prompt = _build_prompt(chunk, allowed)
-        raw = _generate(prompt, model=model)
-        for item in _parse_assignments(raw):
-            index = _segment_index(item.get("id"))
-            if index is None or index < 0 or index >= len(source_segments):
-                continue
-            speaker = _normalize_speaker(item.get("speaker"), allowed)
-            if speaker is not None:
-                assignments[index] = speaker
+    if not role_mapping:
+        raise SpeakerLabelingError("本地 LLM 没有返回可用的 cluster→role 映射。")
 
-    if not assignments:
-        raise SpeakerLabelingError("本地 LLM 没有返回可用的发言人标注。")
-
-    labeled: List[TranscriptSegment] = []
-    fallback = allowed[0]
-    for index, segment in enumerate(source_segments):
-        labeled.append(
-            TranscriptSegment(
-                start=segment.start,
-                end=segment.end,
-                text=segment.text,
-                speaker=assignments.get(index, fallback),
-                confidence=segment.confidence,
-                source=segment.source,
-            )
+    # 保留 pyannote 的 per-segment speaker，只重建 speaker_labels
+    labeled = [
+        TranscriptSegment(
+            start=s.start, end=s.end, text=s.text,
+            speaker=s.speaker or present_clusters[0],
+            confidence=s.confidence, source=s.source,
         )
-
-    used = {segment.speaker for segment in labeled}
-    labels = {
-        speaker: _default_label(speaker)
-        for speaker in allowed
-        if speaker in used or speaker in {"SPEAKER_00", "SPEAKER_01"}
+        for s in source_segments
+    ]
+    # role_mapping 里没覆盖到的簇 fallback 到默认标签
+    speaker_labels = {
+        cluster: role_mapping.get(cluster, _default_label(cluster))
+        for cluster in present_clusters
     }
-    return SpeakerLabelingResult(segments=labeled, speaker_labels=labels)
+    return SpeakerLabelingResult(segments=labeled, speaker_labels=speaker_labels)
 
 
 def _speaker_count(num_speakers: Optional[int]) -> int:
@@ -127,6 +130,94 @@ def _chunks(segments: Sequence[TranscriptSegment]) -> Iterable[List[Tuple[int, T
         current_chars += item_chars
     if current:
         yield current
+
+
+def _build_cluster_mapping_prompt(
+    clusters: Sequence[str], cluster_texts: Dict[str, List[str]]
+) -> str:
+    """v0.2.4 新 prompt：给 LLM 看 pyannote 已经分好的簇的代表性文本，
+    要 LLM 输出 cluster→角色 的 JSON 映射，**不让 LLM 重新分类 segment**。
+    每簇拼接前 ~600 字符样本（避免上下文爆炸）。"""
+    SAMPLE_CHARS = 600
+    sample_lines: List[str] = []
+    for cluster in clusters:
+        joined = " ".join(cluster_texts.get(cluster, []))
+        if len(joined) > SAMPLE_CHARS:
+            head = joined[: SAMPLE_CHARS // 2]
+            tail = joined[-SAMPLE_CHARS // 2:]
+            joined = f"{head} … {tail}"
+        sample_lines.append(f"{cluster}:\n  \"{joined}\"")
+    samples_block = "\n\n".join(sample_lines)
+
+    cluster_list = ", ".join(clusters)
+    return f"""你是访谈逐字稿的角色标签器。下面是 pyannote 已经按声纹分好的若干簇 \
+({cluster_list})，每簇有代表性文本样本。请只根据文本判断每个簇对应什么角色。
+
+允许的角色：采访者、受访者、参与者 3、参与者 4、参与者 5。
+约定：采访者通常提问、引导话题；受访者通常回答问题、讲述细节；其余持续发言者用「参与者 N」。
+
+严格只输出 JSON 对象，不要 Markdown，不要解释，键是簇 ID，值是角色：
+{{"SPEAKER_00":"采访者","SPEAKER_01":"受访者"}}
+
+簇样本：
+{samples_block}
+"""
+
+
+def _parse_cluster_mapping(
+    text: str, allowed_clusters: Sequence[str]
+) -> Dict[str, str]:
+    """解析 LLM 返回的 {cluster_id → role_label} JSON。
+    宽松：忽略未知簇 ID；role 中文/英文都接受；JSON 嵌在 Markdown / 解释里也能挖出来。"""
+    raw = (text or "").strip()
+    if "```" in raw:
+        match = re.search(r"```(?:json)?\s*(.*?)```", raw, flags=re.S | re.I)
+        if match:
+            raw = match.group(1).strip()
+    start = raw.find("{")
+    end = raw.rfind("}")
+    if start == -1 or end == -1 or end < start:
+        return {}
+    try:
+        obj = json.loads(raw[start : end + 1])
+    except json.JSONDecodeError:
+        return {}
+    if not isinstance(obj, dict):
+        return {}
+
+    allowed_set = set(allowed_clusters)
+    role_normalize = {
+        "采访者": "采访者", "主持人": "采访者", "研究者": "采访者", "提问者": "采访者",
+        "interviewer": "采访者", "host": "采访者",
+        "受访者": "受访者", "嘉宾": "受访者", "回答者": "受访者",
+        "interviewee": "受访者", "guest": "受访者",
+    }
+
+    out: Dict[str, str] = {}
+    for k, v in obj.items():
+        cluster = str(k).strip().upper()
+        if cluster not in allowed_set:
+            # LLM 可能写 SPEAKER0 / speaker_00 之类，标准化一下
+            m = re.search(r"(\d+)", cluster)
+            if m:
+                candidate = f"SPEAKER_{int(m.group(1)):02d}"
+                if candidate in allowed_set:
+                    cluster = candidate
+        if cluster not in allowed_set:
+            continue
+        value = str(v or "").strip()
+        lowered = value.lower()
+        role = None
+        for key, label in role_normalize.items():
+            if key in value or key in lowered:
+                role = label
+                break
+        if role is None and value:
+            # 保留原始（比如「参与者 3」之类）
+            role = value
+        if role:
+            out[cluster] = role
+    return out
 
 
 def _build_prompt(chunk: List[Tuple[int, TranscriptSegment]], allowed: Sequence[str]) -> str:
@@ -250,12 +341,21 @@ def _default_label(speaker: str) -> str:
 
 
 def _generate(prompt: str, *, model: str) -> str:
+    # Qwen3 是 hybrid thinking 模型；prompt 里 /no_think directive 不一定被
+    # 遵守，必须显式 think=False 才能彻底关掉 thinking token。否则一个简单
+    # 的 speaker JSON 推理也会跑 100+ 秒（绝大多数耗时全在 think tokens 里）。
     payload = json.dumps(
         {
             "model": model,
             "prompt": prompt,
             "stream": False,
-            "options": {"temperature": 0.0, "num_ctx": 16384},
+            "think": False,
+            "keep_alive": "30m",
+            "options": {
+                "temperature": 0.0,
+                "num_ctx": 4096,
+                "num_predict": 1024,
+            },
         }
     ).encode("utf-8")
     request = urllib.request.Request(

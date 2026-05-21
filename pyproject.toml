@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "liasse"
-version = "0.2.3"
+version = "0.2.4"
 description = "Liasse — 本地访谈转录桌面应用，面向欧洲学术与美国法律的隐私敏感工作流。Qwen3-ASR + pyannote/LLM diarization + 本地 LLM 摘要 + RAG 问答。完全离线，IRB 合规。"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
