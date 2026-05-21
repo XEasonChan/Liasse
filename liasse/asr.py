@@ -521,6 +521,14 @@ def _ends_sentence(text: str) -> bool:
 
 
 def _join_qwen_tokens(tokens: List[str]) -> str:
-    text = "".join(tokens)
-    text = text.replace(" ,", ",").replace(" .", ".").replace(" ?", "?").replace(" !", "!")
+    # Qwen3-ASR 的 time_marks 对中文按字、对英文按词返回 token。
+    # 历史实现用 "".join 拼接，对中文正确（中文字间不要空格），
+    # 但英文场景下会变成 "Thisdesignprocess"。
+    # 改成：先用空格拼，再用 _clean_cjk_spacing 删掉中文字之间的空格，
+    # 最后清掉标点前的空格和 "'s" 这类附着标点的空格。
+    text = " ".join(t for t in tokens if t)
+    text = _clean_cjk_spacing(text)
+    text = re.sub(r" +([,.!?;:、，。！？；：])", r"\1", text)
+    text = re.sub(r" +'([A-Za-z])", r"'\1", text)
+    text = re.sub(r" +", " ", text)
     return text.strip()

@@ -37,6 +37,27 @@ def label_segments(
 
     speaker_count = _speaker_count(num_speakers)
     allowed = [f"SPEAKER_{i:02d}" for i in range(speaker_count)]
+
+    # 单说话人短路：调 LLM 没意义（任务唯一解），还经常返回空 JSON 导致整个
+    # 流程报「智能分离失败」。直接给所有片段贴 SPEAKER_00。
+    if speaker_count <= 1:
+        single = allowed[0]
+        labeled = [
+            TranscriptSegment(
+                start=segment.start,
+                end=segment.end,
+                text=segment.text,
+                speaker=single,
+                confidence=segment.confidence,
+                source=segment.source,
+            )
+            for segment in source_segments
+        ]
+        return SpeakerLabelingResult(
+            segments=labeled,
+            speaker_labels={single: _default_label(single)},
+        )
+
     assignments: Dict[int, str] = {}
 
     for chunk in _chunks(source_segments):

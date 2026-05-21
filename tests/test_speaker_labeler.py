@@ -53,6 +53,25 @@ def test_label_segments_raises_on_malformed_json(monkeypatch):
         speaker_labeler.label_segments(segments)
 
 
+def test_label_segments_single_speaker_skips_llm(monkeypatch):
+    """num_speakers=1 时跳过 LLM 直接全部归 SPEAKER_00；
+    回归保护：之前会调 _generate 拿到空 JSON 然后抛 SpeakerLabelingError。"""
+    segments = [
+        TranscriptSegment(start=0.0, end=2.0, text="一段独白。"),
+        TranscriptSegment(start=2.0, end=4.0, text="还有一段独白。"),
+    ]
+
+    def _fail(*args, **kwargs):
+        raise AssertionError("单说话人不应该调用 LLM")
+
+    monkeypatch.setattr(speaker_labeler, "_generate", _fail)
+
+    result = speaker_labeler.label_segments(segments, num_speakers=1)
+
+    assert [s.speaker for s in result.segments] == ["SPEAKER_00", "SPEAKER_00"]
+    assert result.speaker_labels == {"SPEAKER_00": "采访者"}
+
+
 def test_generate_wraps_ollama_connection_error(monkeypatch):
     class FakeOpener:
         def open(self, *args, **kwargs):
